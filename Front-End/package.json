@@ -6,7 +6,7 @@
     "dev": "NODE_OPTIONS=--max-old-space-size=2048 next dev --webpack -p 3001",
     "dev:turbo": "next dev -p 3001",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3001",
     "lint": "next lint --dir ./",
     "type-check": "tsc --noEmit"
   },

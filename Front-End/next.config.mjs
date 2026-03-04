@@ -1,9 +1,4 @@
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const apiTarget = (process.env.API_PROXY_TARGET || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000')
+const apiTarget = (process.env.API_PROXY_TARGET || 'http://localhost:8000')
   .trim()
   .replace(/^['"]|['"]$/g, '')
   .replace(/\/$/, '');
@@ -11,7 +6,6 @@ const apiTarget = (process.env.API_PROXY_TARGET || process.env.NEXT_PUBLIC_API_U
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: 'export',
   images: {
     unoptimized: true,
     localPatterns: [
@@ -32,6 +26,14 @@ const nextConfig = {
   },
   typescript: {
     tsconfigPath: './tsconfig.json',
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/api/v1/:path*',
+        destination: `${apiTarget}/api/v1/:path*`,
+      },
+    ];
   },
 };
 
