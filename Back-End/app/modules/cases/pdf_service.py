@@ -6,6 +6,7 @@ import re
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 from bson import ObjectId  # type: ignore[import-not-found]
 from jinja2 import (  # type: ignore[import-not-found]
@@ -29,9 +30,12 @@ METHOD_VALUE_TO_LABEL = {
 
 
 class CasePdfService:
+    _SIGNED_STATES = {"Por entregar", "Completado"}
+
     def __init__(self, case_service: CaseService, db: Database):
         self.case_service = case_service
         self.db = db
+        self._repo_root = Path(__file__).resolve().parents[4]
         templates_dir = Path(__file__).parent / "templates"
         self.jinja_env = Environment(
             loader=FileSystemLoader(str(templates_dir)),
@@ -85,8 +89,7 @@ class CasePdfService:
         return pdf_bytes
 
     def _build_header_context(self) -> dict[str, str]:
-        repo_root = Path(__file__).resolve().parents[4]
-        public_dir = repo_root / "Front-End" / "public"
+        public_dir = self._repo_root / "Front-End" / "public"
 
         unified_banner = self._file_to_data_uri(public_dir / "Logos-PDF.png")
 
@@ -109,8 +112,6 @@ class CasePdfService:
         encoded = base64.b64encode(content).decode("ascii")
         return f"data:{mime_type};base64,{encoded}"
 
-    _SIGNED_STATES = {"Por entregar", "Completado"}
-
     def _get_date_from_date_info(self, case: dict[str, Any], field: str) -> str | None:
         """Extrae un timestamp de date_info por nombre de campo."""
         date_info = case.get("date_info") or []
@@ -122,12 +123,15 @@ class CasePdfService:
         patient_info = case.get("patient_info") or {}
         result = case.get("result") or {}
         location = patient_info.get("location") or {}
-
         case_state = str(case.get("state") or "").strip()
         is_signed = case_state in self._SIGNED_STATES
 
         pathologist_info = case.get("assigned_pathologist") or {}
-        pathologist_meta = self._get_pathologist_meta(pathologist_info.get("id"))
+        pathologist_meta = self._get_pathologist_meta(
+            pathologist_code=pathologist_info.get("pathologist_code"),
+            pathologist_id=pathologist_info.get("id"),
+            pathologist_name=pathologist_info.get("name"),
+        )
         pathologist_name = pathologist_info.get("name") or ""
 
         assistants = case.get("assistant_pathologists") or []
@@ -243,9 +247,7 @@ class CasePdfService:
             "participating_pathologists": participating_pathologists,
             "validated_by": pathologist_name or participating_pathologists,
             "pathologist_license": pathologist_meta.get("medical_license") or "",
-            "pathologist_signature": pathologist_meta.get("signature") or ""
-            if is_signed
-            else "",
+            "pathologist_signature": pathologist_meta.get("signature") or "",
             "samples_summary": self._build_samples_summary(case.get("samples") or []),
             "methods_display": self._methods_to_display(methods),
             "has_additional_report": has_additional_report,
@@ -265,29 +267,134 @@ class CasePdfService:
             else "",
         }
 
-    def _get_pathologist_meta(self, pathologist_id: str | None) -> dict[str, Any]:
-        if not pathologist_id:
-            return {}
+    def _get_pathologist_meta(
+        self,
+        pathologist_code: str | None,
+        pathologist_id: str | None,
+        pathologist_name: str | None = None,
+    ) -> dict[str, Any]:
+        users = self.db.get_collection("users")
+        projection = {"medical_license": 1, "signature": 1, "name": 1}
+        user = None
 
-        try:
-            oid = ObjectId(pathologist_id)
-        except Exception:
-            return {}
+        pcode = str(pathologist_code or "").strip()
+        if pcode:
+            code_filters: list[dict] = [{"pathologist_code": pcode}]
+            try:
+                code_filters.append({"pathologist_code": int(pcode)})
+            except (ValueError, TypeError):
+                pass
+            user = users.find_one({"$or": code_filters}, projection)
 
-        user = self.db.get_collection("users").find_one(
-            {"_id": oid}, {"medical_license": 1, "signature": 1}
-        )
+        pid = str(pathologist_id or "").strip()
+        if not user and pid:
+            # 1. Buscar por _id (ObjectId) — casos nuevos
+            try:
+                user = users.find_one({"_id": ObjectId(pid)}, projection)
+            except Exception:
+                pass
+
+            # 2. Buscar por pathologist_code o document — casos legacy/importados
+            if not user:
+                code_filters: list[dict] = [
+                    {"pathologist_code": pid},
+                    {"document": pid},
+                ]
+                try:
+                    pid_int = int(pid)
+                    code_filters += [{"pathologist_code": pid_int}, {"document": pid_int}]
+                except (ValueError, TypeError):
+                    pass
+                user = users.find_one({"$or": code_filters}, projection)
+
+        # 3. Buscar por nombre
+        normalized_name = str(pathologist_name or "").strip()
+        if not user and normalized_name:
+            user = users.find_one(
+                {
+                    "role": {
+                        "$in": [
+                            "pathologist",
+                            "patologo",
+                            "patólogo",
+                            "PATHOLOGIST",
+                            "PATOLOGO",
+                            "PATÓLOGO",
+                        ]
+                    },
+                    "name": {
+                        "$regex": rf"^\s*{re.escape(normalized_name)}\s*$",
+                        "$options": "i",
+                    },
+                },
+                projection,
+            )
+
+        # 4. Fallback final por nombre sin filtrar role (datos legacy inconsistentes)
+        if not user and normalized_name:
+            user = users.find_one(
+                {
+                    "name": {
+                        "$regex": rf"^\s*{re.escape(normalized_name)}\s*$",
+                        "$options": "i",
+                    }
+                },
+                projection,
+            )
+
         if not user:
             return {}
 
-        signature = user.get("signature")
-        if isinstance(signature, str) and signature.startswith("/"):
-            signature = ""
-
         return {
             "medical_license": user.get("medical_license") or "",
-            "signature": signature or "",
+            "signature": self._resolve_signature_for_pdf(user.get("signature")),
         }
+
+    def _resolve_signature_for_pdf(self, value: Any) -> Markup | str:
+        signature = str(value or "").strip()
+        if not signature:
+            return ""
+
+        lowered = signature.lower()
+        if lowered.startswith("data:image"):
+            return Markup(signature)
+
+        candidates: list[Path] = []
+
+        if signature.startswith("/uploads/"):
+            relative = signature.lstrip("/")
+            candidates.append(self._repo_root / "Back-End" / relative)
+            candidates.append(self._repo_root / relative)
+        elif signature.startswith("uploads/"):
+            candidates.append(self._repo_root / "Back-End" / signature)
+            candidates.append(self._repo_root / signature)
+        elif signature.startswith("/"):
+            relative = signature.lstrip("/")
+            candidates.append(self._repo_root / "Back-End" / relative)
+            candidates.append(self._repo_root / relative)
+        elif not lowered.startswith("http://") and not lowered.startswith("https://"):
+            candidates.append(self._repo_root / "Back-End" / signature)
+            candidates.append(self._repo_root / signature)
+        elif lowered.startswith("http://") or lowered.startswith("https://"):
+            parsed = urlparse(signature)
+            path = parsed.path or ""
+            marker = "/uploads/"
+            if marker in path:
+                relative = path[path.find(marker) + 1 :]
+                candidates.append(self._repo_root / "Back-End" / relative)
+                candidates.append(self._repo_root / relative)
+            else:
+                return Markup(signature)
+
+        for candidate in candidates:
+            data_uri = self._file_to_data_uri(candidate)
+            if data_uri:
+                return Markup(data_uri)
+
+        if lowered.startswith("http://") or lowered.startswith("https://"):
+            return Markup(signature)
+
+        return ""
 
     def _methods_to_display(self, methods: list[Any]) -> str:
         values: list[str] = []

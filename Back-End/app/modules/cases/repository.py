@@ -1,5 +1,6 @@
 import copy
-from datetime import datetime, UTC
+import re
+from datetime import datetime, timedelta, UTC
 from typing import Any, Optional
 
 from app.core.business_days import calculate_opportunity_days
@@ -17,6 +18,11 @@ def _round_decimal(val: Optional[float]) -> Optional[float]:
     if val is None:
         return None
     return round(float(val), 2)
+
+
+def _contains_regex(value: str) -> dict[str, str]:
+    """Construye regex case-insensitive escapando caracteres especiales de entrada."""
+    return {"$regex": re.escape(value), "$options": "i"}
 
 
 def _update_date_info(date_info: list, field: str, now: datetime) -> list:
@@ -48,6 +54,42 @@ def _convert_ts(ts: Any) -> str:
     if hasattr(ts, "isoformat"):
         return format_iso_datetime(ts)  # type: ignore
     return str(ts)
+
+
+def _normalize_additional_notes(value: Any) -> Optional[list[str]]:
+    """Normaliza notas adicionales legacy a lista de strings."""
+    if value is None:
+        return None
+    if not isinstance(value, list):
+        return [str(value)]
+
+    normalized: list[str] = []
+    for item in value:
+        if isinstance(item, str):
+            note = item.strip()
+            if note:
+                normalized.append(note)
+            continue
+
+        if isinstance(item, dict):
+            note_text = item.get("note") or item.get("text") or item.get("content") or ""
+            note_text = str(note_text).strip()
+            note_date = item.get("date")
+            if note_date is not None:
+                date_text = _convert_ts(note_date).strip()
+                if note_text:
+                    normalized.append(f"{date_text}: {note_text}".strip())
+                elif date_text:
+                    normalized.append(date_text)
+            elif note_text:
+                normalized.append(note_text)
+            continue
+
+        note = str(item).strip()
+        if note:
+            normalized.append(note)
+
+    return normalized or None
 
 
 def _doc_to_case(doc: dict) -> dict:
@@ -108,6 +150,9 @@ def _doc_to_case(doc: dict) -> dict:
     for key in ("created_at", "updated_at", "signed_at", "delivered_at", "transcribed_at"):
         out.pop(key, None)
 
+    # Compatibilidad de datos legacy para response_model (list[str])
+    out["additional_notes"] = _normalize_additional_notes(out.get("additional_notes"))
+
     if "entity" not in out and "patient_info" in out:
         pi = out.get("patient_info") or {}
         ei = pi.get("entity_info") or {}
@@ -137,6 +182,88 @@ class CaseRepository:
     def __init__(self, db: Database):
         self._coll: Collection = db[self.COLLECTION]
         self._counters: Collection = db[self.COUNTERS_COLLECTION]
+        self._users: Collection = db["users"]
+
+    def _find_user_for_pathologist_ref(self, ref: dict[str, Any]) -> Optional[dict[str, Any]]:
+        projection = {"_id": 1, "name": 1, "pathologist_code": 1, "document": 1}
+
+        code = str(ref.get("pathologist_code") or "").strip()
+        if code:
+            filters: list[dict[str, Any]] = [{"pathologist_code": code}]
+            try:
+                filters.append({"pathologist_code": int(code)})
+            except Exception:
+                pass
+            user = self._users.find_one({"$or": filters}, projection)
+            if user:
+                return user
+
+        pid = str(ref.get("id") or "").strip()
+        if pid:
+            try:
+                user = self._users.find_one({"_id": ObjectId(pid)}, projection)
+                if user:
+                    return user
+            except Exception:
+                pass
+
+            filters = [{"pathologist_code": pid}, {"document": pid}]
+            try:
+                pid_int = int(pid)
+                filters.extend([{"pathologist_code": pid_int}, {"document": pid_int}])
+            except Exception:
+                pass
+            user = self._users.find_one({"$or": filters}, projection)
+            if user:
+                return user
+
+        name = str(ref.get("name") or "").strip()
+        if name:
+            user = self._users.find_one(
+                {"name": {"$regex": rf"^\s*{re.escape(name)}\s*$", "$options": "i"}},
+                projection,
+            )
+            if user:
+                return user
+
+        return None
+
+    def _normalize_pathologist_ref(self, value: Any) -> Any:
+        if not isinstance(value, dict):
+            return value
+
+        ref: dict[str, Any] = {
+            "id": str(value.get("id") or "").strip(),
+            "name": str(value.get("name") or "").strip(),
+        }
+
+        incoming_code = str(value.get("pathologist_code") or "").strip()
+        if incoming_code:
+            ref["pathologist_code"] = incoming_code
+
+        user = self._find_user_for_pathologist_ref(value)
+        if user:
+            if not ref.get("id"):
+                ref["id"] = str(user.get("_id") or "")
+            if not ref.get("name"):
+                ref["name"] = str(user.get("name") or "")
+            user_code = str(user.get("pathologist_code") or "").strip()
+            if user_code:
+                ref["pathologist_code"] = user_code
+
+        return ref
+
+    def _normalize_pathologists_in_payload(self, data: dict[str, Any]) -> None:
+        assigned = data.get("assigned_pathologist")
+        if isinstance(assigned, dict):
+            data["assigned_pathologist"] = self._normalize_pathologist_ref(assigned)
+
+        assistants = data.get("assistant_pathologists")
+        if isinstance(assistants, list):
+            data["assistant_pathologists"] = [
+                self._normalize_pathologist_ref(item) if isinstance(item, dict) else item
+                for item in assistants
+            ]
 
     def _sync_case_seq(self, year: int) -> None:
         """Sincroniza el contador con el máximo seq real en la colección para ese año."""
@@ -211,10 +338,10 @@ class CaseRepository:
             s = search.strip()
             and_conditions.append({
                 "$or": [
-                    {"case_code": {"$regex": s, "$options": "i"}},
-                    {"patient_info.full_name": {"$regex": s, "$options": "i"}},
-                    {"patient_info.identification_number": {"$regex": s, "$options": "i"}},
-                    {"requesting_physician": {"$regex": s, "$options": "i"}},
+                    {"case_code": _contains_regex(s)},
+                    {"patient_info.full_name": _contains_regex(s)},
+                    {"patient_info.identification_number": _contains_regex(s)},
+                    {"requesting_physician": _contains_regex(s)},
                 ]
             })
 
@@ -224,22 +351,22 @@ class CaseRepository:
                 q["$gte"] = datetime.fromisoformat(created_at_from.replace("Z", "+00:00"))
             if created_at_to:
                 end = datetime.fromisoformat(created_at_to.replace("Z", "+00:00"))
-                end = end.replace(hour=23, minute=59, second=59, microsecond=999999)
-                q["$lte"] = end
+                end = end.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
+                q["$lt"] = end
             query["date_info.0.created_at"] = q
 
         if entity and entity.strip():
-            query["patient_info.entity_info.entity_name"] = {"$regex": entity.strip(), "$options": "i"}
+            query["patient_info.entity_info.entity_name"] = _contains_regex(entity.strip())
 
         if assigned_pathologist and assigned_pathologist.strip():
-            query["assigned_pathologist.name"] = {"$regex": assigned_pathologist.strip(), "$options": "i"}
+            query["assigned_pathologist.name"] = _contains_regex(assigned_pathologist.strip())
 
         if pathologist_name and pathologist_name.strip():
             name = pathologist_name.strip()
             and_conditions.append({
                 "$or": [
-                    {"assigned_pathologist.name": {"$regex": name, "$options": "i"}},
-                    {"assistant_pathologists.name": {"$regex": name, "$options": "i"}},
+                    {"assigned_pathologist.name": _contains_regex(name)},
+                    {"assistant_pathologists.name": _contains_regex(name)},
                 ]
             })
 
@@ -250,7 +377,7 @@ class CaseRepository:
             query["state"] = state.strip()
 
         if doctor and doctor.strip():
-            query["requesting_physician"] = {"$regex": doctor.strip(), "$options": "i"}
+            query["requesting_physician"] = _contains_regex(doctor.strip())
 
         if test and test.strip():
             and_conditions.append({"samples.tests.id": test.strip()})
@@ -296,6 +423,7 @@ class CaseRepository:
             except Exception:
                 pass
         data["patient_info"] = stored_patient_info
+        self._normalize_pathologists_in_payload(data)
         # Remove legacy date fields to avoid duplication with date_info
         for key in ("sample_reception_date", "created_at", "updated_at"):
             data.pop(key, None)
@@ -344,6 +472,7 @@ class CaseRepository:
             return None
         for key in ("case_code", "patient_info", "created_at", "updated_at", "audit_info", "sample_reception_date"):
             data.pop(key, None)
+        self._normalize_pathologists_in_payload(data)
         now = datetime.now(UTC)
         if data.get("max_opportunity_time") is not None:
             max_opp = _round_decimal(data.pop("max_opportunity_time"))
@@ -467,11 +596,11 @@ class CaseRepository:
         query: dict[str, Any] = {"complementary_tests": {"$exists": True, "$ne": []}}
         if case_code and case_code.strip():
             s = case_code.strip()
-            query["case_code"] = {"$regex": s, "$options": "i"}
+            query["case_code"] = _contains_regex(s)
         if approval_state and approval_state.strip():
             query["approval_state"] = approval_state.strip()
         if entity and entity.strip():
-            query["patient_info.entity_info.entity_name"] = {"$regex": entity.strip(), "$options": "i"}
+            query["patient_info.entity_info.entity_name"] = _contains_regex(entity.strip())
         if pathologist_id and pathologist_id.strip():
             query["assigned_pathologist.id"] = pathologist_id.strip()
         if test_code and test_code.strip():
@@ -482,8 +611,8 @@ class CaseRepository:
                 q["$gte"] = datetime.fromisoformat(created_at_from.replace("Z", "+00:00"))
             if created_at_to:
                 end = datetime.fromisoformat(created_at_to.replace("Z", "+00:00"))
-                end = end.replace(hour=23, minute=59, second=59, microsecond=999999)
-                q["$lte"] = end
+                end = end.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
+                q["$lt"] = end
             query["created_at"] = q
         total = self._coll.count_documents(query)
         cursor = self._coll.find(query).sort("created_at", -1).skip(skip).limit(limit)

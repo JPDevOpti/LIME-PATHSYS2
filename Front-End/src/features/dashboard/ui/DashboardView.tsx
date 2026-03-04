@@ -37,7 +37,7 @@ export default function DashboardView() {
           {loadingMetrics && !metrics ? (
             <DonutSpinner size="lg" wrapped minHeight="min-h-[140px]" />
           ) : metrics ? (
-            <DashboardKPICards metrics={metrics} username="Doctor" />
+            <DashboardKPICards metrics={metrics} />
           ) : null}
 
           {loadingMetrics && !monthlyCases ? (

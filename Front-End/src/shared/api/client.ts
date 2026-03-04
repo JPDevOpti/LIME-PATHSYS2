@@ -202,7 +202,7 @@ export const apiClient = {
   async get<T>(
     path: string,
     params?: Record<string, string | number | undefined>,
-    extraHeaders?: Record<string, string> & { responseType?: string },
+    extraHeaders?: Record<string, string> & { responseType?: string; suppressErrorLog?: boolean },
   ): Promise<T> {
     const normalizedPath = path.startsWith("/") ? path : `/${path}`;
     let url = BASE_URL ? `${BASE_URL}${normalizedPath}` : normalizedPath;
@@ -214,7 +214,7 @@ export const apiClient = {
       const qs = searchParams.toString();
       if (qs) url += `?${qs}`;
     }
-    const { responseType, ...headersOnly } = extraHeaders || {};
+    const { responseType, suppressErrorLog, ...headersOnly } = extraHeaders || {};
     const headers: Record<string, string> = {
       ...getAuthHeaders(),
       ...headersOnly,
@@ -227,7 +227,9 @@ export const apiClient = {
       });
       return await handleResponse<T>(response, responseType);
     } catch (error) {
-      console.error(`Fetch error at GET ${url}:`, error);
+      if (!suppressErrorLog) {
+        console.error(`Fetch error at GET ${url}:`, error);
+      }
       throw error;
     }
   },

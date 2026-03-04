@@ -1,6 +1,6 @@
 from typing import Any, Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.modules.patients.schemas import (
     EntityInfoSchema,
@@ -87,6 +87,7 @@ class CaseResultSchema(BaseModel):
 class AssignedPathologistSchema(BaseModel):
     id: str
     name: str
+    pathologist_code: Optional[str] = None
 
 
 # Create
@@ -160,6 +161,24 @@ class CaseResponse(BaseModel):
     date_info: Optional[list[DateEntrySchema]] = None
 
     model_config = {"from_attributes": True}
+
+    @field_validator("additional_notes", mode="before")
+    @classmethod
+    def normalize_additional_notes(cls, v: Any) -> Optional[list[str]]:
+        if v is None:
+            return None
+        result = []
+        for item in v:
+            if isinstance(item, str):
+                result.append(item)
+            elif isinstance(item, dict):
+                note = item.get("note") or item.get("text") or item.get("content") or ""
+                date = item.get("date")
+                if date:
+                    result.append(f"{date}: {note}".strip(": "))
+                elif note:
+                    result.append(note)
+        return result or None
 
 
 class CaseListResponse(BaseModel):

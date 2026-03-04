@@ -1,6 +1,6 @@
 """Schemas Pydantic para el módulo de soporte (tickets)."""
 
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel
 
@@ -26,7 +26,7 @@ class SupportTicketCreate(BaseModel):
     title: str
     category: TicketCategory
     description: str
-    images: Optional[list[str]] = None  # base64 strings
+    images: list[str] | None = None  # base64 strings
 
 
 class ChangeStatusRequest(BaseModel):
@@ -38,12 +38,12 @@ class SupportTicketResponse(BaseModel):
     title: str
     category: str
     description: str
-    images: Optional[list[str]] = None
+    images: list[str] | None = None
     ticket_date: str
     status: str
-    created_by: Optional[str] = None
-    created_by_name: Optional[str] = None
-    comments: Optional[list[TicketCommentResponse]] = None
+    created_by: str | None = None
+    created_by_name: str | None = None
+    comments: list[TicketCommentResponse] | None = None
 
     model_config = {"from_attributes": True}
 

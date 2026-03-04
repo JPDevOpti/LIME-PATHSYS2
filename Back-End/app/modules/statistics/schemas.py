@@ -1,4 +1,3 @@
-from typing import List, Optional
 from pydantic import BaseModel
 
 
@@ -9,8 +8,8 @@ class OpportunityTestStat(BaseModel):
     name: str
     withinOpportunity: int
     outOfOpportunity: int
-    averageDays: Optional[float] = None
-    opportunityTimeDays: Optional[float] = None
+    averageDays: float | None = None
+    opportunityTimeDays: float | None = None
 
 
 class PathologistPerformance(BaseModel):
@@ -25,17 +24,17 @@ class OpportunitySummaryStats(BaseModel):
     total: int
     within: int
     out: int
-    averageDays: Optional[float] = None
-    patients: Optional[int] = None
-    total_last_month: Optional[int] = 0
-    percentage_change: Optional[float] = 0.0
+    averageDays: float | None = None
+    patients: int | None = None
+    total_last_month: int | None = 0
+    percentage_change: float | None = 0.0
 
 
 class OpportunityReportResponse(BaseModel):
-    tests: List[OpportunityTestStat]
-    pathologists: List[PathologistPerformance]
-    monthlyPct: Optional[List[float]] = None
-    summary: Optional[OpportunitySummaryStats] = None
+    tests: list[OpportunityTestStat]
+    pathologists: list[PathologistPerformance]
+    monthlyPct: list[float] | None = None
+    summary: OpportunitySummaryStats | None = None
 
 
 # ── Entidades ──────────────────────────────────────────────────────────────────
@@ -59,13 +58,13 @@ class EntitiesReportSummary(BaseModel):
 
 
 class EntitiesReportResponse(BaseModel):
-    entities: List[EntityStat]
-    summary: Optional[EntitiesReportSummary] = None
+    entities: list[EntityStat]
+    summary: EntitiesReportSummary | None = None
 
 
 class EntityTestDetail(BaseModel):
     codigo: str
-    nombre: Optional[str] = None
+    nombre: str | None = None
     total_solicitudes: int
 
 
@@ -76,8 +75,8 @@ class EntityPathologistDetail(BaseModel):
 
 
 class EntityDetailsResponse(BaseModel):
-    pruebas_mas_solicitadas: List[EntityTestDetail]
-    pathologists: List[EntityPathologistDetail]
+    pruebas_mas_solicitadas: list[EntityTestDetail]
+    pathologists: list[EntityPathologistDetail]
 
 
 # ── Pruebas ────────────────────────────────────────────────────────────────────
@@ -97,8 +96,8 @@ class TestsReportSummary(BaseModel):
 
 
 class TestsReportResponse(BaseModel):
-    tests: List[TestStat]
-    summary: Optional[TestsReportSummary] = None
+    tests: list[TestStat]
+    summary: TestsReportSummary | None = None
 
 
 # ── Patólogos ──────────────────────────────────────────────────────────────────
@@ -116,8 +115,8 @@ class PathologistTestDetail(BaseModel):
 
 
 class PathologistEntitiesResponse(BaseModel):
-    entidades: List[PathologistEntityDetail]
+    entidades: list[PathologistEntityDetail]
 
 
 class PathologistTestsResponse(BaseModel):
-    pruebas: List[PathologistTestDetail]
+    pruebas: list[PathologistTestDetail]

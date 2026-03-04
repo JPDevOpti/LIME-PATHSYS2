@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { BaseCard } from '@/shared/components/base';
 import { ConfirmDialog } from '@/shared/components/overlay/ConfirmDialog';
 import { AdditionalTestsDetailsModal } from './AdditionalTestsDetailsModal';
@@ -47,11 +47,12 @@ export function AdditionalTestsList() {
     const [approvedCaseData, setApprovedCaseData] = useState<ApprovalSuccessCaseData | null>(null);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-    const fetchCases = useCallback(async (filterOverride?: ApprovalFilters, pageOverride?: number) => {
+    const fetchCases = useCallback(async (filterOverride?: ApprovalFilters, pageOverride?: number, limitOverride?: number) => {
         setLoading(true);
         try {
             const f = filterOverride || filters;
             const p = pageOverride !== undefined ? pageOverride : currentPage;
+            const l = limitOverride !== undefined ? limitOverride : itemsPerPage;
             const resp = await casesApprovalService.search(
                 {
                     original_case_code: f.searchTerm.trim() || undefined,
@@ -62,8 +63,8 @@ export function AdditionalTestsList() {
                     request_date_from: f.dateFrom || undefined,
                     request_date_to: f.dateTo || undefined
                 },
-                (p - 1) * itemsPerPage,
-                itemsPerPage
+                (p - 1) * l,
+                l
             );
             setCases(toViewModelList(resp.data));
             setTotal(resp.total);
@@ -95,10 +96,7 @@ export function AdditionalTestsList() {
     const handleItemsPerPageChange = (value: number) => {
         setItemsPerPage(value);
         setCurrentPage(1);
-        // Aquí no pasamos itemsPerPage como override porque fetchCases usa el valor actual de itemsPerPage del closure
-        // Pero el cambio de itemsPerPage disparará el re-render y fetchCases se re-creará.
-        // Sin embargo, para seguridad inmediata:
-        fetchCases(filters, 1);
+        fetchCases(filters, 1, value);
     };
 
     const viewCase = async (caseId: string) => {
@@ -248,9 +246,7 @@ export function AdditionalTestsList() {
         if (!selectedCase?.approval_code) return;
         try {
             await casesApprovalService.updateTests(selectedCase.approval_code, updatedTests);
-            selectedCase.additional_tests = updatedTests;
-            const caseItem = cases.find((c) => c.approvalCode === selectedCase.approval_code);
-            if (caseItem) caseItem.additionalTests = updatedTests;
+            setSelectedCase(prev => prev ? { ...prev, additional_tests: updatedTests } : null);
             await fetchCases();
         } catch (e) {
             console.error('Error updating tests:', e);

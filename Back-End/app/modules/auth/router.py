@@ -2,27 +2,22 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from app.database import get_db
+from app.modules.auth.repository import AuthRepository
 from app.modules.auth.schemas import LoginRequest, LoginResponse
 from app.modules.auth.service import AuthService
 from app.modules.users.schemas import UserResponse, UserUpdate
 from app.security import verify_token_payload
-from .dependencies import (
-    oauth2_scheme,
-    get_current_user_id,
-    get_current_user,
-)
+from .dependencies import oauth2_scheme, get_current_user_id
 
 router = APIRouter()
 
 
 def get_auth_service() -> AuthService:
-    from app.database import get_db
-    from app.modules.auth.repository import AuthRepository
     return AuthService(AuthRepository(get_db()))
 
 
 def get_users_service():
-    from app.database import get_db
     from app.modules.users.repository import UsersRepository
     from app.modules.users.service import UsersService
     from app.modules.patients.repository import PatientRepository

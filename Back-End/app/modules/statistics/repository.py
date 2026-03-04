@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pymongo.collection import Collection
 from pymongo.database import Database
@@ -12,7 +12,7 @@ MESES = {
 }
 
 
-def _month_range(year: int, month: int):
+def _month_range(year: int, month: int) -> tuple[datetime, datetime]:
     """Retorna (start_dt, end_dt) en UTC para el mes dado (extremo superior exclusivo)."""
     start = datetime(year, month, 1, 0, 0, 0, tzinfo=timezone.utc)
     if month == 12:
@@ -27,7 +27,7 @@ class StatisticsRepository:
         self.cases: Collection = db["cases"]
         self.tests_col: Collection = db["tests"]
 
-    def _hama_exclusion(self) -> Dict[str, Any]:
+    def _hama_exclusion(self) -> dict[str, Any]:
         entity_name_pattern = "h[aá]ma|alma\\s*m[aá]ter|alma\\s*m[aá]ter\\s*de\\s*antioquia"
         entity_code_pattern = "^HAMA(?:[-_].*)?$"
         return {
@@ -51,10 +51,10 @@ class StatisticsRepository:
         self,
         year: int,
         month: int,
-        entity_name: Optional[str] = None,
+        entity_name: str | None = None,
         completed_only: bool = True,
         exclude_hama: bool = False,
-    ) -> Dict:
+    ) -> dict:
         """
         Filtra por date_info.0.created_at en el mes solicitado.
         Si completed_only=True, restringe a casos 'Completado' para métricas de oportunidad.
@@ -62,7 +62,7 @@ class StatisticsRepository:
         pero solo si ya están completados para tener el dato de was_timely.
         """
         start, end = _month_range(year, month)
-        match: Dict[str, Any] = {
+        match: dict[str, Any] = {
             "date_info.0.created_at": {"$gte": start, "$lt": end},
         }
         if exclude_hama:
@@ -74,7 +74,7 @@ class StatisticsRepository:
             match["patient_info.entity_info.entity_name"] = entity_name
         return match
 
-    def _test_name_map(self) -> Dict[str, str]:
+    def _test_name_map(self) -> dict[str, str]:
         """Devuelve {test_code: test_name} desde la colección tests."""
         result = {}
         for doc in self.tests_col.find({}, {"test_code": 1, "name": 1}):
@@ -88,8 +88,8 @@ class StatisticsRepository:
         self,
         year: int,
         month: int,
-        entity_name: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        entity_name: str | None = None,
+    ) -> dict[str, Any]:
         # Solo casos COMPLETADOS que EMPEZARON en el mes solicitado
         match = self._base_match(
             year,
@@ -145,7 +145,7 @@ class StatisticsRepository:
         }
 
         # ── % mensual: solo meses completados del año (hasta el mes solicitado) ─
-        monthly_pct: List[float] = []
+        monthly_pct: list[float] = []
         for m in range(1, 13):
             m_match = self._base_match(
                 year,
@@ -240,7 +240,7 @@ class StatisticsRepository:
 
     # ── Entidades ──────────────────────────────────────────────────────────────
 
-    def get_entities_report(self, year: int, month: int) -> Dict[str, Any]:
+    def get_entities_report(self, year: int, month: int) -> dict[str, Any]:
         match = self._base_match(year, month, completed_only=True, exclude_hama=True)
 
         pipeline = [
@@ -307,7 +307,7 @@ class StatisticsRepository:
 
     def get_entity_details(
         self, entity_name: str, year: int, month: int
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         # Detalles: todos los casos del mes (no solo completados) para pruebas/patólogos
         match = {
             **self._base_match(year, month, completed_only=False, exclude_hama=True),
@@ -370,8 +370,8 @@ class StatisticsRepository:
         self,
         year: int,
         month: int,
-        entity_name: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        entity_name: str | None = None,
+    ) -> dict[str, Any]:
         # Pruebas: todos los casos del mes (completados o no) — volumen de solicitudes
         match = self._base_match(year, month, entity_name, completed_only=False, exclude_hama=True)
         test_names = self._test_name_map()
@@ -423,7 +423,7 @@ class StatisticsRepository:
 
     # ── Patólogos ──────────────────────────────────────────────────────────────
 
-    def get_pathologists_report(self, year: int, month: int) -> List[Dict[str, Any]]:
+    def get_pathologists_report(self, year: int, month: int) -> list[dict[str, Any]]:
         match = self._base_match(year, month, completed_only=True, exclude_hama=True)
 
         pipeline = [
@@ -462,7 +462,7 @@ class StatisticsRepository:
 
     def get_pathologist_entities(
         self, pathologist_name: str, year: int, month: int
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         match = {
             **self._base_match(year, month, completed_only=True, exclude_hama=True),
             "assigned_pathologist.name": pathologist_name,
@@ -499,7 +499,7 @@ class StatisticsRepository:
 
     def get_pathologist_tests(
         self, pathologist_name: str, year: int, month: int
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         match = {
             **self._base_match(year, month, completed_only=True, exclude_hama=True),
             "assigned_pathologist.name": pathologist_name,

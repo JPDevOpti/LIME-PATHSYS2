@@ -13,7 +13,6 @@ export interface AdditionalTestInfo {
 export interface AssignedPathologist {
     id?: string;
     name?: string;
-    email?: string;
 }
 
 export interface ApprovalRequestResponse {
@@ -59,5 +58,3 @@ export interface CaseToApproveViewModel {
     managing: boolean;
 }
 
-// Alias de compatibilidad (deprecado)
-export type ComplementaryTestInfo = AdditionalTestInfo;

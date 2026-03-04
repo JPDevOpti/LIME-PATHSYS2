@@ -18,7 +18,7 @@ interface PatientsFiltersBarProps {
     canExport?: boolean;
     onRefresh: () => void;
     onExport: () => void;
-    onSearch: () => void;
+    onSearch: (filters: PatientListFilters) => void;
     onClear: () => void;
 }
 
@@ -69,7 +69,7 @@ export function PatientsFiltersBar({
         // El onSearch del padre suele disparar la carga, 
         // pero aseguraros de que usePatientList no dispare antes de onFiltersChange.
         // En este caso usePatientList reacciona a los filtros.
-        onSearch();
+        onSearch(localFilters);
     };
     return (
         <BaseCard variant="muted" padding="md" className="bg-white">

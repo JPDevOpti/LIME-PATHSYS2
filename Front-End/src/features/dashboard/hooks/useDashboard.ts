@@ -37,8 +37,8 @@ export const useDashboard = () => {
                 setUrgentCases(u);
                 setOpportunityStats(o);
 
-            } catch (err: any) {
-                setError(err.message || 'Error al cargar datos del dashboard');
+            } catch (err: unknown) {
+                setError(err instanceof Error ? err.message : 'Error al cargar datos del dashboard');
             } finally {
                 setLoadingMetrics(false);
                 setLoadingOpportunity(false);
@@ -48,11 +48,6 @@ export const useDashboard = () => {
         loadData();
     }, []);
 
-    const refreshDashboard = () => {
-        // Re-fetch logic would go here
-        console.log('Refreshing dashboard data...');
-    };
-
     return {
         metrics,
         opportunityStats,
@@ -61,6 +56,5 @@ export const useDashboard = () => {
         loadingMetrics,
         loadingOpportunity,
         error,
-        refreshDashboard
     };
 };

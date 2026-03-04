@@ -1,24 +1,26 @@
 """Servicio de enfermedades (CIE-10, CIE-O)."""
 
 from app.modules.diseases.repository import DiseasesRepository
-from app.modules.diseases.schemas import DiseaseResponse, DiseaseSearchResponse
+from app.modules.diseases.schemas import (
+    DiseaseCountResponse,
+    DiseaseCreate,
+    DiseaseResponse,
+    DiseaseSearchResponse,
+)
 
 
 class DiseasesService:
     def __init__(self, repo: DiseasesRepository) -> None:
         self._repo = repo
 
-    def create(self, data):
-        # data: DiseaseCreate
-        # Insertar en la colección y devolver el objeto creado
+    def create(self, data: DiseaseCreate) -> DiseaseResponse:
         obj = {
             "code": data.code,
             "name": data.name,
             "table": data.table,
         }
-        inserted = self._repo.collection.insert_one(obj)
-        obj["id"] = str(inserted.inserted_id)
-        return DiseaseResponse(**obj)
+        inserted = self._repo.create(obj)
+        return DiseaseResponse(**inserted)
 
     def search(
         self,
@@ -46,3 +48,7 @@ class DiseasesService:
             skip=skip,
             limit=limit,
         )
+
+    def count(self) -> DiseaseCountResponse:
+        counts = self._repo.count_diseases()
+        return DiseaseCountResponse(**counts)

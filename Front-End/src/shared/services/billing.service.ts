@@ -1,5 +1,5 @@
 import { apiClient } from '../api/client';
-import { BillingPathologistReportData, BillingTestsReportData, BillingTestDetail } from '@/features/billing/types/billing.types';
+import type { BillingPathologistReportData, BillingTestsReportData, BillingTestDetail } from '@/features/billing/types/billing.types';
 
 export const billingService = {
     async getPathologistsReport(year: number, month: number): Promise<BillingPathologistReportData> {

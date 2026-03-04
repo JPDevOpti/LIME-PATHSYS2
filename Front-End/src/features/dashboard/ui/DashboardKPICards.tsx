@@ -6,8 +6,6 @@ import type { DashboardMetrics, MetricDetail } from '../model/dashboard.types';
 
 type DashboardKPICardsProps = {
   metrics: DashboardMetrics;
-  username: string; // To recreate the "Hola, [User]" title if needed, or just specific metrics
-  roleLabel?: string; // e.g. "Patólogo" vs "Admin" labels
 };
 
 const KPICard = ({

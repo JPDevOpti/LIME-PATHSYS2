@@ -3,7 +3,7 @@ import type { LoginRequest, LoginResponse, User } from '../types/auth.types';
 
 const AUTH_BASE = '/api/v1/auth';
 
-const ROLE_NORMALIZE: Record<string, User['role']> = {
+export const ROLE_NORMALIZE: Record<string, User['role']> = {
   administrator: 'administrator',
   admin: 'administrator',
   pathologist: 'pathologist',
@@ -11,6 +11,7 @@ const ROLE_NORMALIZE: Record<string, User['role']> = {
   resident: 'resident',
   residente: 'resident',
   auxiliar: 'recepcionista',
+  recepcion: 'recepcionista',
   recepcionista: 'recepcionista',
   receptionist: 'recepcionista',
   billing: 'visitante',
@@ -18,7 +19,7 @@ const ROLE_NORMALIZE: Record<string, User['role']> = {
   paciente: 'paciente',
 };
 
-function normalizeRole(raw: unknown): User['role'] {
+export function normalizeRole(raw: unknown): User['role'] {
   const key = String(raw ?? '').trim().toLowerCase();
   return ROLE_NORMALIZE[key] ?? 'visitante';
 }

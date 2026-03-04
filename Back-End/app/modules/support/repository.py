@@ -1,11 +1,10 @@
-from datetime import datetime
-from typing import Any, Optional
+from datetime import datetime, timezone
+from typing import Any
 from app.core.date_utils import format_iso_datetime
 
 from bson import ObjectId
 from pymongo.collection import Collection
 from pymongo.database import Database
-from pymongo.cursor import Cursor
 
 
 def _doc_to_ticket(doc: dict) -> dict:

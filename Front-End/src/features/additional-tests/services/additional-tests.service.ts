@@ -7,7 +7,7 @@ import type {
 
 function mapApiToApproval(api: Record<string, unknown>): ApprovalRequestResponse {
     const approvalInfo = api.approval_info as Record<string, unknown> | undefined;
-    const ct = ((api.additional_tests as unknown[]) || (api.complementary_tests as unknown[]) || []);
+    const ct = (api.additional_tests as unknown[]) ?? [];
     return {
         id: String(api.id ?? ''),
         approval_code: String(api.approval_code ?? api.original_case_code ?? ''),

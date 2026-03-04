@@ -14,7 +14,7 @@ import {
   UsersIcon,
 } from '@heroicons/react/24/outline';
 
-import { BarChart3, Building2, ClipboardPlus, EyeOff, FlaskConical, MessageCircleQuestion, Microscope, UserCircle, History } from 'lucide-react';
+import { BarChart3, Building2, ClipboardPlus, EyeOff, FlaskConical, MessageCircleQuestion, Microscope, UserCircle } from 'lucide-react';
 
 type IconType = ComponentType<SVGProps<SVGSVGElement>>;
 
@@ -109,7 +109,6 @@ const applicationNav: NavSection[] = [
           { title: 'Crear caso', href: '/cases/create', icon: PlusIcon, roles: ROLES_CREATE_EDIT },
           { title: 'Editar caso', href: '/cases/edit', icon: PencilSquareIcon, roles: ROLES_CREATE_EDIT },
           { title: 'Listado de casos', href: '/cases', icon: ClipboardPlus as IconType, roles: ROLES_ALL },
-          { title: 'Casos Históricos', href: '/cases-legacy', icon: History as IconType, roles: ROLES_ALL },
         ],
       },
       {

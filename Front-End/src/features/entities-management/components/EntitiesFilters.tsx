@@ -3,7 +3,7 @@
 import { BaseCard, BaseButton } from '@/shared/components/base';
 import { Input, FormField, Select } from '@/shared/components/ui/form';
 import { SearchButton, ClearButton } from '@/shared/components/ui/buttons';
-import { Search, CheckCheck } from 'lucide-react';
+import { Search, Plus } from 'lucide-react';
 import type { EntitiesFilters as EntitiesFiltersType } from '../types/entities-filters.types';
 
 const STATUS_OPTIONS = [
@@ -67,7 +67,7 @@ export function EntitiesFilters({
                                 size="md"
                                 variant="secondary"
                                 onClick={onNewEntity}
-                                startIcon={<CheckCheck className="w-4 h-4" />}
+                                startIcon={<Plus className="w-4 h-4" />}
                                 className="border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100"
                             >
                                 Nueva entidad

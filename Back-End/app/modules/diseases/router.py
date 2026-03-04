@@ -1,15 +1,40 @@
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from fastapi import APIRouter, Depends, Query, HTTPException, status
 from app.modules.auth.dependencies import get_current_user_id
-from app.modules.diseases.schemas import DiseaseSearchResponse, DiseaseCreate, DiseaseResponse
+from app.modules.diseases.schemas import (
+    DiseaseCountResponse,
+    DiseaseCreate,
+    DiseaseResponse,
+    DiseaseSearchResponse,
+)
 from app.modules.diseases.service import DiseasesService
+
 
 def get_diseases_service() -> DiseasesService:
     from app.database import get_db
     from app.modules.diseases.repository import DiseasesRepository
     return DiseasesService(DiseasesRepository(get_db()))
 
+
 router = APIRouter(dependencies=[Depends(get_current_user_id)])
+
+
+@router.get("/count", response_model=DiseaseCountResponse)
+def count_diseases(service: DiseasesService = Depends(get_diseases_service)):
+    """Obtiene cantidad total de enfermedades y la imprime en consola del backend."""
+    counts = service.count()
+    print(
+        "[DiseasesCount] total=",
+        counts.total,
+        "diseases=",
+        counts.diseases_collection,
+        "CIE10=",
+        counts.cie10_collection,
+        "CIEO=",
+        counts.cieo_collection,
+    )
+    return counts
+
 
 @router.get("/search", response_model=DiseaseSearchResponse)
 def search_diseases(
@@ -21,6 +46,7 @@ def search_diseases(
 ):
     """Busca enfermedades por nombre o codigo. Requiere autenticacion."""
     return service.search(query=q, table=table, skip=skip, limit=limit)
+
 
 @router.post("/", response_model=DiseaseResponse, status_code=status.HTTP_201_CREATED)
 def create_disease(

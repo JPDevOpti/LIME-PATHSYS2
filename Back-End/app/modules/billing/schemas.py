@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
+
 
 class BillingPathologistItem(BaseModel):
     codigo: str
@@ -7,9 +7,11 @@ class BillingPathologistItem(BaseModel):
     casos: int
     monto: float
 
+
 class BillingPathologistReportData(BaseModel):
-    pathologists: List[BillingPathologistItem]
+    pathologists: list[BillingPathologistItem]
     total: float
+
 
 class BillingTestItem(BaseModel):
     codigo: str
@@ -17,9 +19,11 @@ class BillingTestItem(BaseModel):
     cantidad: int
     monto: float
 
+
 class BillingTestsReportData(BaseModel):
-    tests: List[BillingTestItem]
+    tests: list[BillingTestItem]
     total: float
+
 
 class BillingTestEntityDetail(BaseModel):
     entidad: str
@@ -28,9 +32,10 @@ class BillingTestEntityDetail(BaseModel):
     monto: float
     tiene_convenio: bool
 
+
 class BillingTestDetail(BaseModel):
     codigo: str
     nombre: str
     total_cantidad: int
     total_monto: float
-    detalles_por_entidad: List[BillingTestEntityDetail]
+    detalles_por_entidad: list[BillingTestEntityDetail]

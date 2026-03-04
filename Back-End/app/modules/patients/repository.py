@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Optional
 from app.core.date_utils import format_iso_datetime
 
@@ -97,8 +97,8 @@ class PatientRepository:
                 q["$gte"] = datetime.fromisoformat(created_at_from.replace("Z", "+00:00"))
             if created_at_to:
                 end = datetime.fromisoformat(created_at_to.replace("Z", "+00:00"))
-                end = end.replace(hour=23, minute=59, second=59, microsecond=999999)
-                q["$lte"] = end
+                end = end.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
+                q["$lt"] = end
             query["created_at"] = q
 
         if entity and entity.strip():

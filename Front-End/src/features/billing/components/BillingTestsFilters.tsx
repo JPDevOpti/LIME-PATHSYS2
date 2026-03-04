@@ -10,20 +10,11 @@ const MONTHS = [
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
 ] as const;
 
-const ENTITY_OPTIONS = [
-    { value: '', label: 'Todas las entidades' },
-    { value: 'hama', label: 'Hospital Alma Mater' },
-    { value: 'udea', label: 'Universidad de Antioquia' },
-    { value: 'otras', label: 'Otras entidades' },
-];
-
 interface BillingTestsFiltersProps {
     selectedMonth: string;
     selectedYear: string;
-    selectedEntity: string;
     onMonthChange: (v: string) => void;
     onYearChange: (v: string) => void;
-    onEntityChange: (v: string) => void;
     onGenerate: () => void;
     onClear: () => void;
     isLoading?: boolean;
@@ -32,10 +23,8 @@ interface BillingTestsFiltersProps {
 export function BillingTestsFilters({
     selectedMonth,
     selectedYear,
-    selectedEntity,
     onMonthChange,
     onYearChange,
-    onEntityChange,
     onGenerate,
     onClear,
     isLoading = false,
@@ -69,14 +58,6 @@ export function BillingTestsFilters({
                         onChange={(e) => onYearChange(e.target.value)}
                         options={yearOptions}
                         placeholder="Seleccionar año"
-                    />
-                </FormField>
-                <FormField label="Entidad" className="w-56">
-                    <Select
-                        value={selectedEntity}
-                        onChange={(e) => onEntityChange(e.target.value)}
-                        options={ENTITY_OPTIONS}
-                        placeholder="Seleccionar entidad"
                     />
                 </FormField>
                 <div className="flex items-center gap-2">

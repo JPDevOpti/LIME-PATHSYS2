@@ -2,15 +2,11 @@ import type { Role } from '../types/auth.types';
 
 const ROLE_LABELS: Record<string, string> = {
   administrator: 'Administrador',
-  admin: 'Administrador',
   pathologist: 'Patólogo',
   resident: 'Residente',
   recepcionista: 'Auxiliar',
-  receptionist: 'Auxiliar',
   visitante: 'Visitante',
-  billing: 'Visitante',
-  facturacion: 'Visitante',
-  facturación: 'Visitante',
+  paciente: 'Paciente',
 };
 
 export function useRoleLabel() {

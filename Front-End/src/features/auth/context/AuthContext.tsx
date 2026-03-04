@@ -15,7 +15,7 @@ import {
   getStoredUser,
   setAuthStorage,
 } from '@/shared/api/client';
-import { authService } from '../services/auth.service';
+import { authService, normalizeRole } from '../services/auth.service';
 import type { LoginRequest, User } from '../types/auth.types';
 
 type AuthContextValue = {
@@ -30,27 +30,6 @@ type AuthContextValue = {
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
-
-const ROLE_NORMALIZE: Record<string, User['role']> = {
-  administrator: 'administrator',
-  admin: 'administrator',
-  pathologist: 'pathologist',
-  patologo: 'pathologist',
-  resident: 'resident',
-  residente: 'resident',
-  auxiliar: 'recepcionista',
-  recepcion: 'recepcionista',
-  recepcionista: 'recepcionista',
-  receptionist: 'recepcionista',
-  billing: 'visitante',
-  visitante: 'visitante',
-  paciente: 'paciente',
-};
-
-function normalizeRole(raw: unknown): User['role'] {
-  const key = String(raw ?? '').trim().toLowerCase();
-  return ROLE_NORMALIZE[key] ?? 'visitante';
-}
 
 function parseStoredUser(raw: unknown): User | null {
   if (!raw || typeof raw !== 'object') return null;

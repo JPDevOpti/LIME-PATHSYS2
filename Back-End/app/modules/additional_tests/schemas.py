@@ -17,6 +17,7 @@ class AdditionalTestSchema(BaseModel):
 class AssignedPathologistSchema(BaseModel):
     id: str
     name: str
+    pathologist_code: Optional[str] = None
 
 
 class ApprovalInfoSchema(BaseModel):

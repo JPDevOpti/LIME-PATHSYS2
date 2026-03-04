@@ -25,41 +25,28 @@ const MONTHS = [
 
 export function EntityDetailsModal({ entity, period, onClose }: EntityDetailsModalProps) {
     const [entityDetails, setEntityDetails] = useState<EntityDetails | null>(null);
-    const [pathologistsData, setPathologistsData] = useState<Array<{ name: string; codigo: string; casesCount: number }>>([]);
-    const [isLoadingPathologists, setIsLoadingPathologists] = useState(false);
-    const [isLoadingTests, setIsLoadingTests] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (!entity) {
             setEntityDetails(null);
-            setPathologistsData([]);
             return;
         }
-        setIsLoadingTests(true);
-        setIsLoadingPathologists(true);
+        setIsLoading(true);
         statisticsService.getEntityDetails(entity.codigo, { month: period.month, year: period.year })
             .then(setEntityDetails)
             .catch(() => setEntityDetails(null))
-            .finally(() => setIsLoadingTests(false));
-        statisticsService.getEntityPathologists(entity.codigo, { month: period.month, year: period.year })
-            .then(setPathologistsData)
-            .catch(() => setPathologistsData([]))
-            .finally(() => setIsLoadingPathologists(false));
+            .finally(() => setIsLoading(false));
     }, [entity, period.month, period.year]);
 
     if (!entity) return null;
 
     const formatPeriod = () => `${MONTHS[period.month - 1]} ${period.year}`;
 
-    const hasData = () => {
-        const fromList = (entity?.total ?? 0) > 0 || (entity?.ambulatorios ?? 0) > 0 || (entity?.hospitalizados ?? 0) > 0;
-        if (fromList) return true;
-        if (!entityDetails) return false;
-        const b = entityDetails.estadisticas_basicas;
-        return b.total_casos > 0 || b.ambulatorios > 0 || b.hospitalizados > 0 ||
-            (entityDetails.pruebas_mas_solicitadas?.length ?? 0) > 0 ||
-            pathologistsData.length > 0;
-    };
+    const hasData = () =>
+        (entity?.total ?? 0) > 0 ||
+        (entityDetails?.pruebas_mas_solicitadas?.length ?? 0) > 0 ||
+        (entityDetails?.pathologists?.length ?? 0) > 0;
 
     return (
         <BaseModal
@@ -127,7 +114,7 @@ export function EntityDetailsModal({ entity, period, onClose }: EntityDetailsMod
                     </div>
                 </div>
 
-                {!isLoadingTests && !isLoadingPathologists && !hasData() ? (
+                {!isLoading && !hasData() ? (
                     <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 text-center">
                         <p className="text-lg font-semibold text-amber-800 mb-2">No hay datos disponibles</p>
                         <p className="text-amber-700 mb-4">
@@ -146,7 +133,7 @@ export function EntityDetailsModal({ entity, period, onClose }: EntityDetailsMod
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
                         <div className="bg-neutral-50 rounded-xl p-4 sm:p-5 space-y-3">
                             <h5 className="text-lg font-semibold text-neutral-900">Pruebas más solicitadas</h5>
-                            {isLoadingTests ? (
+                            {isLoading ? (
                                 <div className="flex items-center justify-center py-6">
                                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
                                     <span className="ml-2 text-neutral-600">Cargando pruebas...</span>
@@ -185,19 +172,19 @@ export function EntityDetailsModal({ entity, period, onClose }: EntityDetailsMod
 
                         <div className="bg-neutral-50 rounded-xl p-4 sm:p-5 space-y-3">
                             <h5 className="text-lg font-semibold text-neutral-900">Patólogos</h5>
-                            {isLoadingPathologists ? (
+                            {isLoading ? (
                                 <div className="flex items-center justify-center py-6">
                                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600" />
                                     <span className="ml-2 text-neutral-600">Cargando patólogos...</span>
                                 </div>
-                            ) : pathologistsData.length === 0 ? (
+                            ) : !entityDetails?.pathologists?.length ? (
                                 <div className="text-center py-6 text-neutral-500">
                                     <UserGroupIcon className="w-12 h-12 mx-auto text-neutral-300 mb-4" />
                                     <p>No se encontraron patólogos</p>
                                 </div>
                             ) : (
                                 <div className="space-y-2 sm:space-y-3">
-                                    {pathologistsData.map((p) => (
+                                    {entityDetails?.pathologists?.map((p) => (
                                         <div
                                             key={p.codigo}
                                             className="bg-white rounded-lg p-3 sm:p-4 border border-neutral-200"

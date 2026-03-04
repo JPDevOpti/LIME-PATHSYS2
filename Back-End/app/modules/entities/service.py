@@ -1,6 +1,6 @@
 """Servicio de entidades."""
 
-from typing import Any, Optional
+from typing import Any
 
 from app.core.exceptions import conflict_exception, not_found_exception
 from app.modules.entities.repository import EntitiesRepository
@@ -13,8 +13,8 @@ class EntitiesService:
 
     def list_entities(
         self,
-        search: Optional[str] = None,
-        is_active: Optional[bool] = None,
+        search: str | None = None,
+        is_active: bool | None = None,
         skip: int = 0,
         limit: int = 100,
     ) -> dict[str, Any]:

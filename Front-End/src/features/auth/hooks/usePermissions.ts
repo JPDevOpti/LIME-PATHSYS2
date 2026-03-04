@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import type { Role } from '../types/auth.types';
 
@@ -6,40 +5,12 @@ export function usePermissions() {
   const { user } = useAuth();
   const role = user?.role ?? null;
 
-  const isAdmin = useMemo(
-    () =>
-      ['administrator', 'admin', 'administrador'].includes(
-        (role ?? '').toString().trim().toLowerCase()
-      ),
-    [role]
-  );
-  const isPatologo = useMemo(
-    () =>
-      ['pathologist', 'patologo', 'patólogo'].includes(
-        (role ?? '').toString().trim().toLowerCase()
-      ),
-    [role]
-  );
-  const isResidente = useMemo(
-    () =>
-      ['resident', 'residente'].includes((role ?? '').toString().trim().toLowerCase()),
-    [role]
-  );
-  const isAuxiliar = useMemo(
-    () =>
-      ['recepcionista', 'receptionist', 'auxiliar'].includes(
-        (role ?? '').toString().trim().toLowerCase()
-      ),
-    [role]
-  );
-  const isVisitante = useMemo(
-    () =>
-      ['visitante', 'billing', 'facturacion'].includes(
-        (role ?? '').toString().trim().toLowerCase()
-      ),
-    [role]
-  );
-  const isPaciente = useMemo(() => role === 'paciente', [role]);
+  const isAdmin = role === 'administrator';
+  const isPatologo = role === 'pathologist';
+  const isResidente = role === 'resident';
+  const isAuxiliar = role === 'recepcionista';
+  const isVisitante = role === 'visitante';
+  const isPaciente = role === 'paciente';
 
   const canCreatePatients = isAdmin || isResidente || isAuxiliar;
   const canEditPatients = isAdmin || isResidente || isAuxiliar;

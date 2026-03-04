@@ -86,8 +86,6 @@ class AuthService:
         user = self.repo.get_user_by_id(user_id)
         if not user:
             raise ValueError("User not found")
-        if not user.get("is_active", True):
-            raise ValueError("User account is inactive")
         expires_delta = self._get_expires_delta(remember_me)
         token = create_access_token(
             subject=user["_id"],

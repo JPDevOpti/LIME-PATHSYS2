@@ -155,9 +155,9 @@ export function usePatientList() {
         setCurrentPage(1);
     }, []);
 
-    const applySearch = useCallback(() => {
+    const applySearch = useCallback((overrideFilters?: PatientListFilters) => {
         setCurrentPage(1);
-        loadPatients();
+        loadPatients(overrideFilters);
     }, [loadPatients]);
 
     const setCurrentPageAndLoad = useCallback((page: number) => {

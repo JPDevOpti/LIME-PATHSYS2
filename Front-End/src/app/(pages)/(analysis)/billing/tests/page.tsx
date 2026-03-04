@@ -2,14 +2,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { BaseCard } from '@/shared/components/base';
-import { 
-    BillingTestsFilters, 
-    BillingTestsChart, 
-    BillingTestsTable, 
-    TestBillingDetailModal 
+import {
+    BillingTestsFilters,
+    BillingTestsChart,
+    BillingTestsTable,
+    TestBillingDetailModal
 } from '@/features/billing/components';
 import { billingService } from '@/shared/services/billing.service';
-import { BillingTestsReportData, BillingTestDetail, BillingTestItem } from '@/features/billing/types/billing.types';
+import type { BillingTestsReportData, BillingTestDetail, BillingTestItem } from '@/features/billing/types/billing.types';
 import { Toast } from '@/shared/components/ui/Toast';
 
 export default function BillingByTestsPage() {
@@ -21,12 +21,10 @@ export default function BillingByTestsPage() {
 
     const [selectedMonth, setSelectedMonth] = useState(String(defaultMonthIndex));
     const [selectedYear, setSelectedYear] = useState(String(defaultYear));
-    const [selectedEntity, setSelectedEntity] = useState('');
     const [showReport, setShowReport] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [billingData, setBillingData] = useState<BillingTestsReportData>({ tests: [], total: 0 });
-    
-    // Modal states
+
     const [detailModalOpen, setDetailModalOpen] = useState(false);
     const [selectedTestDetail, setSelectedTestDetail] = useState<BillingTestDetail | null>(null);
     const [isLoadingDetail, setIsLoadingDetail] = useState(false);
@@ -104,7 +102,6 @@ export default function BillingByTestsPage() {
     const clearSelection = () => {
         setSelectedMonth(String(defaultMonthIndex));
         setSelectedYear(String(defaultYear));
-        setSelectedEntity('');
         setShowReport(false);
         setBillingData({ tests: [], total: 0 });
     };
@@ -121,10 +118,8 @@ export default function BillingByTestsPage() {
             <BillingTestsFilters
                 selectedMonth={selectedMonth}
                 selectedYear={selectedYear}
-                selectedEntity={selectedEntity}
                 onMonthChange={setSelectedMonth}
                 onYearChange={setSelectedYear}
-                onEntityChange={setSelectedEntity}
                 onGenerate={generateReport}
                 onClear={clearSelection}
                 isLoading={isLoading}
@@ -146,8 +141,8 @@ export default function BillingByTestsPage() {
             ) : (
                 <div className="space-y-4">
                     <BillingTestsChart datos={billingData.tests} />
-                    <BillingTestsTable 
-                        datos={billingData.tests} 
+                    <BillingTestsTable
+                        datos={billingData.tests}
                         onRowClick={handleRowClick}
                     />
                 </div>

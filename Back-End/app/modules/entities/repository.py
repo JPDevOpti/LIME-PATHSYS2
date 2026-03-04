@@ -1,7 +1,7 @@
 """Repositorio de entidades."""
 
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 from bson import ObjectId
 from pymongo.database import Database
@@ -28,8 +28,8 @@ class EntitiesRepository:
 
     def find_many(
         self,
-        search: Optional[str] = None,
-        is_active: Optional[bool] = None,
+        search: str | None = None,
+        is_active: bool | None = None,
         skip: int = 0,
         limit: int = 100,
     ) -> tuple[list[dict[str, Any]], int]:
@@ -48,14 +48,14 @@ class EntitiesRepository:
         data = [self._doc_to_dict(d) for d in cursor]
         return data, total
 
-    def find_by_code(self, code: str) -> Optional[dict[str, Any]]:
+    def find_by_code(self, code: str) -> dict[str, Any] | None:
         normalized = code.strip().upper()
         doc = self.collection.find_one({"code": normalized})
         if not doc:
             return None
         return self._doc_to_dict(doc)
 
-    def code_exists(self, code: str, exclude_id: Optional[str] = None) -> bool:
+    def code_exists(self, code: str, exclude_id: str | None = None) -> bool:
         normalized = code.strip().upper()
         q: dict[str, Any] = {"code": normalized}
         if exclude_id:
@@ -74,7 +74,7 @@ class EntitiesRepository:
         doc = self.collection.find_one({"_id": result.inserted_id})
         return self._doc_to_dict(doc) if doc else {}
 
-    def update_by_code(self, code: str, data: dict[str, Any]) -> Optional[dict[str, Any]]:
+    def update_by_code(self, code: str, data: dict[str, Any]) -> dict[str, Any] | None:
         normalized = code.strip().upper()
         data["updated_at"] = datetime.now(timezone.utc).isoformat()
         result = self.collection.update_one({"code": normalized}, {"$set": data})

@@ -11,6 +11,19 @@ class AuthRepository:
         self.db = db
         self.collection = db.get_collection("users")
 
+    def _enrich_billing_user(self, doc: dict[str, Any]) -> None:
+        """Enriquece un usuario de billing con sus entidades asociadas si no las tiene."""
+        if doc.get("role") != "billing" or doc.get("associated_entities"):
+            return
+        try:
+            bc = doc.get("billing_code")
+            if bc:
+                bd = self.db.get_collection("billing").find_one({"billing_code": bc})
+                if bd and bd.get("associated_entities"):
+                    doc["associated_entities"] = bd["associated_entities"]
+        except Exception:
+            pass
+
     def get_user_by_email(self, email: str) -> Optional[dict[str, Any]]:
         doc = self.collection.find_one(
             {"email": {"$regex": f"^{email}$", "$options": "i"}, "is_active": True}
@@ -18,15 +31,7 @@ class AuthRepository:
         if not doc:
             return None
         doc["_id"] = str(doc.get("_id", ""))
-        if doc.get("role") == "billing" and not doc.get("associated_entities"):
-            try:
-                bc = doc.get("billing_code")
-                if bc:
-                    bd = self.db.get_collection("billing").find_one({"billing_code": bc})
-                    if bd and bd.get("associated_entities"):
-                        doc["associated_entities"] = bd["associated_entities"]
-            except Exception:
-                pass
+        self._enrich_billing_user(doc)
         return doc
 
     def get_user_by_id(self, user_id: str) -> Optional[dict[str, Any]]:
@@ -38,13 +43,5 @@ class AuthRepository:
         if not doc:
             return None
         doc["_id"] = str(doc.get("_id", ""))
-        if doc.get("role") == "billing" and not doc.get("associated_entities"):
-            try:
-                bc = doc.get("billing_code")
-                if bc:
-                    bd = self.db.get_collection("billing").find_one({"billing_code": bc})
-                    if bd and bd.get("associated_entities"):
-                        doc["associated_entities"] = bd["associated_entities"]
-            except Exception:
-                pass
+        self._enrich_billing_user(doc)
         return doc

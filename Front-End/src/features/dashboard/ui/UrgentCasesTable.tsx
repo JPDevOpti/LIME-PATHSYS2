@@ -37,11 +37,9 @@ function normalizeText(value?: string): string {
 }
 
 function isHamaCase(caseItem: UrgentCase): boolean {
-  const entityCode = normalizeText(caseItem.paciente.entidad_codigo);
   const entityName = normalizeText(caseItem.paciente.entidad);
-
   return (
-    entityCode === HAMA_ENTITY_CODE ||
+    entityName === HAMA_ENTITY_CODE ||
     entityName.includes("alma mater") ||
     entityName.includes("hospital alma mater") ||
     entityName.includes("hama")

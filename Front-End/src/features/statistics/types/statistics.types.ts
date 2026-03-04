@@ -12,7 +12,6 @@ export interface EstadisticasOportunidad {
     };
 }
 
-// Oportunidad general - reporte mensual (copiado del sistema antiguo)
 export interface OpportunityTest {
     code: string;
     name: string;
@@ -22,7 +21,6 @@ export interface OpportunityTest {
     opportunityTimeDays?: number;
 }
 
-// Reporte por prueba - ambulatorios vs hospitalizados
 export interface TestStats {
     codigo: string;
     nombre: string;

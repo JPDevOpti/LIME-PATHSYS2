@@ -3,34 +3,23 @@ export enum CasePriority {
   Prioritario = 'Prioritario',
 }
 
-export enum CaseStatus {
-  EnRecepcion = 'En recepción',
-  CorteMacro = 'Corte macro',
-  DescripMicro = 'Descrip micro',
-  PorFirmar = 'Por firmar',
-  PorEntregar = 'Por entregar',
-  Completado = 'Completado',
-}
-
 export interface UrgentCase {
-  id: string; // Added ID for key prop
+  id: string;
   codigo: string;
   paciente: {
     nombre: string;
     cedula: string;
     entidad?: string;
-    entidad_codigo?: string;
   };
   pruebas: string[];
   patologo: string;
   fecha_creacion: string;
-  estado: CaseStatus;
+  estado: string;
   prioridad: CasePriority;
   dias_en_sistema: number;
   tiempo_oportunidad_max?: number;
 }
 
-// Alias for compatibility with ported Vue components
 export type CasoUrgente = UrgentCase;
 
 export interface MetricDetail {
@@ -58,13 +47,7 @@ export interface OpportunityStats {
   };
 }
 
-// Alias for compatibility with ported Vue components
 export type EstadisticasOportunidad = OpportunityStats;
-
-export interface FiltrosCasosUrgentes {
-  patologo?: string;
-  limite?: number;
-}
 
 export interface MonthlyCasesData {
   datos: number[];

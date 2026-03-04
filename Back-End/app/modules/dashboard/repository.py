@@ -1,8 +1,5 @@
-from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List
+from datetime import datetime, timezone
 
-from bson import ObjectId
-from pymongo.collection import Collection
 from pymongo.database import Database
 
 from app.core.business_days import calculate_opportunity_days
@@ -10,10 +7,10 @@ from app.core.business_days import calculate_opportunity_days
 
 class DashboardRepository:
     def __init__(self, db: Database):
-        self.cases: Collection = db["cases"]
-        self.patients: Collection = db["patients"]
+        self.cases = db["cases"]
+        self.patients = db["patients"]
 
-    def get_metrics(self, pathologist_name: str = None) -> Dict[str, Any]:
+    def get_metrics(self, pathologist_name: str = None) -> dict:
         now = datetime.now(timezone.utc)
 
         # "mes actual" = mes calendario anterior completo (ej. enero si estamos en febrero)
@@ -35,11 +32,9 @@ class DashboardRepository:
             base_query_tm["assigned_pathologist.name"] = pathologist_name
             base_query_lm["assigned_pathologist.name"] = pathologist_name
 
-        # Casos
         casos_mes_actual = self.cases.count_documents(base_query_tm)
         casos_mes_anterior = self.cases.count_documents(base_query_lm)
 
-        # Pacientes (unique patients who had cases)
         pacientes_mes_actual = len(
             self.cases.distinct("patient_info.patient_id", base_query_tm)
         )
@@ -67,7 +62,7 @@ class DashboardRepository:
             },
         }
 
-    def get_monthly_cases_data(self, pathologist_name: str = None) -> Dict[str, Any]:
+    def get_monthly_cases_data(self, pathologist_name: str = None) -> dict:
         now = datetime.now(timezone.utc)
         year = now.year
         datos = []
@@ -77,15 +72,13 @@ class DashboardRepository:
             query = {"date_info.0.created_at": {"$gte": month_start, "$lt": month_end}}
             if pathologist_name:
                 query["assigned_pathologist.name"] = pathologist_name
-
-            count = self.cases.count_documents(query)
-            datos.append(count)
+            datos.append(self.cases.count_documents(query))
 
         return {"datos": datos, "total": sum(datos), "año": year}
 
     def get_urgent_cases(
         self, pathologist_name: str = None, limit: int = 10
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict]:
         query = {
             "state": {"$ne": "Completado"},
             "priority": {"$in": ["prioritario", "Prioritario"]},
@@ -97,10 +90,6 @@ class DashboardRepository:
 
         results = []
         for doc in cursor:
-            # Reusing the logic to map to frontend structure
-            # UrgentCase in frontend needs specific fields
-
-            # Calculate days in system
             created_at_val = doc.get("date_info", [{}])[0].get("created_at")
             dias = 0
             created_at_str = ""
@@ -108,18 +97,13 @@ class DashboardRepository:
                 if isinstance(created_at_val, datetime):
                     created_dt = created_at_val
                     created_at_str = created_at_val.isoformat()
-                    if (
-                        not created_at_val.tzinfo
-                        and not created_at_str.endswith("Z")
-                        and "+00:00" not in created_at_str
-                    ):
+                    if not created_at_val.tzinfo and not created_at_str.endswith("Z") and "+00:00" not in created_at_str:
                         created_at_str += "Z"
                 else:
                     created_at_str = str(created_at_val)
                     created_dt = datetime.fromisoformat(
                         created_at_str.replace("Z", "+00:00")
                     )
-
                 dias = calculate_opportunity_days(
                     created_dt, datetime.now(timezone.utc)
                 )
@@ -144,8 +128,7 @@ class DashboardRepository:
                         for t in s.get("tests", [])
                         if t.get("name")
                     ],
-                    "patologo": (doc.get("assigned_pathologist") or {}).get("name")
-                    or "Sin asignar",
+                    "patologo": (doc.get("assigned_pathologist") or {}).get("name") or "Sin asignar",
                     "fecha_creacion": created_at_str or "",
                     "estado": doc.get("state", ""),
                     "prioridad": doc.get("priority", "normal"),
@@ -170,36 +153,24 @@ class DashboardRepository:
             return year - 1, 12
         return year, month - 1
 
-    def get_opportunity_stats(self, pathologist_name: str = None) -> Dict[str, Any]:
+    def get_opportunity_stats(self, pathologist_name: str = None) -> dict:
         """
         Muestra siempre el mes calendario ANTERIOR completo.
         En febrero muestra enero; en enero muestra diciembre del año anterior.
-        Filtra por date_info.0.created_at (casos ingresados en ese mes)
-        y state='Completado' para garantizar opportunity_info poblado.
-        El cambio_porcentual compara ese mes con el mes previo a ese.
+        Filtra por date_info.0.created_at y state='Completado'.
+        Excluye casos HAMA. Compara con el mes previo a ese.
         """
         meses = {
-            1: "Enero",
-            2: "Febrero",
-            3: "Marzo",
-            4: "Abril",
-            5: "Mayo",
-            6: "Junio",
-            7: "Julio",
-            8: "Agosto",
-            9: "Septiembre",
-            10: "Octubre",
-            11: "Noviembre",
-            12: "Diciembre",
+            1: "Enero", 2: "Febrero", 3: "Marzo", 4: "Abril",
+            5: "Mayo", 6: "Junio", 7: "Julio", 8: "Agosto",
+            9: "Septiembre", 10: "Octubre", 11: "Noviembre", 12: "Diciembre",
         }
 
         now = datetime.now(timezone.utc)
 
-        # Mes a mostrar: mes calendario anterior
         target_year, target_month = self._prev_month(now.year, now.month)
         t_start, t_end = self._calendar_month_range(target_year, target_month)
 
-        # Mes de comparación: dos meses atrás
         prev_year, prev_month = self._prev_month(target_year, target_month)
         p_start, p_end = self._calendar_month_range(prev_year, prev_month)
 
@@ -234,8 +205,6 @@ class DashboardRepository:
             out = self.cases.count_documents(
                 {**q, "opportunity_info.0.was_timely": False}
             )
-            # $avg on "opportunity_info.0.opportunity_time" via dot-notation doesn't work
-            # inside $group pipelines — must extract scalar first with $addFields + $arrayElemAt.
             pipeline = [
                 {"$match": q},
                 {
@@ -269,34 +238,5 @@ class DashboardRepository:
                 "nombre": meses.get(target_month, ""),
                 "inicio": t_start.isoformat(),
                 "fin": t_end.isoformat(),
-            },
-        }
-
-    def _empty_opportunity_stats(self, lm_start_dt, lm_end_dt):
-        meses = {
-            1: "Enero",
-            2: "Febrero",
-            3: "Marzo",
-            4: "Abril",
-            5: "Mayo",
-            6: "Junio",
-            7: "Julio",
-            8: "Agosto",
-            9: "Septiembre",
-            10: "Octubre",
-            11: "Noviembre",
-            12: "Diciembre",
-        }
-        return {
-            "porcentaje_oportunidad": 0.0,
-            "cambio_porcentual": 0.0,
-            "tiempo_promedio": 0.0,
-            "casos_dentro_oportunidad": 0,
-            "casos_fuera_oportunidad": 0,
-            "total_casos_mes_anterior": 0,
-            "mes_anterior": {
-                "nombre": meses.get(lm_start_dt.month, ""),
-                "inicio": lm_start_dt.isoformat(),
-                "fin": lm_end_dt.isoformat(),
             },
         }

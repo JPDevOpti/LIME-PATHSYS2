@@ -1,5 +1,6 @@
 """Servicio de solicitudes de pruebas adicionales."""
 
+from datetime import datetime
 from typing import Any, Optional
 
 from fastapi import HTTPException
@@ -20,9 +21,9 @@ def _case_to_additional_test_response(case: dict) -> dict:
     tests = case.get("complementary_tests") or []
     created = case.get("created_at")
     updated = case.get("updated_at")
-    if hasattr(created, "isoformat"):
+    if isinstance(created, datetime):
         created = created.isoformat()
-    if hasattr(updated, "isoformat"):
+    if isinstance(updated, datetime):
         updated = updated.isoformat()
     return {
         "id": case.get("id", ""),
@@ -108,7 +109,7 @@ class AdditionalTestsService:
             for t in additional_tests
         ]
 
-        if len(tests_data) == 0:
+        if not tests_data:
             raise HTTPException(status_code=400, detail="additional_tests must contain at least one test")
 
         result = self._case_repo.update_transcription(
@@ -154,7 +155,8 @@ class AdditionalTestsService:
             ap = case["assigned_pathologist"]
             assigned_pathologist = AssignedPathologistSchema(
                 id=str(ap.get("id", "")),
-                name=str(ap.get("name", ""))
+                name=str(ap.get("name", "")),
+                pathologist_code=str(ap.get("pathologist_code", "") or "") or None,
             )
         
         assistant_pathologists = None
@@ -162,7 +164,8 @@ class AdditionalTestsService:
             assistant_pathologists = [
                 AssignedPathologistSchema(
                     id=str(a.get("id", "")),
-                    name=str(a.get("name", ""))
+                    name=str(a.get("name", "")),
+                    pathologist_code=str(a.get("pathologist_code", "") or "") or None,
                 )
                 for a in case["assistant_pathologists"]
             ]

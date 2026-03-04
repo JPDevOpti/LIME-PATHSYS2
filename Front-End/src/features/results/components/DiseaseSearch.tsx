@@ -38,6 +38,7 @@ function SearchBlock({
     const [results, setResults] = useState<Disease[]>([]);
     const [searching, setSearching] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
+    const [searchError, setSearchError] = useState<string | null>(null);
         const [showCreateForm, setShowCreateForm] = useState(false);
         const [newCode, setNewCode] = useState('');
         const [newName, setNewName] = useState('');
@@ -47,13 +48,22 @@ function SearchBlock({
         if (!query.trim() || disabled) return;
         setSearching(true);
         setHasSearched(true);
+        setSearchError(null);
         try {
+            const count = await diseaseService.count();
+            if (count) {
+                console.log('[DiseaseSearch] /api/v1/diseases/count', count);
+            }
+
             const list = await diseaseService.search(query.trim(), table);
             setResults(list);
+            console.log(`[DiseaseSearch][${table}] enfermedades mostradas: ${list.length}`);
                 setShowCreateForm(list.length === 0);
-        } catch {
+        } catch (error) {
             setResults([]);
-                setShowCreateForm(true);
+                console.log(`[DiseaseSearch][${table}] enfermedades mostradas: 0`);
+                setShowCreateForm(false);
+                setSearchError(error instanceof Error ? error.message : 'No se pudo buscar diagnósticos');
         } finally {
             setSearching(false);
         }
@@ -70,6 +80,7 @@ function SearchBlock({
         setQuery('');
         setResults([]);
         setHasSearched(false);
+            setSearchError(null);
             setShowCreateForm(false);
             setNewCode('');
             setNewName('');
@@ -77,6 +88,7 @@ function SearchBlock({
 
     useEffect(() => {
         if (value) {
+            setSearchError(null);
             setShowCreateForm(false);
             setNewCode('');
             setNewName('');
@@ -167,6 +179,7 @@ function SearchBlock({
                                             <span className="text-sm">Busque para ver resultados</span>
                                         ) : (
                                             <>
+                                                {searchError && <p className="text-sm text-red-600 mb-2">{searchError}</p>}
                                                 <p className="text-sm">No se encontraron resultados</p>
                                                     {showCreateForm && (
                                                         <div className="mt-4 p-4 border border-dashed border-blue-300 rounded-lg bg-blue-50">

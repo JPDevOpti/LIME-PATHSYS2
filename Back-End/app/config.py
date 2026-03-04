@@ -4,9 +4,17 @@ from pydantic import field_validator
 from pydantic_settings import BaseSettings
 
 
+def _env_first(*names: str, default: str) -> str:
+    for name in names:
+        value = os.getenv(name)
+        if value and value.strip():
+            return value.strip()
+    return default
+
+
 class Settings(BaseSettings):
-    mongodb_uri: str = "mongodb://localhost:27017"
-    database_name: str = "pathsys"
+    mongodb_uri: str = _env_first("MONGODB_URI", "MONGODB_URL", "MONGO_URI", default="mongodb://localhost:27017")
+    database_name: str = _env_first("DATABASE_NAME", "DB_NAME", "MONGO_DB", default="pathsys")
     api_host: str = "0.0.0.0"
     api_port: int = 8000
 

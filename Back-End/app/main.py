@@ -19,8 +19,6 @@ from app.modules.patients.repository import PatientRepository
 from app.modules.dashboard import dashboard_router
 from app.modules.statistics import statistics_router
 from app.modules.additional_tests.router import router as additional_tests_router
-from app.modules.cases_legacy import router as cases_legacy_router
-from app.modules.cases_legacy.repository import LegacyCaseRepository
 from app.modules.cases.repository import CaseRepository
 from app.modules.entities.repository import EntitiesRepository
 from app.modules.tests.repository import TestsRepository
@@ -37,7 +35,6 @@ async def lifespan(app: FastAPI):
     TestsRepository(db)._ensure_indexes()
     UnreadCasesRepository(db)._ensure_indexes()
     SupportRepository(db)._ensure_indexes()
-    LegacyCaseRepository(db)._ensure_indexes()
     yield
 
 
@@ -76,7 +73,6 @@ app.include_router(unread_cases_router, prefix="/api/v1/unread-cases", tags=["un
 app.include_router(additional_tests_router, prefix="/api/v1/additional-tests", tags=["additional-tests"])
 app.include_router(support_router, prefix="/api/v1/support", tags=["support"])
 app.include_router(statistics_router, prefix="/api/v1/statistics", tags=["statistics"])
-app.include_router(cases_legacy_router, prefix="/api/v1/cases-legacy", tags=["cases-legacy"])
 app.include_router(billing_router, prefix="/api/v1/billing", tags=["billing"])
 
 
