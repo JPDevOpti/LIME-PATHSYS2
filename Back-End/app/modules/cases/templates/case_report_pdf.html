@@ -310,45 +310,37 @@
                 page-break-inside: avoid;
             }
 
-            .signature-table {
+            .signature-block {
+                margin-top: 14px;
+                width: 70mm;
+            }
+
+            .signature-line-wrap {
+                position: relative;
+                height: 62px;
+                display: flex;
+                align-items: flex-end;
+            }
+
+            .signature-line {
                 width: 100%;
-                border-collapse: collapse;
-                table-layout: fixed;
-                margin-top: 10px;
-                margin-bottom: 0;
-            }
-
-            .signature-table td {
-                border: 1px solid #111827;
-                padding: 6px 8px;
-                vertical-align: top;
-                font-size: 10px;
-                line-height: 1.4;
-            }
-
-            .signature-top-row {
-                font-size: 10px;
-                font-weight: 400;
-            }
-
-            .signature-left-cell {
-                width: 68%;
-            }
-
-            .signature-right-cell {
-                width: 32%;
-            }
-
-            .signature-name-line {
-                margin-bottom: 8px;
+                border-top: 1px solid #000;
             }
 
             .signature-image {
                 max-height: 55px;
                 width: auto;
                 display: block;
+                margin: 0 auto;
+                position: absolute;
+                bottom: 2px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            .signature-signer {
                 margin-top: 4px;
-                margin-bottom: 2px;
+                font-size: 10px;
             }
         </style>
     </head>
@@ -511,41 +503,22 @@
             </div>
             {% endif %}
 
-            <table class="signature-table" role="presentation">
-                <tr>
-                    <td colspan="2" class="signature-top-row">
-                        <span class="patient-label">Evaluado por:</span>
-                        <span class="patient-value"
-                            >{{ case.participating_pathologists }}</span
-                        >
-                    </td>
-                </tr>
-                <tr>
-                    <td class="signature-left-cell">
-                        <div class="signature-name-line">
-                            <span class="patient-label">Firmado por:</span>
-                            <span class="patient-value"
-                                >{{ case.validated_by }}</span
-                            >
-                        </div>
-                        {% if case.pathologist_signature %}
-                        <img
-                            class="signature-image"
-                            src="{{ case.pathologist_signature }}"
-                            alt="Firma patólogo"
-                        />
-                        {% else %}
-                        <span style="font-size:9px;color:#888;font-style:italic;">Firma no encontrada</span>
-                        {% endif %}
-                    </td>
-                    <td class="signature-right-cell">
-                        <span class="patient-label">Registro:</span>
-                        <span class="patient-value"
-                            >{{ case.pathologist_license }}</span
-                        >
-                    </td>
-                </tr>
-            </table>
+            <div class="signature-block">
+                <div class="signature-line-wrap">
+                    {% if case.pathologist_signature %}
+                    <img
+                        class="signature-image"
+                        src="{{ case.pathologist_signature }}"
+                        alt="Firma patólogo"
+                    />
+                    {% endif %}
+                    <div class="signature-line"></div>
+                </div>
+                <div class="signature-signer">
+                    <span class="patient-label">Firmado por:</span>
+                    <span class="patient-value">{{ case.validated_by }}</span>
+                </div>
+            </div>
         </section>
         {% endfor %}
     </body>

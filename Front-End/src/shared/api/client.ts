@@ -202,7 +202,7 @@ export const apiClient = {
   async get<T>(
     path: string,
     params?: Record<string, string | number | undefined>,
-    extraHeaders?: Record<string, string> & { responseType?: string; suppressErrorLog?: boolean },
+    extraHeaders?: { responseType?: string; suppressErrorLog?: boolean } & Record<string, string | boolean | undefined>,
   ): Promise<T> {
     const normalizedPath = path.startsWith("/") ? path : `/${path}`;
     let url = BASE_URL ? `${BASE_URL}${normalizedPath}` : normalizedPath;
@@ -217,8 +217,12 @@ export const apiClient = {
     const { responseType, suppressErrorLog, ...headersOnly } = extraHeaders || {};
     const headers: Record<string, string> = {
       ...getAuthHeaders(),
-      ...headersOnly,
     };
+    Object.entries(headersOnly).forEach(([key, value]) => {
+      if (typeof value === "string") {
+        headers[key] = value;
+      }
+    });
 
     try {
       const response = await fetchWithFallback("GET", url, {

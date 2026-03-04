@@ -43,6 +43,8 @@ export interface PatientLocation {
 export interface EntityInfo {
     entity_name?: string;
     eps_name?: string;
+    entity_code?: string;
+    code?: string;
 }
 
 export interface AuditEntry {
