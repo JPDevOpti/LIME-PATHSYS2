@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Nombre Apellido",
+    "email": "usuario@dominio.edu.co",
+    "password": "contraseña-segura-aqui"
+  },
+  {
+    "name": "System Administrator",
+    "email": "admin@lime.edu.co",
+    "password": "contraseña-segura-aqui"
+  }
+]

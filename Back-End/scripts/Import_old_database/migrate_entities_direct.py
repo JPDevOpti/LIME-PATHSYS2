@@ -13,6 +13,7 @@ Uso:
     python3 migrate_entities_direct.py [--dry-run]
 """
 
+import os
 import sys
 import argparse
 import re
@@ -22,7 +23,7 @@ from pymongo.errors import DuplicateKeyError
 
 # ── Configuración ─────────────────────────────────────────────────────────────
 
-ATLAS_URL = "mongodb+srv://juanrestrepo183:cHp6ewrNmsPxfwfG@cluster0.o8uta.mongodb.net/"
+ATLAS_URL = os.environ.get("LEGACY_ATLAS_URI", "")
 ATLAS_DB  = "lime_pathsys"
 LOCAL_URL = "mongodb://localhost:27017"
 LOCAL_DB  = "pathsys"

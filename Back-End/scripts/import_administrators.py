@@ -17,6 +17,7 @@ Argumentos:
 """
 
 import argparse
+import json
 import os
 import sys
 from datetime import datetime
@@ -30,29 +31,17 @@ if os.getenv("MONGODB_URL") and not os.getenv("MONGODB_URI"):
 from app.database import get_db
 from app.security import get_password_hash
 
-ADMINISTRATORS = [
-    {
-        "name": "Juan Pablo Restrepo",
-        "email": "juan.restrepo183@udea.edu.co",
-        "password": "Nomerobe-12345",
-    },
-    {
-        "name": "Juliana Duque",
-        "email": "juliana.duqueg@udea.edu.co",
-        "password": "juliana.duque2025",
-    },
-    {
-        "name": "System Administrator",
-        "email": "admin@lime.edu.co",
-        "password": "admin123",
-    },
-    {
-        "name": "Ana Milena Patino Ramirez",
-        "email": "milena.patino@udea.edu.co",
-        "password": "39213383",
-        "code": "39213383",
-    },
-]
+_SEED_FILE = os.path.join(os.path.dirname(__file__), "admins_seed.json")
+
+def _load_administrators():
+    if not os.path.exists(_SEED_FILE):
+        print(f"ERROR: Archivo de seed no encontrado: {_SEED_FILE}")
+        print(f"       Copia admins_seed.example.json a admins_seed.json y completa las credenciales.")
+        sys.exit(1)
+    with open(_SEED_FILE, encoding="utf-8") as f:
+        return json.load(f)
+
+ADMINISTRATORS = _load_administrators()
 
 
 def check_email_exists(collection, email: str) -> bool:

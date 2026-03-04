@@ -24,6 +24,7 @@ Uso:
     python3 migrate_cases_direct.py [--dry-run] [--batch-size N]
 """
 
+import os
 import sys
 import argparse
 import re
@@ -34,7 +35,7 @@ from bson import ObjectId
 
 # ── Configuración ─────────────────────────────────────────────────────────────
 
-ATLAS_URL  = "mongodb+srv://juanrestrepo183:cHp6ewrNmsPxfwfG@cluster0.o8uta.mongodb.net/"
+ATLAS_URL  = os.environ.get("LEGACY_ATLAS_URI", "")
 ATLAS_DB   = "lime_pathsys"
 
 LOCAL_URL  = "mongodb://localhost:27017"

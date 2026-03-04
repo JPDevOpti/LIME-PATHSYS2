@@ -23,6 +23,7 @@ Uso:
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -52,7 +53,7 @@ DEFAULT_ORDER: List[str] = [
     "unread_cases",
 ]
 
-DEST_ATLAS_URL = "mongodb+srv://juanpablorestrepo2020:RwDzfZCJskMeCiBP@cluster0.myvykk4.mongodb.net/"
+DEST_ATLAS_URL = os.environ.get("DEST_ATLAS_URI", "")
 DEFAULT_DEST_URL = "mongodb://localhost:27017"
 DEFAULT_DEST_DB = "pathsys"
 

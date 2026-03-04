@@ -78,6 +78,9 @@ out/
 # Uploaded/generated files from legacy migration tools
 Import_old_database/antiguo-back/uploads/
 
+# Seed de administradores (contiene credenciales - no commitear)
+admins_seed.json
+
 # Local databases
 *.sqlite
 *.sqlite3
