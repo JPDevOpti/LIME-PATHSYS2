@@ -306,7 +306,7 @@ export const UrgentCasesTable = ({
                           </button>
                         ) : (
                           <Link
-                            href={item.id ? `/cases/${item.id}/edit` : "#"}
+                            href={item.id ? `/cases/edit?id=${encodeURIComponent(item.id)}` : "#"}
                             className="p-1.5 rounded-md hover:bg-gray-100 text-gray-600"
                             title="Ver detalles"
                           >

@@ -11,7 +11,9 @@ const apiTarget = (process.env.API_PROXY_TARGET || process.env.NEXT_PUBLIC_API_U
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  output: 'export',
   images: {
+    unoptimized: true,
     localPatterns: [
       {
         pathname: '/**',
@@ -30,14 +32,6 @@ const nextConfig = {
   },
   typescript: {
     tsconfigPath: './tsconfig.json',
-  },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${apiTarget}/api/:path*`,
-      },
-    ];
   },
 };
 

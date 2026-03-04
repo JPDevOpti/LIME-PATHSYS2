@@ -161,7 +161,7 @@ export function PatientsTable({
                                             </button>
                                         ) : (
                                             <Link
-                                                href={p.id ? `/patients/${p.id}/edit` : '#'}
+                                                href={p.id ? `/patients/edit?id=${encodeURIComponent(p.id)}` : '#'}
                                                 className="p-2 rounded-md hover:bg-neutral-100 text-neutral-600"
                                                 title="Ver detalles"
                                             >
@@ -170,7 +170,7 @@ export function PatientsTable({
                                         )}
                                         {!isPatologo && (
                                             <Link
-                                                href={p.id ? `/patients/${p.id}/edit` : '#'}
+                                                href={p.id ? `/patients/edit?id=${encodeURIComponent(p.id)}` : '#'}
                                                 className="p-2 rounded-md hover:bg-neutral-100 text-neutral-600"
                                                 title="Editar"
                                             >
@@ -256,7 +256,7 @@ export function PatientsTable({
                                 </button>
                             ) : (
                                 <Link
-                                    href={p.id ? `/patients/${p.id}/edit` : '#'}
+                                    href={p.id ? `/patients/edit?id=${encodeURIComponent(p.id)}` : '#'}
                                     className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-neutral-50 text-neutral-700 rounded-lg hover:bg-neutral-100 text-xs font-medium"
                                 >
                                     <Info className="w-3 h-3" />
@@ -265,7 +265,7 @@ export function PatientsTable({
                             )}
                             {!isPatologo && (
                                 <Link
-                                    href={p.id ? `/patients/${p.id}/edit` : '#'}
+                                    href={p.id ? `/patients/edit?id=${encodeURIComponent(p.id)}` : '#'}
                                     className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-neutral-50 text-neutral-700 rounded-lg hover:bg-neutral-100 text-xs font-medium"
                                 >
                                     <UserRoundPen className="w-3 h-3" />

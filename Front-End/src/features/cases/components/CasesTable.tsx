@@ -382,7 +382,7 @@ export function CasesTable({
                             </button>
                           ) : (
                             <Link
-                              href={c.id ? `/cases/${c.id}/edit` : "#"}
+                              href={c.id ? `/cases/edit?id=${encodeURIComponent(c.id)}` : "#"}
                               className="p-1.5 rounded-md hover:bg-gray-100 text-gray-600"
                               title="Ver detalles"
                             >
@@ -594,7 +594,7 @@ export function CasesTable({
                         </button>
                       ) : (
                         <Link
-                          href={c.id ? `/cases/${c.id}/edit` : "#"}
+                          href={c.id ? `/cases/edit?id=${encodeURIComponent(c.id)}` : "#"}
                           className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 text-xs font-medium"
                         >
                           <Info className="w-3 h-3" />
