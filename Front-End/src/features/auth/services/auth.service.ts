@@ -53,6 +53,16 @@ function toLoginError(err: unknown): Error {
   const msg = err instanceof Error ? err.message : String(err);
   const lower = msg.toLowerCase();
   if (
+    lower.includes('respuesta inválida') ||
+    lower.includes('response') ||
+    lower.includes('json') ||
+    lower.includes('api')
+  ) {
+    return new Error(
+      'No se pudo validar la respuesta del servidor. Verifique NEXT_PUBLIC_API_URL y que el backend esté disponible.'
+    );
+  }
+  if (
     lower.includes('invalid') ||
     lower.includes('credentials') ||
     lower.includes('401') ||
@@ -82,12 +92,39 @@ export const authService = {
         password: credentials.password,
         remember_me: credentials.remember_me ?? false,
       });
-      const token = data.token || {};
-      const user = mapUser(data.user || {});
+
+      if (!data || typeof data !== 'object') {
+        throw new Error('Respuesta inválida del API de login (body vacío o no JSON).');
+      }
+
+      const tokenCandidate = (data as { token?: unknown }).token;
+      const userCandidate = (data as { user?: unknown }).user;
+
+      if (!tokenCandidate || typeof tokenCandidate !== 'object') {
+        throw new Error('Respuesta inválida del API de login (token faltante).');
+      }
+
+      const tokenObj = tokenCandidate as {
+        access_token?: unknown;
+        token_type?: unknown;
+        expires_in?: unknown;
+      };
+
+      const accessToken = typeof tokenObj.access_token === 'string' ? tokenObj.access_token : '';
+      if (!accessToken) {
+        throw new Error('Respuesta inválida del API de login (access_token faltante).');
+      }
+
+      const user = mapUser(
+        userCandidate && typeof userCandidate === 'object'
+          ? (userCandidate as Record<string, unknown>)
+          : {}
+      );
+
       return {
-        access_token: token.access_token ?? '',
-        token_type: token.token_type ?? 'bearer',
-        expires_in: token.expires_in ?? 0,
+        access_token: accessToken,
+        token_type: typeof tokenObj.token_type === 'string' ? tokenObj.token_type : 'bearer',
+        expires_in: typeof tokenObj.expires_in === 'number' ? tokenObj.expires_in : 0,
         user,
       };
     } catch (err) {
