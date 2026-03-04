@@ -1,0 +1,121 @@
+'use client';
+
+import { BaseCard, BaseButton } from '@/shared/components/base';
+import { Input, FormField, Select } from '@/shared/components/ui/form';
+import { SearchButton, ClearButton } from '@/shared/components/ui/buttons';
+import { Search, UserRoundPlus } from 'lucide-react';
+import type { ProfileFilters } from '../types/profile.types';
+
+const ROLE_OPTIONS = [
+    { value: '', label: 'Todos los roles' },
+    { value: 'administrador', label: 'Administrador' },
+    { value: 'patologo', label: 'Patologo' },
+    { value: 'residente', label: 'Residente' },
+    { value: 'recepcion', label: 'Auxiliar administrativo' },
+    { value: 'visitante', label: 'Visitante' },
+    ];
+
+const STATUS_OPTIONS = [
+    { value: '', label: 'Todos' },
+    { value: 'activo', label: 'Activo' },
+    { value: 'inactivo', label: 'Inactivo' },
+];
+
+interface ProfilesFiltersProps {
+    filters: ProfileFilters;
+    onFiltersChange: (updates: Partial<ProfileFilters>) => void;
+    onSearch: () => void;
+    onClear: () => void;
+    onNewProfile: () => void;
+    loading?: boolean;
+}
+
+export function ProfilesFilters({
+    filters,
+    onFiltersChange,
+    onSearch,
+    onClear,
+    onNewProfile,
+    loading = false,
+}: ProfilesFiltersProps) {
+    return (
+        <BaseCard className="p-6">
+            <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2">
+                    <Search className="w-5 h-5 text-lime-brand-600" />
+                    <span className="text-sm font-semibold text-neutral-700">Gestion de perfiles</span>
+                    <span className="text-xs text-neutral-500">
+                        Buscar por nombre, correo o codigo. Filtrar por rol, estado y fecha de creacion.
+                    </span>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                    <FormField label="Buscar por nombre, correo o codigo" htmlFor="search-profiles">
+                        <Input
+                            id="search-profiles"
+                            placeholder="Ej: Maria Garcia, admin@lime.com, ADM001"
+                            value={filters.searchQuery}
+                            onChange={(e) => onFiltersChange({ searchQuery: e.target.value })}
+                            onKeyDown={(e) => e.key === 'Enter' && onSearch()}
+                        />
+                    </FormField>
+
+                    <div className="flex flex-wrap items-end gap-4 justify-between">
+                        <div className="flex flex-wrap items-end gap-4">
+                            <FormField label="Fecha desde">
+                                <Input
+                                    type="date"
+                                    value={filters.dateFrom}
+                                    onChange={(e) => onFiltersChange({ dateFrom: e.target.value })}
+                                />
+                            </FormField>
+                            <FormField label="Fecha hasta">
+                                <Input
+                                    type="date"
+                                    value={filters.dateTo}
+                                    onChange={(e) => onFiltersChange({ dateTo: e.target.value })}
+                                />
+                            </FormField>
+                            <FormField label="Rol" className="w-56">
+                                <Select
+                                    value={filters.role}
+                                    onChange={(e) => onFiltersChange({ role: e.target.value })}
+                                    options={ROLE_OPTIONS}
+                                    placeholder="Todos los roles"
+                                />
+                            </FormField>
+                            <FormField label="Estado" className="w-52">
+                                <Select
+                                    value={filters.status}
+                                    onChange={(e) => onFiltersChange({ status: e.target.value })}
+                                    options={STATUS_OPTIONS}
+                                    placeholder="Todos"
+                                />
+                            </FormField>
+                        </div>
+                        <div className="flex gap-2 items-center">
+                            <BaseButton
+                                size="md"
+                                variant="secondary"
+                                onClick={onNewProfile}
+                                startIcon={<UserRoundPlus className="w-4 h-4" />}
+                                className="border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100"
+                            >
+                                Nuevo perfil
+                            </BaseButton>
+                            <ClearButton text="Limpiar" onClick={onClear} className="[&>svg]:mr-2" />
+                            <SearchButton
+                                size="md"
+                                onClick={onSearch}
+                                disabled={loading}
+                                text="Buscar"
+                                loadingText="Buscando..."
+                                loading={loading}
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </BaseCard>
+    );
+}

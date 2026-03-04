@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <style>
+            @page {
+                size: Letter;
+                margin: 34mm 12mm 30mm 12mm;
+                @top-center {
+                    content: element(pdf-header);
+                }
+                @bottom-center {
+                    content: element(pdf-footer);
+                }
+            }
+
+            body {
+                font-family: Arial, Helvetica, sans-serif;
+                color: #111827;
+                font-size: 11px;
+                line-height: 1.35;
+                margin: 0;
+                padding: 0;
+            }
+
+            .case-page {
+                page-break-after: always;
+            }
+
+            .case-page:last-child {
+                page-break-after: auto;
+            }
+
+            .pdf-header {
+                position: running(pdf-header);
+                width: 192mm;
+                box-sizing: border-box;
+                margin: 0;
+                background: #ffffff;
+            }
+
+            .pdf-footer {
+                position: running(pdf-footer);
+                width: 192mm;
+                box-sizing: border-box;
+                margin: 0;
+                padding-top: 4px;
+                color: #6b7280;
+                font-size: 8px;
+                line-height: 1.35;
+                border-top: 1px solid #111827;
+            }
+
+            .pdf-footer-main {
+                text-align: center;
+                font-size: 10px;
+                line-height: 1.35;
+            }
+
+            .pdf-footer-note {
+                margin-top: 4px;
+                max-width: 58mm;
+                text-align: center;
+                font-size: 8px;
+                line-height: 1.35;
+            }
+
+            .pdf-header-table {
+                width: 100%;
+                border-collapse: collapse;
+                table-layout: fixed;
+            }
+
+            .pdf-header-table td {
+                border: 1px solid #111827;
+                vertical-align: middle;
+                padding: 0;
+            }
+
+            .pdf-header-left {
+                width: 75%;
+                padding: 4px 8px;
+                height: 64px;
+                text-align: center;
+            }
+
+            .pdf-header-right {
+                width: 25%;
+            }
+
+            .pdf-header-meta-row {
+                display: block;
+                text-align: center;
+                font-size: 10px;
+                font-weight: 400;
+                height: 32px;
+                line-height: 32px;
+                border-bottom: 1px solid #111827;
+            }
+
+            .pdf-header-meta-row:last-child {
+                border-bottom: 0;
+            }
+
+            .pdf-header-meta-row strong {
+                font-size: 10px;
+                font-weight: 700;
+            }
+
+            .pdf-header-title {
+                padding: 0;
+            }
+
+            .pdf-header-title-inner {
+                text-align: center;
+                font-size: 11px;
+                font-weight: 400;
+                letter-spacing: 0.2px;
+                text-transform: uppercase;
+                padding: 8px 6px;
+                line-height: 1.2;
+            }
+
+            .logos {
+                text-align: center;
+                line-height: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+            }
+
+            .logos img {
+                max-width: 100%;
+                max-height: 56px;
+                object-fit: contain;
+                display: inline-block;
+                vertical-align: middle;
+            }
+
+            .patient-data-table {
+                margin-top: 2px;
+                margin-bottom: 10px;
+                border-collapse: separate;
+                border-spacing: 0;
+                page-break-inside: auto;
+                break-inside: auto;
+            }
+
+            .patient-data-table tr {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            .patient-data-table tr.section-continue-row {
+                page-break-inside: auto;
+                break-inside: auto;
+            }
+
+            .patient-data-table tr.section-title-row {
+                page-break-after: avoid;
+                break-after: avoid;
+            }
+
+            .patient-data-table,
+            .patient-data-table td,
+            .patient-data-table th {
+                border-color: #111827;
+            }
+
+            .patient-data-table td,
+            .patient-data-table th {
+                padding: 4px 5px;
+                vertical-align: top;
+            }
+
+            .patient-data-title {
+                text-align: center;
+                text-transform: uppercase;
+                font-size: 11px;
+                font-weight: 400;
+                padding: 10px 6px !important;
+                letter-spacing: 0.2px;
+            }
+
+            .patient-label {
+                font-weight: 400;
+            }
+
+            .patient-value {
+                font-weight: 500;
+            }
+
+            .date-cell {
+                padding: 0 !important;
+            }
+
+            .date-head {
+                border-bottom: 1px solid #111827;
+                text-align: center;
+                padding: 4px 4px 3px 4px;
+                font-weight: 400;
+            }
+
+            .date-parts {
+                display: table;
+                width: 100%;
+                table-layout: fixed;
+            }
+
+            .date-part {
+                display: table-cell;
+                text-align: center;
+                padding: 3px 2px 4px 2px;
+                border-right: 1px solid #111827;
+            }
+
+            .date-part:last-child {
+                border-right: 0;
+            }
+
+            .patient-row-text {
+                line-height: 1.45;
+                font-size: 10px;
+            }
+
+            .patient-section-title {
+                text-align: center;
+                font-size: 11px;
+                font-weight: 400;
+                padding: 6px 6px !important;
+                border-bottom: 0 !important;
+            }
+
+            .patient-section-content {
+                font-size: 10px;
+                line-height: 1.5;
+                padding: 8px 8px !important;
+                border-top: 1px solid #111827 !important;
+                box-decoration-break: clone;
+                -webkit-box-decoration-break: clone;
+            }
+
+            .diagnosis-codes {
+                margin-top: 8px;
+            }
+
+            .v-align-middle {
+                vertical-align: middle !important;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 8px;
+            }
+
+            th,
+            td {
+                border: 1px solid #d1d5db;
+                padding: 5px 6px;
+                vertical-align: top;
+            }
+
+            th {
+                width: 20%;
+                text-align: left;
+                background: #f9fafb;
+                font-weight: 700;
+            }
+
+            .section {
+                margin-bottom: 8px;
+                page-break-inside: avoid;
+            }
+
+            .section h3 {
+                margin: 0 0 4px 0;
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 0.2px;
+                border-bottom: 1px solid #e5e7eb;
+                padding-bottom: 2px;
+            }
+
+            .box {
+                border: 1px solid #e5e7eb;
+                padding: 6px;
+                min-height: 18px;
+                word-break: break-word;
+            }
+
+            .muted {
+                color: #6b7280;
+            }
+
+            .signature {
+                margin-top: 16px;
+                page-break-inside: avoid;
+            }
+
+            .signature-table {
+                width: 100%;
+                border-collapse: collapse;
+                table-layout: fixed;
+                margin-top: 10px;
+                margin-bottom: 0;
+            }
+
+            .signature-table td {
+                border: 1px solid #111827;
+                padding: 6px 8px;
+                vertical-align: top;
+                font-size: 10px;
+                line-height: 1.4;
+            }
+
+            .signature-top-row {
+                font-size: 10px;
+                font-weight: 400;
+            }
+
+            .signature-left-cell {
+                width: 68%;
+            }
+
+            .signature-right-cell {
+                width: 32%;
+            }
+
+            .signature-name-line {
+                margin-bottom: 8px;
+            }
+
+            .signature-image {
+                max-height: 55px;
+                width: auto;
+                display: block;
+                margin-top: 4px;
+                margin-bottom: 2px;
+            }
+
+            .signature-line {
+                border-top: 1px solid #111827;
+                width: 260px;
+                margin-top: 6px;
+                padding-top: 4px;
+                font-size: 10px;
+            }
+
+            .html-content p,
+            .html-content div,
+            .html-content li {
+                margin: 0 0 4px 0;
+            }
+
+            .html-content ul,
+            .html-content ol {
+                margin: 0 0 0 18px;
+                padding: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <header class="pdf-header">
+            <table class="pdf-header-table" role="presentation">
+                <tr>
+                    <td class="pdf-header-left">
+                        <div class="logos">
+                            {% if header.unified_banner %}
+                            <img
+                                src="{{ header.unified_banner }}"
+                                alt="Logos LIME UdeA HAMA"
+                            />
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td class="pdf-header-right">
+                        <span class="pdf-header-meta-row"
+                            ><strong>Código:</strong> {{ header.document_code
+                            }}</span
+                        >
+                        <span class="pdf-header-meta-row"
+                            ><strong>Versión:</strong> {{
+                            header.document_version }}</span
+                        >
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="pdf-header-title">
+                        <div class="pdf-header-title-inner">
+                            {{ header.title }}
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </header>
+
+        <footer class="pdf-footer">
+            <div class="pdf-footer-main">
+                <div>
+                    Estamos ubicados en el Hospital San Vicente Fundación
+                    (Medellín) - Bloque 7 Pabellón amarillo Dermatología Calle
+                    64 N° 51D-154.
+                </div>
+                <div>Teléfono: 6042192538 - Línea WhatsApp: 314 835 37 64</div>
+                <div>labdermatopatologia@udea.edu.co</div>
+            </div>
+            <div class="pdf-footer-note">
+                La impresión o copia magnética de este documento se considera
+                “COPIA NO CONTROLADA”. Solo se garantiza la actualización de la
+                Documentación en el ONE DRIVE del correo de calidad
+                (calidad.lime@udea.edu.co)
+            </div>
+        </footer>
+
+        {% for case in cases %}
+        <section class="case-page">
+            <table class="patient-data-table" role="presentation">
+                <colgroup>
+                    <col style="width: 15%" />
+                    <col style="width: 15%" />
+                    <col style="width: 15%" />
+                    <col style="width: 15%" />
+                    <col style="width: 20%" />
+                    <col style="width: 20%" />
+                </colgroup>
+                <tr>
+                    <td colspan="6" class="patient-data-title">
+                        LABORATORIO DE DERMATOPATOLOGÍA
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4" class="patient-row-text v-align-middle">
+                        <span class="patient-label">Nombres y Apellidos:</span>
+                        <span class="patient-value"
+                            >{{ case.patient_name }}</span
+                        >
+                    </td>
+                    <td class="patient-row-text v-align-middle">
+                        <span class="patient-label">Número de H.C:</span>
+                        <span class="patient-value">{{ case.patient_hc }}</span>
+                    </td>
+                    <td class="date-cell">
+                        <div class="date-head">Fecha de recepción</div>
+                        <div class="date-parts">
+                            <span class="date-part"
+                                >{{ case.sample_reception_day }}</span
+                            >
+                            <span class="date-part"
+                                >{{ case.sample_reception_month }}</span
+                            >
+                            <span class="date-part"
+                                >{{ case.sample_reception_year }}</span
+                            >
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="patient-row-text">
+                        <span class="patient-label">Municipio:</span>
+                        <span class="patient-value"
+                            >{{ case.patient_residence }}</span
+                        >
+                    </td>
+                    <td colspan="2" class="patient-row-text">
+                        <span class="patient-label">Teléfono:</span>
+                        <span class="patient-value"
+                            >{{ case.patient_phone }}</span
+                        >
+                    </td>
+                    <td class="patient-row-text">
+                        <span class="patient-label">Estudio n°:</span>
+                        <span class="patient-value"
+                            >{{ case.study_number }}</span
+                        >
+                    </td>
+                    <td class="patient-row-text">
+                        <span class="patient-label">Edad:</span>
+                        <span class="patient-value"
+                            >{{ case.patient_age }}</span
+                        >
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3" class="patient-row-text">
+                        <span class="patient-label">Correo electrónico:</span>
+                        <span class="patient-value"
+                            >{{ case.patient_email }}</span
+                        >
+                    </td>
+                    <td colspan="2" class="patient-row-text">
+                        <span class="patient-label">Procedencia:</span>
+                        <span class="patient-value"
+                            >{{ case.entity_name }}</span
+                        >
+                    </td>
+                    <td class="patient-row-text">
+                        <span class="patient-label">Sexo:</span>
+                        <span class="patient-value"
+                            >{{ case.patient_gender }}</span
+                        >
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6" class="patient-row-text">
+                        <span class="patient-label">Estudio previo:</span>
+                        <span class="patient-value"
+                            >{{ case.previous_study_display }}</span
+                        >
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3" class="patient-row-text">
+                        <span class="patient-label"
+                            >Fecha de transcripción:</span
+                        >
+                        <span class="patient-value"
+                            >{{ case.transcription_date|replace('/', '-')
+                            }}</span
+                        >
+                    </td>
+                    <td colspan="3" class="patient-row-text">
+                        <span class="patient-label">Fecha de firma:</span>
+                        <span class="patient-value"
+                            >{{ case.signature_date|replace('/', '-') }}</span
+                        >
+                    </td>
+                </tr>
+                <tr class="section-title-row">
+                    <td colspan="6" class="patient-section-title">
+                        Corte macroscópico
+                    </td>
+                </tr>
+                <tr class="section-continue-row">
+                    <td
+                        colspan="6"
+                        class="patient-section-content html-content"
+                    >
+                        {{ case.macro_html }}
+                    </td>
+                </tr>
+                <tr class="section-title-row">
+                    <td colspan="6" class="patient-section-title">
+                        Descripción microscópica
+                    </td>
+                </tr>
+                <tr class="section-continue-row">
+                    <td
+                        colspan="6"
+                        class="patient-section-content html-content"
+                    >
+                        {{ case.micro_html }}
+                    </td>
+                </tr>
+                {% if case.has_additional_report %}
+                <tr class="section-title-row">
+                    <td colspan="6" class="patient-section-title">
+                        Informe adicional
+                    </td>
+                </tr>
+                <tr class="section-continue-row">
+                    <td
+                        colspan="6"
+                        class="patient-section-content html-content"
+                    >
+                        {% if case.additional_tests_display and
+                        case.additional_tests_display|length > 0 %}
+                        <p><strong>Pruebas adicionales requeridas:</strong></p>
+                        <ul>
+                            {% for test_name in case.additional_tests_display %}
+                            <li>{{ test_name }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %} {% if case.additional_notes_display and
+                        case.additional_notes_display|length > 0 %}
+                        <p><strong>Notas adicionales:</strong></p>
+                        <ul>
+                            {% for note in case.additional_notes_display %}
+                            <li>{{ note }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %} {% if case.additional_report_reason_html %}
+                        <div>{{ case.additional_report_reason_html }}</div>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endif %}
+                <tr class="section-title-row">
+                    <td colspan="6" class="patient-section-title">
+                        Diagnóstico
+                    </td>
+                </tr>
+                <tr class="section-continue-row">
+                    <td
+                        colspan="6"
+                        class="patient-section-content html-content"
+                    >
+                        {{ case.diagnosis_html }} {% if case.cie10 or case.cieo
+                        %}
+                        <div class="diagnosis-codes">
+                            {% if case.cie10 %}
+                            <p><strong>CIE-10:</strong> {{ case.cie10 }}</p>
+                            {% endif %} {% if case.cieo %}
+                            <p><strong>CIE-O:</strong> {{ case.cieo }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+            <table class="signature-table" role="presentation">
+                <tr>
+                    <td colspan="2" class="signature-top-row">
+                        <span class="patient-label">Evaluado por:</span>
+                        <span class="patient-value"
+                            >{{ case.participating_pathologists }}</span
+                        >
+                    </td>
+                </tr>
+                <tr>
+                    <td class="signature-left-cell">
+                        <div class="signature-name-line">
+                            <span class="patient-label">Firmado por:</span>
+                            <span class="patient-value"
+                                >{{ case.validated_by }}</span
+                            >
+                        </div>
+                        {% if case.pathologist_signature %}
+                        <img
+                            class="signature-image"
+                            src="{{ case.pathologist_signature }}"
+                            alt="Firma patólogo"
+                        />
+                        {% endif %}
+                    </td>
+                    <td class="signature-right-cell">
+                        <span class="patient-label">Registro:</span>
+                        <span class="patient-value"
+                            >{{ case.pathologist_license }}</span
+                        >
+                    </td>
+                </tr>
+            </table>
+        </section>
+        {% endfor %}
+    </body>
+</html>

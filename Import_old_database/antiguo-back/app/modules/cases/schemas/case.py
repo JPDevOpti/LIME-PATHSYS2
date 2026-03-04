@@ -1,0 +1,150 @@
+from typing import Optional, List, Dict, Any
+from datetime import datetime
+from pydantic import BaseModel, Field, field_validator
+from pydantic.config import ConfigDict
+
+
+class EntityInfo(BaseModel):
+    id: str = Field(..., max_length=50)
+    name: str = Field(..., max_length=200)
+
+
+class LocationInfo(BaseModel):
+    municipality_code: Optional[str] = Field(None, max_length=10, description="Código del municipio")
+    municipality_name: Optional[str] = Field(None, max_length=100, description="Nombre del municipio")
+    subregion: Optional[str] = Field(None, max_length=100, description="Subregión")
+    address: Optional[str] = Field(None, max_length=200, description="Dirección completa")
+
+
+class PatientInfo(BaseModel):
+    patient_code: str = Field(..., max_length=50)
+    identification_type: Optional[int] = Field(None, ge=1, le=12, description="Tipo de identificación (1..12)")
+    identification_number: Optional[str] = Field(None, min_length=5, max_length=20, description="Número de identificación (5 a 20 caracteres alfanuméricos)")
+    name: str = Field(..., max_length=200)
+    age: int = Field(..., ge=0, le=150)
+    birth_date: Optional[datetime] = Field(None, description="Fecha de nacimiento del paciente")
+    gender: str = Field(..., max_length=20)
+    entity_info: EntityInfo
+    care_type: str = Field(..., max_length=50)
+    observations: Optional[str] = Field(None, max_length=1000)
+    location: Optional[LocationInfo] = Field(None, description="Información de ubicación del paciente")
+
+    @field_validator('identification_number', mode='before')
+    def normalize_identification_number(cls, v):
+        if v is None:
+            return None
+        value = str(v).strip().upper()
+        if not value:
+            return None
+        value = ''.join(ch for ch in value if ch.isalnum())
+        if len(value) < 5 or len(value) > 20:
+            raise ValueError('El número de identificación debe tener entre 5 y 20 caracteres alfanuméricos')
+        return value
+
+
+class SampleTest(BaseModel):
+    id: str = Field(..., max_length=50)
+    name: str = Field(..., max_length=200)
+    quantity: int = Field(default=1, ge=1)
+
+
+class SampleInfo(BaseModel):
+    body_region: str = Field(..., max_length=100)
+    tests: List[SampleTest] = Field(default_factory=list)
+
+
+class AssignedPathologist(BaseModel):
+    id: str = Field(..., max_length=50)
+    name: str = Field(..., max_length=200)
+    medical_license: Optional[str] = Field(None, max_length=50, description="Registro médico del patólogo")
+
+
+class AssignedResident(BaseModel):
+    id: str = Field(..., max_length=50)
+    name: str = Field(..., max_length=200)
+
+
+class CasePriority(str):
+    NORMAL = "Normal"
+    PRIORITARIO = "Prioritario"
+
+
+class CaseState(str):
+    EN_PROCESO = "En proceso"
+    POR_FIRMAR = "Por firmar"
+    POR_ENTREGAR = "Por entregar"
+    COMPLETADO = "Completado"
+
+
+class AdditionalNote(BaseModel):
+    date: datetime = Field(..., description="Fecha de la nota")
+    note: str = Field(..., max_length=1000, description="Contenido de la nota")
+    
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CaseCreate(BaseModel):
+    patient_info: PatientInfo
+    requesting_physician: Optional[str] = Field(None, max_length=200)
+    service: Optional[str] = Field(None, max_length=100)
+    samples: Optional[List[SampleInfo]] = Field(default_factory=list)
+    state: str = Field(default=CaseState.EN_PROCESO)
+    priority: str = Field(default=CasePriority.NORMAL)
+    observations: Optional[str] = Field(None, max_length=1000)
+
+
+class CaseUpdate(BaseModel):
+    patient_info: Optional[PatientInfo] = None
+    requesting_physician: Optional[str] = Field(None, max_length=200)
+    service: Optional[str] = Field(None, max_length=100)
+    samples: Optional[List[SampleInfo]] = None
+    state: Optional[str] = None
+    priority: Optional[str] = None
+    observations: Optional[str] = Field(None, max_length=1000)
+    assigned_pathologist: Optional[AssignedPathologist] = None
+    assigned_resident: Optional[AssignedResident] = None
+    delivered_to: Optional[str] = Field(None, max_length=200)
+    delivered_at: Optional[datetime] = None
+    business_days: Optional[int] = Field(None, ge=0, description="Días hábiles transcurridos")
+    additional_notes: Optional[List[AdditionalNote]] = None
+    complementary_tests: Optional[List[Dict[str, Any]]] = None
+
+
+class CaseResult(BaseModel):
+    method: Optional[List[str]] = None
+    macro_result: Optional[str] = None
+    micro_result: Optional[str] = None
+    diagnosis: Optional[str] = None
+    observations: Optional[str] = None
+    cie10_diagnosis: Optional[Dict[str, str]] = None
+    cieo_diagnosis: Optional[Dict[str, str]] = None
+    updated_at: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CaseResponse(BaseModel):
+    id: str
+    case_code: str
+    patient_info: PatientInfo
+    requesting_physician: Optional[str] = None
+    service: Optional[str] = None
+    samples: List[SampleInfo] = Field(default_factory=list)
+    state: str
+    priority: str
+    observations: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+    signed_at: Optional[datetime] = None
+    assigned_pathologist: Optional[AssignedPathologist] = None
+    assigned_resident: Optional[AssignedResident] = None
+    result: Optional[CaseResult] = None
+    delivered_to: Optional[str] = None
+    delivered_at: Optional[datetime] = None
+    business_days: Optional[int] = None
+    additional_notes: Optional[List[AdditionalNote]] = None
+    complementary_tests: Optional[List[Dict[str, Any]]] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+

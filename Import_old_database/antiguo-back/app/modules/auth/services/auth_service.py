@@ -1,0 +1,93 @@
+from datetime import timedelta
+from typing import Dict, Any
+from pydantic import EmailStr
+from app.config.database import get_database
+from app.config.security import verify_password, create_access_token
+from app.config.settings import settings
+from app.modules.auth.repositories.auth_repository import AuthRepository
+
+
+class AuthService:
+    def __init__(self, repo: AuthRepository) -> None:
+        self.repo = repo
+
+    @classmethod
+    async def build(cls) -> "AuthService":
+        db = await get_database()
+        return cls(AuthRepository(db))
+
+    def _get_expires_delta(self, remember_me: bool) -> timedelta:
+        minutes = settings.ACCESS_TOKEN_EXPIRE_MINUTES_REMEMBER_ME if remember_me else settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        return timedelta(minutes=minutes)
+
+    async def login(self, email: EmailStr, password: str, remember_me: bool = False) -> Dict[str, Any]:
+        user = await self.repo.get_user_by_email(email)
+        if not user:
+            raise ValueError("Invalid credentials")
+
+        if not verify_password(password, user.get("password_hash", "")):
+            raise ValueError("Invalid credentials")
+
+        expires_delta = self._get_expires_delta(remember_me)
+        token = create_access_token(subject=user["_id"], expires_delta=expires_delta, extra_claims={"rm": bool(remember_me)})
+
+        public_user = {
+            "id": user.get("_id"),
+            "name": user.get("name"),
+            "email": user.get("email"),
+            "role": user.get("role"),
+            "is_active": user.get("is_active", True),
+            "administrator_code": user.get("administrator_code"),
+            "pathologist_code": user.get("pathologist_code"),
+            "resident_code": user.get("resident_code"),
+            "auxiliary_code": user.get("auxiliary_code"),
+            "billing_code": user.get("billing_code"),
+            "associated_entities": user.get("associated_entities", []),
+        }
+
+        return {
+            "token": {
+                "access_token": token,
+                "token_type": "bearer",
+                "expires_in": int(expires_delta.total_seconds()),
+            },
+            "user": public_user,
+        }
+
+    async def refresh_token(self, user_id: str, remember_me: bool = False) -> Dict[str, Any]:
+        """Refresh an access token for an authenticated user"""
+        user = await self.repo.get_user_by_id(user_id)
+        if not user:
+            raise ValueError("User not found")
+
+        if not user.get("is_active", True):
+            raise ValueError("User account is inactive")
+
+        expires_delta = self._get_expires_delta(remember_me)
+        token = create_access_token(subject=user["_id"], expires_delta=expires_delta, extra_claims={"rm": bool(remember_me)})
+
+        return {
+            "access_token": token,
+            "token_type": "bearer",
+            "expires_in": int(expires_delta.total_seconds()),
+        }
+
+    async def get_user_public_by_id(self, user_id: str) -> Dict[str, Any]:
+        user = await self.repo.get_user_by_id(user_id)
+        if not user:
+            raise ValueError("User not found or inactive")
+        return {
+            "id": user.get("_id"),
+            "name": user.get("name"),
+            "email": user.get("email"),
+            "role": user.get("role"),
+            "is_active": user.get("is_active", True),
+            "administrator_code": user.get("administrator_code"),
+            "pathologist_code": user.get("pathologist_code"),
+            "resident_code": user.get("resident_code"),
+            "auxiliary_code": user.get("auxiliary_code"),
+            "billing_code": user.get("billing_code"),
+            "associated_entities": user.get("associated_entities", []),
+        }
+
+

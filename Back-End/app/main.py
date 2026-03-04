@@ -1,0 +1,85 @@
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.database import get_db
+from app.modules.auth import auth_router
+from app.modules.cases import router as cases_router
+from app.modules.entities import entities_router
+from app.modules.tests import tests_router
+from app.modules.users import users_router
+from app.modules.users.router import pathologists_router
+from app.modules.diseases import diseases_router
+from app.modules.unread_cases import unread_cases_router
+from app.modules.support.router import router as support_router
+from app.modules.support.repository import SupportRepository
+from app.modules.patients import router as patients_router
+from app.modules.patients.repository import PatientRepository
+from app.modules.dashboard import dashboard_router
+from app.modules.statistics import statistics_router
+from app.modules.additional_tests.router import router as additional_tests_router
+from app.modules.cases_legacy import router as cases_legacy_router
+from app.modules.cases_legacy.repository import LegacyCaseRepository
+from app.modules.cases.repository import CaseRepository
+from app.modules.entities.repository import EntitiesRepository
+from app.modules.tests.repository import TestsRepository
+from app.modules.unread_cases.repository import UnreadCasesRepository
+from app.modules.billing.router import billing_router
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    db = get_db()
+    PatientRepository(db)._ensure_indexes()
+    CaseRepository(db)._ensure_indexes()
+    EntitiesRepository(db)._ensure_indexes()
+    TestsRepository(db)._ensure_indexes()
+    UnreadCasesRepository(db)._ensure_indexes()
+    SupportRepository(db)._ensure_indexes()
+    LegacyCaseRepository(db)._ensure_indexes()
+    yield
+
+
+app = FastAPI(title="PathSys API", version="1.0.0", lifespan=lifespan)
+
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
+    "http://0.0.0.0:3001",
+    "localhost:3001",
+    "127.0.0.1:3001",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\\d+)?$",
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["Authorization", "Content-Type", "X-Requested-With", "Accept", "X-User-Email", "X-User-Name"],
+    expose_headers=["*"],
+)
+
+app.include_router(auth_router, prefix="/api/v1/auth", tags=["auth"])
+app.include_router(pathologists_router, prefix="/api/v1", tags=["pathologists"])
+app.include_router(users_router, prefix="/api/v1/users", tags=["users"])
+app.include_router(diseases_router, prefix="/api/v1/diseases", tags=["diseases"])
+app.include_router(entities_router, prefix="/api/v1/entities", tags=["entities"])
+app.include_router(tests_router, prefix="/api/v1/tests", tags=["tests"])
+app.include_router(patients_router, prefix="/api/v1/patients", tags=["patients"])
+app.include_router(cases_router, prefix="/api/v1/cases", tags=["cases"])
+app.include_router(dashboard_router, prefix="/api/v1/dashboard", tags=["dashboard"])
+app.include_router(unread_cases_router, prefix="/api/v1/unread-cases", tags=["unread-cases"])
+app.include_router(additional_tests_router, prefix="/api/v1/additional-tests", tags=["additional-tests"])
+app.include_router(support_router, prefix="/api/v1/support", tags=["support"])
+app.include_router(statistics_router, prefix="/api/v1/statistics", tags=["statistics"])
+app.include_router(cases_legacy_router, prefix="/api/v1/cases-legacy", tags=["cases-legacy"])
+app.include_router(billing_router, prefix="/api/v1/billing", tags=["billing"])
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}

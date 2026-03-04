@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	:root {
+		color-scheme: light;
+		--font-primary: 'Inter';
+		--font-heading: 'Outfit';
+		--app-bg: #f9fafb;
+		--app-card-bg: #ffffff;
+		--app-border: #e4e7ec;
+	}
+
+	*,
+	::before,
+	::after {
+		border-color: var(--app-border);
+	}
+
+	body {
+		background-color: var(--app-bg);
+		color: #101828;
+		font-family: var(--font-primary), ui-sans-serif, system-ui;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+
+	button {
+		font-family: var(--font-primary), ui-sans-serif, system-ui;
+	}
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		color: #101828;
+		font-family: var(--font-heading), var(--font-primary), ui-sans-serif, system-ui;
+	}
+
+	::selection {
+		background-color: #e0f2fe;
+		color: #101828;
+	}
+}
+
+@layer utilities {
+	.focus-ring {
+		outline: none;
+		box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #e0f2fe;
+	}
+}
+
+/* Icono de fecha alineado a la derecha en inputs type="date" */
+input[type="date"]::-webkit-calendar-picker-indicator {
+	margin-left: auto;
+	cursor: pointer;
+}
+input[type="date"]::-webkit-date-and-time-value {
+	text-align: left;
+}
+
+/* RichTextEditor - TipTap/ProseMirror */
+.rich-text-editor-content .ProseMirror {
+	font-family: inherit;
+	font-size: 14px;
+	line-height: 1.6;
+	outline: none;
+}
+.rich-text-editor-content .ProseMirror:focus {
+	outline: none;
+	box-shadow: 0 0 0 2px rgb(88 160 117 / 0.3);
+}
+.rich-text-editor-content .ProseMirror p {
+	margin-bottom: 0.5rem;
+}
+.rich-text-editor-content .ProseMirror ul,
+.rich-text-editor-content .ProseMirror ol {
+	margin-left: 1.5rem;
+	margin-bottom: 0.5rem;
+}
+.rich-text-editor-content .ProseMirror ul {
+	list-style-type: disc;
+}
+.rich-text-editor-content .ProseMirror ol {
+	list-style-type: decimal;
+}
+
+/* Contenido HTML de resultados guardados (formato igual al editor) */
+.result-content-display p {
+	margin-bottom: 0.5rem;
+}
+.result-content-display p:last-child {
+	margin-bottom: 0;
+}
+.result-content-display ul,
+.result-content-display ol {
+	margin-left: 1.5rem;
+	margin-bottom: 0.5rem;
+}
+.result-content-display ul {
+	list-style-type: disc;
+}
+.result-content-display ol {
+	list-style-type: decimal;
+}
+.result-content-display strong {
+	font-weight: 600;
+}
+.result-content-display em {
+	font-style: italic;
+}
+.result-content-display u {
+	text-decoration: underline;
+}

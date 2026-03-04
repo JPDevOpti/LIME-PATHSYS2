@@ -1,0 +1,87 @@
+# =========================
+# Global / OS
+# =========================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# =========================
+# Logs
+# =========================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =========================
+# Env / Secrets
+# =========================
+.env
+.env.*
+!.env.example
+!.env.sample
+*.env
+
+# =========================
+# Python (Back-End + scripts)
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Packaging
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Type checking / notebooks
+.ipynb_checkpoints/
+
+# =========================
+# Node / Next.js (Front-End)
+# =========================
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/
+
+# Next.js output
+.next/
+out/
+
+# Front-end build caches
+*.tsbuildinfo
+.parcel-cache/
+
+# =========================
+# Project specific
+# =========================
+# Uploaded/generated files from legacy migration tools
+Import_old_database/antiguo-back/uploads/
+
+# Local databases
+*.sqlite
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
