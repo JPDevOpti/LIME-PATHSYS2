@@ -7,8 +7,9 @@ import { BaseCard, BaseButton } from '@/shared/components/base';
 import { Input, Select } from '@/shared/components/ui/form';
 import { FormField } from '@/shared/components/ui/form';
 import { SearchButton } from '@/shared/components/ui/buttons';
-import { Search, FileSpreadsheet, Plus, Trash2, Lock } from 'lucide-react';
+import { Search, FileSpreadsheet, Plus, Trash2, Lock, Printer, PackageCheck } from 'lucide-react';
 import type { CaseListFilters } from '../hooks/useCaseList';
+import type { Case } from '../types/case.types';
 import type { CaseStatus } from '../types/case.types';
 import { EntitiesCombobox, PathologistsCombobox, TestsCombobox } from '@/shared/components/lists';
 
@@ -26,6 +27,9 @@ interface CasesFiltersBarProps {
     lockedPathologist?: string;
     lockedIdentificationNumber?: string;
     isPaciente?: boolean;
+    selectedCases?: Case[];
+    onPrintSelected?: () => void;
+    onDeliverSelected?: () => void;
 }
 
 const PRIORITY_OPTIONS = [
@@ -58,6 +62,9 @@ export function CasesFiltersBar({
     lockedPathologist,
     lockedIdentificationNumber,
     isPaciente = false,
+    selectedCases = [],
+    onPrintSelected,
+    onDeliverSelected,
 }: CasesFiltersBarProps) {
     const [localFilters, setLocalFilters] = useState<CaseListFilters>(filters);
     // id del patólogo seleccionado — PathologistsCombobox usa el id como value, el filtro usa el nombre
@@ -203,6 +210,29 @@ export function CasesFiltersBar({
 
                 <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 pt-2 border-t border-neutral-200">
                     <div className="flex flex-col sm:flex-row gap-2 sm:ml-auto">
+                        {!isPaciente && selectedCases.length > 0 && (
+                            <>
+                                <BaseButton
+                                    size="md"
+                                    variant="secondary"
+                                    onClick={onPrintSelected}
+                                    startIcon={<Printer className="w-4 h-4" />}
+                                >
+                                    Imprimir informes ({selectedCases.length})
+                                </BaseButton>
+                                {onDeliverSelected && selectedCases.some(c => c.status === 'Por entregar') && (
+                                    <BaseButton
+                                        size="md"
+                                        variant="secondary"
+                                        onClick={onDeliverSelected}
+                                        startIcon={<PackageCheck className="w-4 h-4" />}
+                                        className="text-green-700 border-green-300 hover:bg-green-50"
+                                    >
+                                        Entregar casos ({selectedCases.filter(c => c.status === 'Por entregar').length})
+                                    </BaseButton>
+                                )}
+                            </>
+                        )}
                         {!isPaciente && (
                             <BaseButton
                                 size="md"

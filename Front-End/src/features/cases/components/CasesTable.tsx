@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Case, getDateFromDateInfo } from "../types/case.types";
 import type { CaseSortKey, SortOrder } from "../hooks/useCaseList";
@@ -64,6 +65,7 @@ interface CasesTableProps {
   onViewDetails?: (caseItem: Case) => void;
   onAssignPathologistClick?: (caseItem: Case) => void;
   onMarkDelivered?: (selectedCases: Case[]) => void;
+  onSelectionChange?: (selected: Case[]) => void;
   isPaciente?: boolean;
 }
 
@@ -168,10 +170,44 @@ export function CasesTable({
   onViewDetails,
   onAssignPathologistClick,
   onMarkDelivered,
+  onSelectionChange,
   isPaciente = false,
 }: CasesTableProps) {
   const { canSignResults, isAdmin, isAuxiliar } = usePermissions();
   const canMarkDelivered = isAdmin || isAuxiliar;
+
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // Reset selection when cases list changes (page/filter change)
+  useEffect(() => {
+    setSelectedIds(new Set());
+    onSelectionChange?.([]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cases]);
+
+  const applySelection = (newIds: Set<string>) => {
+    setSelectedIds(newIds);
+    onSelectionChange?.(cases.filter((c) => c.id && newIds.has(c.id)));
+  };
+
+  const toggleSelect = (c: Case) => {
+    if (!c.id) return;
+    const newIds = new Set(selectedIds);
+    if (newIds.has(c.id)) newIds.delete(c.id);
+    else newIds.add(c.id);
+    applySelection(newIds);
+  };
+
+  const toggleSelectAll = () => {
+    const pageIds = cases.map((c) => c.id).filter(Boolean) as string[];
+    const allSelected = pageIds.every((id) => selectedIds.has(id));
+    applySelection(allSelected ? new Set() : new Set(pageIds));
+  };
+
+  const allSelected =
+    cases.length > 0 && cases.every((c) => c.id && selectedIds.has(c.id));
+  const someSelected =
+    !allSelected && cases.some((c) => c.id && selectedIds.has(c.id));
 
   const resultsHref = (caseCode: string) =>
     canSignResults
@@ -188,6 +224,21 @@ export function CasesTable({
         <table className="min-w-full text-base">
           <thead>
             <tr className="border-b border-gray-200 bg-gray-50">
+              {/* Checkbox column */}
+              {!isPaciente && (
+                <th className="px-2 py-2 text-center w-[3%]">
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    ref={(el) => {
+                      if (el) el.indeterminate = someSelected;
+                    }}
+                    onChange={toggleSelectAll}
+                    className="w-4 h-4 rounded border-gray-300 text-lime-600 cursor-pointer"
+                    title="Seleccionar todos"
+                  />
+                </th>
+              )}
               {columns.map((col) => {
                 const Icon = COLUMN_ICONS[col.key];
                 return (
@@ -223,11 +274,29 @@ export function CasesTable({
               const overdue = isOverdue(c);
               const days = getElapsedDays(c);
               const isDeliverable = c.status === "Por entregar";
+              const isSelected = !!c.id && selectedIds.has(c.id);
               return (
                 <tr
                   key={c.id}
-                  className={`hover:bg-gray-50 ${overdue ? "bg-red-50/70" : ""}`}
+                  className={`hover:bg-gray-50 ${
+                    isSelected
+                      ? "bg-blue-50/60"
+                      : overdue
+                        ? "bg-red-50/70"
+                        : ""
+                  }`}
                 >
+                  {/* Checkbox cell */}
+                  {!isPaciente && (
+                    <td className="px-2 py-3 text-center">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleSelect(c)}
+                        className="w-4 h-4 rounded border-gray-300 text-lime-600 cursor-pointer"
+                      />
+                    </td>
+                  )}
                   <td className="px-1 py-3 text-center">
                     <span className="font-medium text-gray-800">
                       {c.case_code}
@@ -424,7 +493,7 @@ export function CasesTable({
             {cases.length === 0 && (
               <tr>
                 <td
-                  colSpan={columns.length + 1}
+                  colSpan={columns.length + (isPaciente ? 1 : 2)}
                   className="px-5 py-8 text-center"
                 >
                   <p className="text-gray-500 text-sm">{noResultsMessage}</p>
@@ -441,16 +510,27 @@ export function CasesTable({
             const tests = getTestsFromCase(c);
             const overdue = isOverdue(c);
             const days = getElapsedDays(c);
+            const isSelected = !!c.id && selectedIds.has(c.id);
             return (
               <div
                 key={c.id}
                 className={`border rounded-lg p-4 hover:shadow-md transition-shadow ${
-                  overdue
-                    ? "bg-red-50/70 border-red-200"
-                    : "bg-white border-gray-200"
+                  isSelected
+                    ? "bg-blue-50/60 border-blue-200"
+                    : overdue
+                      ? "bg-red-50/70 border-red-200"
+                      : "bg-white border-gray-200"
                 }`}
               >
                 <div className="flex items-start justify-between mb-3">
+                  {!isPaciente && (
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => toggleSelect(c)}
+                      className="w-4 h-4 mt-0.5 mr-2 rounded border-gray-300 text-lime-600 cursor-pointer shrink-0"
+                    />
+                  )}
                   <div className="flex-1 min-w-0">
                     <h4 className="font-semibold text-gray-800 text-sm truncate">
                       {c.case_code}

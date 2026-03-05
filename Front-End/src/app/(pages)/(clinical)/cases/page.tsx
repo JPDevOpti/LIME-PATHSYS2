@@ -14,6 +14,7 @@ import type { Case } from '@/features/cases/types/case.types';
 import type { CaseListFilters } from '@/features/cases/hooks/useCaseList';
 import { caseService } from '@/features/cases/services/case.service';
 import { exportCasesToExcel } from '@/shared/utils/excelExport';
+import { openCasePdf } from '@/shared/utils/pdf';
 
 const COLUMNS = [
     { key: 'case_code' as const, label: 'Código Caso', class: 'w-[16%]' },
@@ -77,10 +78,14 @@ type CasesListInnerProps = {
 };
 
 function CasesListInner({ isRestrictedView, lockedPathologist, lockedIdentificationNumber, initialListFilters }: CasesListInnerProps) {
+    const { isAdmin, isAuxiliar } = usePermissions();
+    const canMarkDelivered = isAdmin || isAuxiliar;
+
     const [detailCase, setDetailCase] = useState<Case | null>(null);
     const [assignPathologistCase, setAssignPathologistCase] = useState<Case | null>(null);
     const [markDeliveredCases, setMarkDeliveredCases] = useState<Case[]>([]);
     const [isExporting, setIsExporting] = useState(false);
+    const [selectedCases, setSelectedCases] = useState<Case[]>([]);
     const {
         isLoading,
         error,
@@ -118,6 +123,15 @@ function CasesListInner({ isRestrictedView, lockedPathologist, lockedIdentificat
         } finally {
             setIsExporting(false);
         }
+    };
+
+    const handlePrintSelected = () => {
+        selectedCases.forEach(c => c.id && openCasePdf(c.id));
+    };
+
+    const handleDeliverSelected = () => {
+        const deliverable = selectedCases.filter(c => c.status === 'Por entregar');
+        if (deliverable.length > 0) setMarkDeliveredCases(deliverable);
     };
 
     const handleMarkDeliveredConfirm = async (
@@ -159,6 +173,9 @@ function CasesListInner({ isRestrictedView, lockedPathologist, lockedIdentificat
                 lockedPathologist={lockedPathologist}
                 lockedIdentificationNumber={lockedIdentificationNumber}
                 isPaciente={isRestrictedView}
+                selectedCases={selectedCases}
+                onPrintSelected={handlePrintSelected}
+                onDeliverSelected={canMarkDelivered ? handleDeliverSelected : undefined}
             />
 
             {isLoading && (
@@ -198,6 +215,7 @@ function CasesListInner({ isRestrictedView, lockedPathologist, lockedIdentificat
                     onViewDetails={c => setDetailCase(c)}
                     onAssignPathologistClick={!isRestrictedView ? c => setAssignPathologistCase(c) : undefined}
                     onMarkDelivered={!isRestrictedView ? cases => setMarkDeliveredCases(cases) : undefined}
+                    onSelectionChange={setSelectedCases}
                     isPaciente={isRestrictedView}
                 />
             )}
