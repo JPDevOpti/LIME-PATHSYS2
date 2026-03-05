@@ -1,5 +1,6 @@
 """Repositorio de casos sin lectura."""
 
+import re
 from datetime import datetime, timezone
 from typing import Any, Optional
 
@@ -69,7 +70,7 @@ class UnreadCasesRepository:
     ) -> tuple[list[dict[str, Any]], int]:
         q: dict[str, Any] = {}
         if search and search.strip():
-            s = search.strip().lower()
+            s = re.escape(search.strip())
             q["$or"] = [
                 {"case_code": {"$regex": s, "$options": "i"}},
                 {"patient_name": {"$regex": s, "$options": "i"}},
@@ -86,7 +87,7 @@ class UnreadCasesRepository:
             q["$or"] = q.get("$or", []) + [
                 {"test_groups.type": s},
                 {"test_groups.tests.code": s},
-                {"test_groups.tests.name": {"$regex": s, "$options": "i"}}
+                {"test_groups.tests.name": {"$regex": re.escape(s), "$options": "i"}}
             ]
         if date_from or date_to:
             q["entry_date"] = {}

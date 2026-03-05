@@ -1,6 +1,6 @@
 from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from pymongo.database import Database
@@ -35,7 +35,7 @@ def get_case_pdf_service(
 
 @router.get("", response_model=CaseListResponse)
 def list_cases(
-    search: str | None = Query(None, alias="search"),
+    search: str | None = Query(None),
     created_at_from: str | None = Query(None, alias="created_at_from"),
     created_at_to: str | None = Query(None, alias="created_at_to"),
     entity: str | None = Query(None),
@@ -52,6 +52,7 @@ def list_cases(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100000),
     service: CaseService = Depends(get_case_service),
+    _: str = Depends(get_current_user_id),
 ):
     result = service.list_cases(
         search=search,
@@ -78,6 +79,7 @@ def list_cases(
 def get_case_by_code(
     code: str,
     service: CaseService = Depends(get_case_service),
+    _: str = Depends(get_current_user_id),
 ):
     return service.get_by_code(code)
 
@@ -86,6 +88,7 @@ def get_case_by_code(
 def get_case_pdf(
     id: str,
     pdf_service: CasePdfService = Depends(get_case_pdf_service),
+    _: str = Depends(get_current_user_id),
 ):
     try:
         pdf_bytes, case_code = pdf_service.generate_case_pdf_by_id(id)
@@ -93,22 +96,21 @@ def get_case_pdf(
         return StreamingResponse(
             iter([pdf_bytes]),
             media_type="application/pdf",
-            headers={
-                "Content-Disposition": f"inline; filename*=UTF-8''{quote(filename)}"
-            },
+            headers={"Content-Disposition": f"inline; filename*=UTF-8''{quote(filename)}"},
         )
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except HTTPException:
         raise
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Error generando PDF: {str(exc)}") from exc
+        raise HTTPException(status_code=500, detail="Error generando PDF") from exc
 
 
 @router.post("/batch/pdf")
 def get_batch_pdf(
     request: BatchPdfRequest,
     pdf_service: CasePdfService = Depends(get_case_pdf_service),
+    _: str = Depends(get_current_user_id),
 ):
     case_ids = request.case_ids or []
     case_codes = request.case_codes or []
@@ -125,22 +127,21 @@ def get_batch_pdf(
         return StreamingResponse(
             iter([pdf_bytes]),
             media_type="application/pdf",
-            headers={
-                "Content-Disposition": "inline; filename*=UTF-8''casos_combinados.pdf"
-            },
+            headers={"Content-Disposition": "inline; filename*=UTF-8''casos_combinados.pdf"},
         )
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except HTTPException:
         raise
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Error generando PDF batch: {str(exc)}") from exc
+        raise HTTPException(status_code=500, detail="Error generando PDF batch") from exc
 
 
 @router.get("/{id}", response_model=CaseResponse)
 def get_case(
     id: str,
     service: CaseService = Depends(get_case_service),
+    _: str = Depends(get_current_user_id),
 ):
     return service.get_by_id(id)
 
@@ -148,11 +149,14 @@ def get_case(
 @router.post("", response_model=CaseResponse, status_code=201)
 def create_case(
     data: CaseCreate,
-    x_user_email: str | None = Header(None, alias="X-User-Email"),
-    x_user_name: str | None = Header(None, alias="X-User-Name"),
+    current_user: dict = Depends(get_current_user),
     service: CaseService = Depends(get_case_service),
 ):
-    return service.create(data, created_by_email=x_user_email, created_by_name=x_user_name)
+    return service.create(
+        data,
+        created_by_email=current_user.get("email"),
+        created_by_name=current_user.get("name"),
+    )
 
 
 @router.put("/{id}/transcription", response_model=CaseResponse)
@@ -160,41 +164,56 @@ def update_case_transcription(
     id: str,
     data: CaseTranscriptionUpdate,
     skip_state_update: bool = False,
-    x_user_email: str | None = Header(None, alias="X-User-Email"),
-    x_user_name: str | None = Header(None, alias="X-User-Name"),
+    current_user: dict = Depends(get_current_user),
     service: CaseService = Depends(get_case_service),
 ):
-    return service.update_transcription(id, data, updated_by_email=x_user_email, updated_by_name=x_user_name, skip_state_update=skip_state_update)
+    return service.update_transcription(
+        id,
+        data,
+        updated_by_email=current_user.get("email"),
+        updated_by_name=current_user.get("name"),
+        skip_state_update=skip_state_update,
+    )
 
 
 @router.put("/{id}/sign", response_model=CaseResponse)
 def sign_case(
     id: str,
     data: CaseTranscriptionUpdate,
-    x_user_email: str | None = Header(None, alias="X-User-Email"),
-    x_user_name: str | None = Header(None, alias="X-User-Name"),
     user_id: str = Depends(get_current_user_id),
     current_user: dict = Depends(get_current_user),
     service: CaseService = Depends(get_case_service),
 ):
-    """Firma el resultado y pasa el caso a estado Por entregar. Solo administrador o patologo asignado."""
-    return service.sign_case(id, data, user_id=user_id, current_user=current_user, updated_by_email=x_user_email, updated_by_name=x_user_name)
+    """Firma el resultado. Solo administrador o patologo asignado."""
+    return service.sign_case(
+        id,
+        data,
+        user_id=user_id,
+        current_user=current_user,
+        updated_by_email=current_user.get("email"),
+        updated_by_name=current_user.get("name"),
+    )
 
 
 @router.put("/{id}", response_model=CaseResponse)
 def update_case(
     id: str,
     data: CaseUpdate,
-    x_user_email: str | None = Header(None, alias="X-User-Email"),
-    x_user_name: str | None = Header(None, alias="X-User-Name"),
+    current_user: dict = Depends(get_current_user),
     service: CaseService = Depends(get_case_service),
 ):
-    return service.update(id, data, updated_by_email=x_user_email, updated_by_name=x_user_name)
+    return service.update(
+        id,
+        data,
+        updated_by_email=current_user.get("email"),
+        updated_by_name=current_user.get("name"),
+    )
 
 
 @router.delete("/{id}", status_code=204)
 def delete_case(
     id: str,
     service: CaseService = Depends(get_case_service),
+    _: str = Depends(get_current_user_id),
 ):
     service.delete(id)

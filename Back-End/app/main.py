@@ -1,7 +1,13 @@
+import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.database import get_db
 from app.modules.auth import auth_router
@@ -38,26 +44,56 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="PathSys API", version="1.0.0", lifespan=lifespan)
+# Rate limiter (compartido con auth router)
+limiter = Limiter(key_func=get_remote_address)
 
-origins = [
+app = FastAPI(title="PathSys API", version="1.0.0", lifespan=lifespan)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+
+# ── Security headers middleware ────────────────────────────────────────────────
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+        if request.url.scheme == "https":
+            response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains"
+        return response
+
+
+app.add_middleware(SecurityHeadersMiddleware)
+
+
+# ── CORS ───────────────────────────────────────────────────────────────────────
+def _parse_cors_origins(raw: str | None) -> list[str]:
+    if not raw:
+        return []
+    return [origin.strip().rstrip("/") for origin in raw.split(",") if origin.strip()]
+
+
+default_origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://localhost:3001",
     "http://127.0.0.1:3001",
-    "http://0.0.0.0:3001",
-    "localhost:3001",
-    "127.0.0.1:3001",
 ]
+
+configured_origins = _parse_cors_origins(os.getenv("CORS_ORIGINS"))
+origins = configured_origins or default_origins
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\\d+)?$",
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?$",
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["Authorization", "Content-Type", "X-Requested-With", "Accept", "X-User-Email", "X-User-Name"],
-    expose_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-Requested-With", "Accept"],
+    expose_headers=["Content-Disposition"],
 )
 
 app.include_router(auth_router, prefix="/api/v1/auth", tags=["auth"])

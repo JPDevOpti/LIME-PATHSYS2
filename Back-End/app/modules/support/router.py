@@ -26,7 +26,8 @@ def get_tickets(
     limit: int = Query(20, ge=1, le=100),
     sort_by: str = "ticket_date",
     sort_order: str = "desc",
-    service: SupportService = Depends(get_support_service)
+    service: SupportService = Depends(get_support_service),
+    _: dict = Depends(get_current_user),
 ):
     data, total = service.get_tickets(
         status=status,
@@ -41,8 +42,9 @@ def get_tickets(
 
 @router.get("/{code}", response_model=SupportTicketResponse)
 def get_ticket(
-    code: str, 
-    service: SupportService = Depends(get_support_service)
+    code: str,
+    service: SupportService = Depends(get_support_service),
+    _: dict = Depends(get_current_user),
 ):
     ticket = service.get_ticket(code)
     if not ticket:
@@ -63,7 +65,8 @@ def create_ticket(
 def update_ticket_status(
     code: str,
     payload: ChangeStatusRequest,
-    service: SupportService = Depends(get_support_service)
+    service: SupportService = Depends(get_support_service),
+    _: dict = Depends(get_current_user),
 ):
     ticket = service.update_status(code, payload.status)
     if not ticket:
@@ -89,8 +92,9 @@ def add_comment(
 
 @router.delete("/{code}")
 def delete_ticket(
-    code: str, 
-    service: SupportService = Depends(get_support_service)
+    code: str,
+    service: SupportService = Depends(get_support_service),
+    _: dict = Depends(get_current_user),
 ):
     if not service.delete_ticket(code):
         raise HTTPException(status_code=404, detail="Ticket no encontrado")

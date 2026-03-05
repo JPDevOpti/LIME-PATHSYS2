@@ -1,5 +1,6 @@
 """Repositorio de usuarios para autenticación."""
 
+import re
 from typing import Any, Optional
 
 from bson import ObjectId
@@ -26,7 +27,7 @@ class AuthRepository:
 
     def get_user_by_email(self, email: str) -> Optional[dict[str, Any]]:
         doc = self.collection.find_one(
-            {"email": {"$regex": f"^{email}$", "$options": "i"}, "is_active": True}
+            {"email": {"$regex": f"^{re.escape(email)}$", "$options": "i"}, "is_active": True}
         )
         if not doc:
             return None

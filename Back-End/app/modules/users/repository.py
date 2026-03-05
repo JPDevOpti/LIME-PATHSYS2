@@ -1,5 +1,6 @@
 """Repositorio de usuarios."""
 
+import re
 from datetime import datetime, timezone
 from typing import Any, Optional
 
@@ -59,7 +60,7 @@ class UsersRepository:
     ) -> tuple[list[dict[str, Any]], int]:
         q: dict[str, Any] = {}
         if search and search.strip():
-            s = search.strip()
+            s = re.escape(search.strip())
             q["$or"] = [
                 {"name": {"$regex": s, "$options": "i"}},
                 {"email": {"$regex": s, "$options": "i"}},
@@ -107,7 +108,7 @@ class UsersRepository:
         self.collection.update_one({"_id": oid}, {"$set": {"patient_id": patient_id}})
 
     def email_exists(self, email: str, exclude_id: Optional[str] = None) -> bool:
-        q: dict[str, Any] = {"email": {"$regex": f"^{email}$", "$options": "i"}}
+        q: dict[str, Any] = {"email": {"$regex": f"^{re.escape(email)}$", "$options": "i"}}
         if exclude_id:
             try:
                 q["_id"] = {"$ne": ObjectId(exclude_id)}

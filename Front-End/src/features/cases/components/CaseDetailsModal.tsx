@@ -11,6 +11,7 @@ import { CloseButton } from '@/shared/components/ui/buttons';
 import { BaseCard } from '@/shared/components/base/BaseCard';
 import { FileText, User, Phone, MapPin, Building2, FlaskConical, UserRoundPen, History, ShieldCheck, Microscope, ZoomIn, ChevronLeft, ChevronRight, X as XIcon, Image } from 'lucide-react';
 import { formatAge } from '@/shared/utils/formatAge';
+import { sanitizeHtml } from '@/shared/utils/sanitizeHtml';
 import { usePermissions } from '@/features/auth/hooks/usePermissions';
 
 interface CaseDetailsModalProps {
@@ -379,7 +380,7 @@ export function CaseDetailsModal({ visible, caseData, onClose, onCaseUpdated }: 
                                             </div>
                                             <div
                                                 className="text-sm text-neutral-800 prose prose-sm max-w-none"
-                                                dangerouslySetInnerHTML={{ __html: caseData.result.macro_result }}
+                                                dangerouslySetInnerHTML={{ __html: sanitizeHtml(caseData.result.macro_result) }}
                                             />
                                         </div>
                                     </BaseCard>
@@ -393,7 +394,7 @@ export function CaseDetailsModal({ visible, caseData, onClose, onCaseUpdated }: 
                                             </div>
                                             <div
                                                 className="text-sm text-neutral-800 prose prose-sm max-w-none"
-                                                dangerouslySetInnerHTML={{ __html: caseData.result.micro_result }}
+                                                dangerouslySetInnerHTML={{ __html: sanitizeHtml(caseData.result.micro_result) }}
                                             />
                                         </div>
                                     </BaseCard>
@@ -411,7 +412,7 @@ export function CaseDetailsModal({ visible, caseData, onClose, onCaseUpdated }: 
                                     </div>
                                     <div
                                         className="text-sm text-neutral-800 prose prose-sm max-w-none"
-                                        dangerouslySetInnerHTML={{ __html: caseData.result.diagnosis }}
+                                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(caseData.result.diagnosis) }}
                                     />
                                 </div>
                             </BaseCard>

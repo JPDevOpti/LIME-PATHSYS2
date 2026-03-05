@@ -21,19 +21,7 @@ router = APIRouter(dependencies=[Depends(get_current_user_id)])
 
 @router.get("/count", response_model=DiseaseCountResponse)
 def count_diseases(service: DiseasesService = Depends(get_diseases_service)):
-    """Obtiene cantidad total de enfermedades y la imprime en consola del backend."""
-    counts = service.count()
-    print(
-        "[DiseasesCount] total=",
-        counts.total,
-        "diseases=",
-        counts.diseases_collection,
-        "CIE10=",
-        counts.cie10_collection,
-        "CIEO=",
-        counts.cieo_collection,
-    )
-    return counts
+    return service.count()
 
 
 @router.get("/search", response_model=DiseaseSearchResponse)
@@ -56,5 +44,7 @@ def create_disease(
     """Crea un nuevo diagnóstico."""
     try:
         return service.create(data)
-    except Exception as e:
+    except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Error creando diagnóstico")

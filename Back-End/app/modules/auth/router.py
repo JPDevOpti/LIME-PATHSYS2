@@ -1,6 +1,8 @@
 """Rutas de autenticación."""
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 from app.database import get_db
 from app.modules.auth.repository import AuthRepository
@@ -11,6 +13,7 @@ from app.security import verify_token_payload
 from .dependencies import oauth2_scheme, get_current_user_id
 
 router = APIRouter()
+limiter = Limiter(key_func=get_remote_address)
 
 
 def get_auth_service() -> AuthService:
@@ -26,7 +29,8 @@ def get_users_service():
 
 
 @router.post("/login", response_model=LoginResponse)
-def login(payload: LoginRequest, service: AuthService = Depends(get_auth_service)):
+@limiter.limit("10/minute")
+def login(request: Request, payload: LoginRequest, service: AuthService = Depends(get_auth_service)):
     try:
         return service.login(payload.email, payload.password, payload.remember_me)
     except ValueError:
@@ -74,5 +78,5 @@ def update_profile(
         return UserResponse(**service.update(user_id, payload))
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error al actualizar perfil: {str(e)}")
+    except Exception:
+        raise HTTPException(status_code=500, detail="Error al actualizar perfil")

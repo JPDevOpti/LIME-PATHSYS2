@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timedelta
 from typing import Any, Optional
 from app.core.date_utils import format_iso_datetime
@@ -82,7 +83,7 @@ class PatientRepository:
 
         and_conditions: list[dict] = []
         if search and search.strip():
-            s = search.strip().lower()
+            s = re.escape(search.strip())
             and_conditions.append({
                 "$or": [
                     {"full_name": {"$regex": s, "$options": "i"}},

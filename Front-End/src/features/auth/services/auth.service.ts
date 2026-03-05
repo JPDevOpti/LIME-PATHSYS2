@@ -85,8 +85,11 @@ export const authService = {
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     try {
       const data = await apiClient.post<{
-        token: { access_token: string; token_type?: string; expires_in?: number };
-        user: Record<string, unknown>;
+        token?: { access_token?: string; token_type?: string; expires_in?: number };
+        access_token?: string;
+        token_type?: string;
+        expires_in?: number;
+        user?: Record<string, unknown>;
       }>(`${AUTH_BASE}/login`, {
         email: credentials.email,
         password: credentials.password,
@@ -100,17 +103,22 @@ export const authService = {
       const tokenCandidate = (data as { token?: unknown }).token;
       const userCandidate = (data as { user?: unknown }).user;
 
-      if (!tokenCandidate || typeof tokenCandidate !== 'object') {
-        throw new Error('Respuesta inválida del API de login (token faltante).');
-      }
+      const tokenObj =
+        tokenCandidate && typeof tokenCandidate === 'object'
+          ? (tokenCandidate as {
+              access_token?: unknown;
+              token_type?: unknown;
+              expires_in?: unknown;
+            })
+          : undefined;
 
-      const tokenObj = tokenCandidate as {
-        access_token?: unknown;
-        token_type?: unknown;
-        expires_in?: unknown;
-      };
+      const accessToken =
+        typeof tokenObj?.access_token === 'string'
+          ? tokenObj.access_token
+          : typeof (data as { access_token?: unknown }).access_token === 'string'
+            ? ((data as { access_token?: string }).access_token ?? '')
+            : '';
 
-      const accessToken = typeof tokenObj.access_token === 'string' ? tokenObj.access_token : '';
       if (!accessToken) {
         throw new Error('Respuesta inválida del API de login (access_token faltante).');
       }
@@ -123,8 +131,18 @@ export const authService = {
 
       return {
         access_token: accessToken,
-        token_type: typeof tokenObj.token_type === 'string' ? tokenObj.token_type : 'bearer',
-        expires_in: typeof tokenObj.expires_in === 'number' ? tokenObj.expires_in : 0,
+        token_type:
+          typeof tokenObj?.token_type === 'string'
+            ? tokenObj.token_type
+            : typeof (data as { token_type?: unknown }).token_type === 'string'
+              ? ((data as { token_type?: string }).token_type ?? 'bearer')
+              : 'bearer',
+        expires_in:
+          typeof tokenObj?.expires_in === 'number'
+            ? tokenObj.expires_in
+            : typeof (data as { expires_in?: unknown }).expires_in === 'number'
+              ? ((data as { expires_in?: number }).expires_in ?? 0)
+              : 0,
         user,
       };
     } catch (err) {

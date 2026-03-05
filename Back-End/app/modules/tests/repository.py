@@ -1,5 +1,6 @@
 """Repositorio de pruebas."""
 
+import re
 from datetime import datetime, timezone
 from typing import Any, Optional
 
@@ -38,7 +39,7 @@ class TestsRepository:
     ) -> tuple[list[dict[str, Any]], int]:
         q: dict[str, Any] = {}
         if search and search.strip():
-            s = search.strip()
+            s = re.escape(search.strip())
             q["$or"] = [
                 {"name": {"$regex": s, "$options": "i"}},
                 {"test_code": {"$regex": s, "$options": "i"}},

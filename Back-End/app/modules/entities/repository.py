@@ -1,5 +1,6 @@
 """Repositorio de entidades."""
 
+import re
 from datetime import datetime, timezone
 from typing import Any
 
@@ -35,7 +36,7 @@ class EntitiesRepository:
     ) -> tuple[list[dict[str, Any]], int]:
         q: dict[str, Any] = {}
         if search and search.strip():
-            s = search.strip()
+            s = re.escape(search.strip())
             q["$or"] = [
                 {"name": {"$regex": s, "$options": "i"}},
                 {"code": {"$regex": s, "$options": "i"}},
