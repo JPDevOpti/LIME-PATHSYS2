@@ -1,12 +1,25 @@
-// Sanitiza HTML básico para mostrar contenido en notificaciones
-export function sanitizeHtml(input: string): string {
-    if (!input || typeof input !== 'string') return '';
+import DOMPurify from "dompurify";
 
-    const withoutScripts = input.replace(/<\s*script[^>]*>[\s\S]*?<\s*\/\s*script\s*>/gi, '');
-    const withoutEvents = withoutScripts.replace(/\son[a-z]+\s*=\s*(['"]).*?\1/gi, '');
-    const withoutJsUrls = withoutEvents.replace(/(href|src)\s*=\s*(['"])\s*javascript:[^'"\s]*\2/gi, '$1="#"');
-    const withoutExpression = withoutJsUrls.replace(/style\s*=\s*(['"])[\s\S]*?expression\([^'"]*\)\1/gi, '');
-    const withoutEmbeds = withoutExpression.replace(/<\s*(iframe|object|embed)[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi, '');
+const ALLOWED_TAGS = [
+  "p", "br", "strong", "b", "em", "i", "u", "s", "strike",
+  "ul", "ol", "li", "blockquote",
+  "h1", "h2", "h3", "h4", "h5", "h6",
+  "span", "div",
+];
 
-    return withoutEmbeds;
+const ALLOWED_ATTR = ["class"];
+
+/**
+ * Sanitiza HTML usando DOMPurify antes de renderizarlo con dangerouslySetInnerHTML.
+ * Solo permite etiquetas y atributos seguros (sin scripts, eventos ni URLs externas).
+ */
+export function sanitizeHtml(input: string | null | undefined): string {
+  if (!input || typeof input !== "string") return "";
+  if (typeof window === "undefined") return "";
+  return DOMPurify.sanitize(input, {
+    ALLOWED_TAGS,
+    ALLOWED_ATTR,
+    FORBID_SCRIPTS: true,
+    FORBID_ATTR: ["style", "onclick", "onerror", "onload", "onmouseover"],
+  });
 }
