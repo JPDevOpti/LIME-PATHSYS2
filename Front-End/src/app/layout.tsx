@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <body className="bg-[var(--app-bg)] text-neutral-900">
         <AuthProvider>
           <AuthLayout>{children}</AuthLayout>

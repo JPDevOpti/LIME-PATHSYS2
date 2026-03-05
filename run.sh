@@ -52,24 +52,41 @@ ensure_backend_venv() {
     fi
 }
 
-set_backend_env() {
+write_backend_env() {
     local mongodb_uri="$1"
-    local database_name="$2"
+    local mode="$2"
 
     mkdir -p "$BACK_DIR"
-    touch "$ENV_FILE"
 
-    local tmp_file
-    tmp_file="$(mktemp)"
+    # Preservar SECRET_KEY si ya existe (no sobreescribir un secreto configurado)
+    local secret_key=""
+    if [ -f "$ENV_FILE" ]; then
+        secret_key="$(grep -E '^SECRET_KEY=' "$ENV_FILE" | tail -n 1 | cut -d'=' -f2- || true)"
+    fi
 
-    grep -Ev '^(MONGODB_URI|DATABASE_NAME)=' "$ENV_FILE" > "$tmp_file" || true
     {
-        cat "$tmp_file"
+        echo "# Generado por run.sh - modo: $mode"
         echo "MONGODB_URI=$mongodb_uri"
-        echo "DATABASE_NAME=$database_name"
+        echo "DATABASE_NAME=$DATABASE_NAME"
+        echo "ENVIRONMENT=development"
+        echo "CORS_ORIGINS=http://localhost:3001,http://127.0.0.1:3001"
+        if [ -n "$secret_key" ]; then
+            echo "SECRET_KEY=$secret_key"
+        fi
     } > "$ENV_FILE"
 
-    rm -f "$tmp_file"
+    log "Back-End .env escrito (modo: $mode, DB: $DATABASE_NAME)"
+}
+
+write_frontend_env() {
+    local api_url="$1"
+
+    {
+        echo "# Generado por run.sh"
+        echo "NEXT_PUBLIC_API_URL=$api_url"
+    } > "$FRONT_DIR/.env.local"
+
+    log "Front-End .env.local escrito: NEXT_PUBLIC_API_URL=$api_url"
 }
 
 setup() {
@@ -94,24 +111,6 @@ setup() {
     log "Setup complete"
 }
 
-run_imports() {
-    require_dir "$BACK_DIR" "Back-End"
-
-    ensure_backend_venv
-
-    log "Running database imports"
-    (
-        cd "$BACK_DIR"
-        "$BACK_DIR/.venv/bin/python" scripts/import_entities.py
-        "$BACK_DIR/.venv/bin/python" scripts/import_tests.py
-        "$BACK_DIR/.venv/bin/python" scripts/import_cie10_from_csv.py || log "Warning: CIE-10 import failed, continuing"
-        "$BACK_DIR/.venv/bin/python" scripts/import_cieo_from_csv.py || log "Warning: CIE-O import failed, continuing"
-        "$BACK_DIR/.venv/bin/python" scripts/import_pathologists.py
-        "$BACK_DIR/.venv/bin/python" scripts/import_administrators.py
-    )
-
-    log "Imports complete"
-}
 
 start_services() {
     local mode="$1"
@@ -119,48 +118,83 @@ start_services() {
     require_dir "$BACK_DIR" "Back-End"
     require_dir "$FRONT_DIR" "Front-End"
 
-    if pgrep -f "$BACK_DIR/.venv/bin/python run.py" >/dev/null 2>&1 || pgrep -f "$FRONT_DIR/node_modules/.bin/next dev" >/dev/null 2>&1 || pgrep -f "next dev" >/dev/null 2>&1; then
-        log "Existing services detected, stopping first..."
-        stop_services
-    fi
-
-    rm -f "$SCRIPT_DIR/.pathsys.pids" 2>/dev/null || true
+    # Siempre detener servicios previos y esperar a que los puertos queden libres
+    stop_services
 
     ensure_backend_venv
 
+    local backend_uri=""
+
     case "$mode" in
         local)
-            set_backend_env "$LOCAL_MONGODB_URI" "$DATABASE_NAME"
-            log "Back-End configured for local MongoDB ($LOCAL_MONGODB_URI, DB: $DATABASE_NAME)"
+            backend_uri="$LOCAL_MONGODB_URI"
+            write_backend_env "$backend_uri" "local"
+            write_frontend_env "http://localhost:8000"
             ;;
         atlas)
             load_atlas_config
             if [ -z "$ATLAS_MONGODB_URI" ]; then
-                echo "Error: ATLAS_MONGODB_URI is not set (env var or .pathsys.runner.env)."
-                echo "Example: ATLAS_MONGODB_URI='mongodb+srv://user:pass@cluster.mongodb.net/' $0 atlas"
+                echo "Error: ATLAS_MONGODB_URI no está configurado."
+                echo "Defínelo en .pathsys.runner.env o como variable de entorno:"
+                echo "  ATLAS_MONGODB_URI='mongodb+srv://user:pass@cluster.mongodb.net/' $0 atlas"
                 exit 1
             fi
-            set_backend_env "$ATLAS_MONGODB_URI" "$DATABASE_NAME"
-            log "Back-End configured for Atlas (DB: $DATABASE_NAME)"
+            backend_uri="$ATLAS_MONGODB_URI"
+            write_backend_env "$backend_uri" "atlas"
+            write_frontend_env "http://localhost:8000"
             ;;
         *)
-            echo "Error: Unknown mode '$mode'"
+            echo "Error: modo desconocido '$mode'"
             exit 1
             ;;
     esac
 
-    log "Starting Back-End on port 8000"
-    (cd "$BACK_DIR" && .venv/bin/python run.py) &
-    sleep 2
+    log "Iniciando Back-End en puerto 8000 (modo: $mode)"
+    # Todas las variables críticas se pasan explícitamente al proceso
+    (cd "$BACK_DIR" && \
+        MONGODB_URI="$backend_uri" \
+        DATABASE_NAME="$DATABASE_NAME" \
+        ENVIRONMENT=development \
+        CORS_ORIGINS="http://localhost:3001,http://127.0.0.1:3001,http://0.0.0.0:3001" \
+        .venv/bin/python run.py 2>&1) &
+    local backend_pid=$!
 
-    log "Starting Front-End on port 3001 (low-memory mode)"
+    # Esperar hasta que el puerto 8000 esté activo (máx 15 seg)
+    local i=0
+    while ! lsof -ti:8000 >/dev/null 2>&1; do
+        i=$((i + 1))
+        if [ "$i" -ge 30 ]; then
+            echo "Error: el Back-End no levantó en 15 segundos. Revisa los logs."
+            exit 1
+        fi
+        sleep 0.5
+    done
+    log "Back-End listo (PID $backend_pid)"
+
+    log "Iniciando Front-End en puerto 3001"
     (cd "$FRONT_DIR" && npm run dev) &
 
-    log "Services started: Front-End http://localhost:3001 | Back-End http://localhost:8000"
+    log "Servicios activos → Front-End: http://localhost:3001 | Back-End: http://localhost:8000"
+}
+
+wait_port_free() {
+    local port="$1"
+    local attempts=20
+    local i=0
+    while lsof -ti:"$port" >/dev/null 2>&1; do
+        i=$((i + 1))
+        if [ "$i" -ge "$attempts" ]; then
+            log "Advertencia: el puerto $port sigue ocupado después de ${attempts} intentos, forzando..."
+            lsof -ti:"$port" | xargs kill -9 2>/dev/null || true
+            sleep 1
+            return
+        fi
+        sleep 0.5
+    done
 }
 
 stop_services() {
-    log "Stopping services..."
+    log "Deteniendo servicios..."
 
     rm -f "$SCRIPT_DIR/.pathsys.pids" 2>/dev/null || true
 
@@ -169,7 +203,11 @@ stop_services() {
     pkill -f "$FRONT_DIR/node_modules/.bin/next dev" 2>/dev/null || true
     pkill -f "next dev" 2>/dev/null || true
 
-    log "Services stopped"
+    # Esperar a que los puertos queden libres antes de continuar
+    wait_port_free 8000
+    wait_port_free 3001
+
+    log "Servicios detenidos"
 }
 
 show_help() {
@@ -181,7 +219,6 @@ Usage:
 
 Commands:
     setup   Install dependencies only (Front-End + Back-End)
-    import  Run DB imports (entities, tests, CIE-10, CIE-O, pathologists, administrators)
     local   Run app with local MongoDB (mongodb://localhost:27017, DB: pathsys)
     atlas   Run app with MongoDB Atlas (requires ATLAS_MONGODB_URI)
     stop    Stop Front-End and Back-End services
@@ -189,7 +226,6 @@ Commands:
 
 Examples:
     $0 setup
-    $0 import
     $0 local
     $0 help
 
@@ -204,9 +240,6 @@ EOF
 case "${1:-help}" in
     setup)
         setup
-        ;;
-    import)
-        run_imports
         ;;
     local)
         start_services "local"

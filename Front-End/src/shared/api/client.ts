@@ -1,112 +1,4 @@
-function resolveBaseUrl(): string {
-  const configured = (process.env.NEXT_PUBLIC_API_URL || "")
-    .trim()
-    .replace(/^['"]|['"]$/g, "");
-
-  if (!configured) {
-    if (typeof window !== "undefined") {
-      const browserHost = window.location.hostname;
-      const isLocalHost =
-        browserHost === "localhost" ||
-        browserHost === "127.0.0.1" ||
-        browserHost === "0.0.0.0";
-
-      if (isLocalHost) {
-        const host = browserHost === "0.0.0.0" ? "127.0.0.1" : browserHost;
-        return `http://${host}:8000`;
-      }
-    }
-
-    if (process.env.NODE_ENV === "development") {
-      return "http://localhost:8000";
-    }
-
-    return "";
-  }
-
-  const isAbsolute = /^https?:\/\//i.test(configured);
-  if (!isAbsolute) return configured.replace(/\/$/, "");
-
-  if (typeof window === "undefined") return configured;
-
-  try {
-    const parsed = new URL(configured);
-    const isApiLocalHost =
-      parsed.hostname === "localhost" ||
-      parsed.hostname === "127.0.0.1" ||
-      parsed.hostname === "0.0.0.0";
-    const browserHost = window.location.hostname;
-    const isBrowserLocalHost =
-      browserHost === "localhost" ||
-      browserHost === "127.0.0.1" ||
-      browserHost === "0.0.0.0";
-
-    if (isApiLocalHost && !isBrowserLocalHost) {
-      parsed.hostname = browserHost;
-      return parsed.toString().replace(/\/$/, "");
-    }
-
-    if (parsed.hostname === "0.0.0.0") {
-      parsed.hostname = browserHost === "0.0.0.0" ? "127.0.0.1" : browserHost;
-      return parsed.toString().replace(/\/$/, "");
-    }
-
-    return configured.replace(/\/$/, "");
-  } catch {
-    return configured.replace(/\/$/, "");
-  }
-}
-
-function buildFallbackUrls(url: string): string[] {
-  if (!/^https?:\/\//i.test(url)) return [url];
-
-  const fallbackUrls = [url];
-  try {
-    const parsed = new URL(url);
-    const originalHost = parsed.hostname;
-    const browserHost = typeof window !== "undefined" ? window.location.hostname : "";
-
-    const candidates = [browserHost, "127.0.0.1", "localhost"]
-      .filter(Boolean)
-      .filter((host) => host !== originalHost);
-
-    for (const host of candidates) {
-      const candidate = new URL(parsed.toString());
-      candidate.hostname = host;
-      fallbackUrls.push(candidate.toString());
-    }
-  } catch {
-    return [url];
-  }
-
-  return [...new Set(fallbackUrls)];
-}
-
-async function fetchWithFallback(
-  method: string,
-  url: string,
-  init: RequestInit,
-): Promise<Response> {
-  const candidates = buildFallbackUrls(url);
-  let lastError: unknown;
-
-  for (let index = 0; index < candidates.length; index += 1) {
-    const candidateUrl = candidates[index];
-    try {
-      return await fetch(candidateUrl, init);
-    } catch (error) {
-      lastError = error;
-      if (index === candidates.length - 1) {
-        throw error;
-      }
-      console.warn(`Fetch retry at ${method} ${candidateUrl} failed, trying next host...`, error);
-    }
-  }
-
-  throw lastError instanceof Error ? lastError : new Error(`Fetch failed at ${method} ${url}`);
-}
-
-const BASE_URL = resolveBaseUrl();
+const BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "").trim().replace(/\/$/, "");
 const AUTH_TOKEN_KEY = "pathsys_auth_token";
 const AUTH_USER_KEY = "pathsys_auth_user";
 const AUTH_REMEMBER_KEY = "pathsys_auth_remember";
@@ -169,17 +61,33 @@ function getAuthHeaders(): Record<string, string> {
   return { Authorization: `Bearer ${token}` };
 }
 
-async function handleResponse<T>(
-  response: Response,
-  responseType?: string,
-): Promise<T> {
+function buildUrl(path: string, params?: Record<string, string | number | undefined>): string {
+  if (!BASE_URL) {
+    throw new Error(
+      "NEXT_PUBLIC_API_URL no está configurado. Crea Front-End/.env.local con NEXT_PUBLIC_API_URL=http://localhost:8000",
+    );
+  }
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  let url = `${BASE_URL}${normalizedPath}`;
+  if (params) {
+    const searchParams = new URLSearchParams();
+    Object.entries(params).forEach(([k, v]) => {
+      if (v !== undefined && v !== "") searchParams.set(k, String(v));
+    });
+    const qs = searchParams.toString();
+    if (qs) url += `?${qs}`;
+  }
+  return url;
+}
+
+async function handleResponse<T>(response: Response, responseType?: string): Promise<T> {
   if (!response.ok) {
     const text = await response.text();
     const contentType = (response.headers.get("content-type") || "").toLowerCase();
 
     if (contentType.includes("text/html")) {
       throw new Error(
-        "Respuesta HTML inesperada del servidor. Verifique NEXT_PUBLIC_API_URL y que el backend esté disponible.",
+        "Respuesta HTML inesperada del servidor. Verifica NEXT_PUBLIC_API_URL y que el backend esté disponible.",
       );
     }
 
@@ -191,9 +99,7 @@ async function handleResponse<T>(
     }
 
     const message =
-      typeof errorData === "object" &&
-      errorData !== null &&
-      "detail" in errorData
+      typeof errorData === "object" && errorData !== null && "detail" in errorData
         ? (errorData as { detail: string | { msg?: string }[] }).detail
         : typeof errorData === "string" && errorData
           ? errorData
@@ -231,36 +137,17 @@ export const apiClient = {
     params?: Record<string, string | number | undefined>,
     extraHeaders?: { responseType?: string; suppressErrorLog?: boolean } & Record<string, string | boolean | undefined>,
   ): Promise<T> {
-    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-    let url = BASE_URL ? `${BASE_URL}${normalizedPath}` : normalizedPath;
-    if (params) {
-      const searchParams = new URLSearchParams();
-      Object.entries(params).forEach(([k, v]) => {
-        if (v !== undefined && v !== "") searchParams.set(k, String(v));
-      });
-      const qs = searchParams.toString();
-      if (qs) url += `?${qs}`;
-    }
+    const url = buildUrl(path, params);
     const { responseType, suppressErrorLog, ...headersOnly } = extraHeaders || {};
-    const headers: Record<string, string> = {
-      ...getAuthHeaders(),
-    };
+    const headers: Record<string, string> = { ...getAuthHeaders() };
     Object.entries(headersOnly).forEach(([key, value]) => {
-      if (typeof value === "string") {
-        headers[key] = value;
-      }
+      if (typeof value === "string") headers[key] = value;
     });
-
     try {
-      const response = await fetchWithFallback("GET", url, {
-        method: "GET",
-        headers,
-      });
+      const response = await fetch(url, { method: "GET", headers });
       return await handleResponse<T>(response, responseType);
     } catch (error) {
-      if (!suppressErrorLog) {
-        console.error(`Fetch error at GET ${url}:`, error);
-      }
+      if (!suppressErrorLog) console.error(`GET ${url}:`, error);
       throw error;
     }
   },
@@ -276,17 +163,16 @@ export const apiClient = {
       ...getAuthHeaders(),
       ...headersOnly,
     };
-    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-    const url = BASE_URL ? `${BASE_URL}${normalizedPath}` : normalizedPath;
+    const url = buildUrl(path);
     try {
-      const response = await fetchWithFallback("POST", url, {
+      const response = await fetch(url, {
         method: "POST",
         headers: reqHeaders,
         body: JSON.stringify(body),
       });
       return await handleResponse<T>(response, responseType);
     } catch (error) {
-      console.error(`Fetch error at POST ${url}:`, error);
+      console.error(`POST ${url}:`, error);
       throw error;
     }
   },
@@ -302,17 +188,16 @@ export const apiClient = {
       ...getAuthHeaders(),
       ...headersOnly,
     };
-    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-    const url = BASE_URL ? `${BASE_URL}${normalizedPath}` : normalizedPath;
+    const url = buildUrl(path);
     try {
-      const response = await fetchWithFallback("PUT", url, {
+      const response = await fetch(url, {
         method: "PUT",
         headers: reqHeaders,
         body: JSON.stringify(body),
       });
       return await handleResponse<T>(response, responseType);
     } catch (error) {
-      console.error(`Fetch error at PUT ${url}:`, error);
+      console.error(`PUT ${url}:`, error);
       throw error;
     }
   },
@@ -328,33 +213,30 @@ export const apiClient = {
       ...getAuthHeaders(),
       ...headersOnly,
     };
-    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-    const url = BASE_URL ? `${BASE_URL}${normalizedPath}` : normalizedPath;
+    const url = buildUrl(path);
     try {
-      const response = await fetchWithFallback("PATCH", url, {
+      const response = await fetch(url, {
         method: "PATCH",
         headers: reqHeaders,
         body: JSON.stringify(body),
       });
       return await handleResponse<T>(response, responseType);
     } catch (error) {
-      console.error(`Fetch error at PATCH ${url}:`, error);
+      console.error(`PATCH ${url}:`, error);
       throw error;
     }
   },
 
   async delete(path: string): Promise<void> {
-    const headers = getAuthHeaders();
-    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-    const url = BASE_URL ? `${BASE_URL}${normalizedPath}` : normalizedPath;
+    const url = buildUrl(path);
     try {
-      const response = await fetchWithFallback("DELETE", url, {
+      const response = await fetch(url, {
         method: "DELETE",
-        headers,
+        headers: getAuthHeaders(),
       });
       if (!response.ok) await handleResponse<never>(response);
     } catch (error) {
-      console.error(`Fetch error at DELETE ${url}:`, error);
+      console.error(`DELETE ${url}:`, error);
       throw error;
     }
   },

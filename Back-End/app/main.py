@@ -76,23 +76,27 @@ def _parse_cors_origins(raw: str | None) -> list[str]:
     return [origin.strip().rstrip("/") for origin in raw.split(",") if origin.strip()]
 
 
-default_origins = [
+_default_origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "http://0.0.0.0:3000",
     "http://localhost:3001",
     "http://127.0.0.1:3001",
+    "http://0.0.0.0:3001",
 ]
 
-configured_origins = _parse_cors_origins(os.getenv("CORS_ORIGINS"))
-origins = configured_origins or default_origins
+_env_origins = _parse_cors_origins(os.getenv("CORS_ORIGINS"))
+origins = list(dict.fromkeys(_default_origins + _env_origins))  # dedup preservando orden
+
+print(f"[PathSys] CORS origins: {origins}", flush=True)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?$",
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type", "X-Requested-With", "Accept"],
+    allow_headers=["*"],
+    allow_private_network=True,
     expose_headers=["Content-Disposition"],
 )
 
