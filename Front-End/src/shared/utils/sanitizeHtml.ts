@@ -19,7 +19,7 @@ export function sanitizeHtml(input: string | null | undefined): string {
   return DOMPurify.sanitize(input, {
     ALLOWED_TAGS,
     ALLOWED_ATTR,
-    FORBID_SCRIPTS: true,
+    FORBID_TAGS: ["script", "style", "iframe", "object", "embed", "form", "input"],
     FORBID_ATTR: ["style", "onclick", "onerror", "onload", "onmouseover"],
   });
 }
