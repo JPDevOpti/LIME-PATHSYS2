@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Case, getDateFromDateInfo } from "../types/case.types";
 import type { CaseSortKey, SortOrder } from "../hooks/useCaseList";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
+import { openCasePdf } from "@/shared/utils/pdf";
 import {
   calculateBusinessDays,
   getElapsedDays,
@@ -171,12 +172,6 @@ export function CasesTable({
 }: CasesTableProps) {
   const { canSignResults, isAdmin, isAuxiliar } = usePermissions();
   const canMarkDelivered = isAdmin || isAuxiliar;
-
-  const openCasePdf = (caseId: string) => {
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-    const url = `${apiBase}/api/v1/cases/${encodeURIComponent(caseId)}/pdf`;
-    window.open(url, "_blank", "noopener,noreferrer");
-  };
 
   const resultsHref = (caseCode: string) =>
     canSignResults

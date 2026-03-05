@@ -18,6 +18,7 @@ import Link from "next/link";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
 import { BaseCard } from "@/shared/components/base/BaseCard";
+import { openCasePdf } from "@/shared/utils/pdf";
 import { CasePriority, type UrgentCase } from "../model/dashboard.types";
 import { twMerge } from "tailwind-merge";
 
@@ -102,12 +103,6 @@ export const UrgentCasesTable = ({
           c.patologo.trim().toLowerCase() === user.name!.trim().toLowerCase(),
       )
     : nonHamaCases;
-
-  const openCasePdf = (caseId: string) => {
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-    const url = `${apiBase}/api/v1/cases/${encodeURIComponent(caseId)}/pdf`;
-    window.open(url, "_blank", "noopener,noreferrer");
-  };
 
   const resultsHref = (caseCode: string) =>
     canSignResults

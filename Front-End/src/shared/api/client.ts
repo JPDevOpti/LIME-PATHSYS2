@@ -3,7 +3,26 @@ function resolveBaseUrl(): string {
     .trim()
     .replace(/^['"]|['"]$/g, "");
 
-  if (!configured) return "";
+  if (!configured) {
+    if (typeof window !== "undefined") {
+      const browserHost = window.location.hostname;
+      const isLocalHost =
+        browserHost === "localhost" ||
+        browserHost === "127.0.0.1" ||
+        browserHost === "0.0.0.0";
+
+      if (isLocalHost) {
+        const host = browserHost === "0.0.0.0" ? "127.0.0.1" : browserHost;
+        return `http://${host}:8000`;
+      }
+    }
+
+    if (process.env.NODE_ENV === "development") {
+      return "http://localhost:8000";
+    }
+
+    return "";
+  }
 
   const isAbsolute = /^https?:\/\//i.test(configured);
   if (!isAbsolute) return configured.replace(/\/$/, "");
@@ -156,6 +175,14 @@ async function handleResponse<T>(
 ): Promise<T> {
   if (!response.ok) {
     const text = await response.text();
+    const contentType = (response.headers.get("content-type") || "").toLowerCase();
+
+    if (contentType.includes("text/html")) {
+      throw new Error(
+        "Respuesta HTML inesperada del servidor. Verifique NEXT_PUBLIC_API_URL y que el backend esté disponible.",
+      );
+    }
+
     let errorData: unknown;
     try {
       errorData = text ? JSON.parse(text) : null;

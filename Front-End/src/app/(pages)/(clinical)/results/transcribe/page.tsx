@@ -10,6 +10,7 @@ import { Case } from '@/features/cases/types/case.types';
 import { PageTitleCard } from '@/shared/components/ui/page-title';
 import { BaseCard, BaseButton } from '@/shared/components/base';
 import { PrintPdfButton } from '@/shared/components/ui/buttons';
+import { openCasePdf as openCasePdfFile } from '@/shared/utils/pdf';
 import { Search, FilePen, SaveAll, FileCheck } from 'lucide-react';
 import type { ResultEditorSection, ResultSections } from '@/features/results/types/results.types';
 
@@ -95,8 +96,7 @@ export default function TranscribeResultsPage() {
 
     const openCasePdf = () => {
         if (!caseData?.id) return;
-        const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        window.open(`${apiBase}/api/v1/cases/${encodeURIComponent(caseData.id)}/pdf`, '_blank', 'noopener,noreferrer');
+        openCasePdfFile(caseData.id);
     };
 
     const handleClear = () => {
