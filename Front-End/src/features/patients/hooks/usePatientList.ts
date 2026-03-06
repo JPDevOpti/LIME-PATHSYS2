@@ -44,26 +44,13 @@ function toPatientFilters(f: PatientListFilters): PatientFilters {
     };
 }
 
-const getDefaultDateRange = () => {
-    const today = new Date();
-    const from = new Date(today);
-    from.setMonth(from.getMonth() - 1);
-    return {
-        dateFrom: from.toISOString().slice(0, 10),
-        dateTo: today.toISOString().slice(0, 10)
-    };
-};
-
 export function usePatientList() {
     const [patients, setPatients] = useState<Patient[]>([]);
     const [totalItems, setTotalItems] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const [filters, setFilters] = useState<PatientListFilters>(() => {
-        const defaults = getDefaultDateRange();
-        return { ...defaultFilters, dateFrom: defaults.dateFrom, dateTo: defaults.dateTo };
-    });
+    const [filters, setFilters] = useState<PatientListFilters>(defaultFilters);
 
     const [sortKey, setSortKey] = useState<PatientSortKey>('created_at');
     const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
@@ -103,13 +90,7 @@ export function usePatientList() {
     }, []);
 
     const clearFilters = useCallback(() => {
-        const defaults = getDefaultDateRange();
-        const newFilters: PatientListFilters = {
-            ...defaultFilters,
-            dateFrom: defaults.dateFrom,
-            dateTo: defaults.dateTo
-        };
-        setFilters(newFilters);
+        setFilters(defaultFilters);
         setCurrentPage(1);
     }, []);
 

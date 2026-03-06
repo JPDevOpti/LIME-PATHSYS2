@@ -10,9 +10,7 @@ import {
     Stethoscope,
     Calendar,
     TestTube,
-    AlertTriangle,
     Clock,
-    Printer
 } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -59,19 +57,7 @@ export const UrgentCaseDetailsModal = ({
                     </div>
                 </div>
             }
-            footer={
-                <>
-                    <button
-                        type="button"
-                        className="inline-flex items-center gap-2 rounded-md bg-white px-3 py-2 text-sm font-semibold text-neutral-700 shadow-sm ring-1 ring-inset ring-neutral-300 hover:bg-neutral-50"
-                        onClick={() => window.print()}
-                    >
-                        <Printer className="h-4 w-4" />
-                        Imprimir
-                    </button>
-                    <CloseButton onClick={onClose} size="sm" />
-                </>
-            }
+            footer={<CloseButton onClick={onClose} size="sm" />}
         >
             <div className="space-y-6">
                 {/* Status Header */}

@@ -63,7 +63,13 @@ export function Combobox({
             updateDropdownPosition();
             const resizeObserver = new ResizeObserver(updateDropdownPosition);
             resizeObserver.observe(containerRef.current);
-            return () => resizeObserver.disconnect();
+            window.addEventListener('scroll', updateDropdownPosition, true);
+            window.addEventListener('resize', updateDropdownPosition);
+            return () => {
+                resizeObserver.disconnect();
+                window.removeEventListener('scroll', updateDropdownPosition, true);
+                window.removeEventListener('resize', updateDropdownPosition);
+            };
         } else {
             setDropdownStyle(null);
         }
@@ -117,16 +123,6 @@ export function Combobox({
 
         if (onBlur) {
             onBlur(e);
-        }
-    };
-
-    const toggleDropdown = () => {
-        if (disabled) return;
-
-        if (isOpen) {
-            inputRef.current?.blur();
-        } else {
-            inputRef.current?.focus();
         }
     };
 

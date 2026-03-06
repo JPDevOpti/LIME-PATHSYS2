@@ -24,7 +24,7 @@ interface SelectProps {
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-    ({ className, error, id, name, options, placeholder, value = '', onChange, onBlur, disabled, ...props }, ref) => {
+    ({ className, error, id, name, options, placeholder, value = '', onChange, onBlur, disabled }, ref) => {
         const [isOpen, setIsOpen] = useState(false);
         const [dropdownStyle, setDropdownStyle] = useState<{ top: number; left: number; width: number } | null>(null);
         const containerRef = useRef<HTMLDivElement>(null);
@@ -49,7 +49,13 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
                 updateDropdownPosition();
                 const resizeObserver = new ResizeObserver(updateDropdownPosition);
                 resizeObserver.observe(containerRef.current);
-                return () => resizeObserver.disconnect();
+                window.addEventListener('scroll', updateDropdownPosition, true);
+                window.addEventListener('resize', updateDropdownPosition);
+                return () => {
+                    resizeObserver.disconnect();
+                    window.removeEventListener('scroll', updateDropdownPosition, true);
+                    window.removeEventListener('resize', updateDropdownPosition);
+                };
             } else {
                 setDropdownStyle(null);
             }
