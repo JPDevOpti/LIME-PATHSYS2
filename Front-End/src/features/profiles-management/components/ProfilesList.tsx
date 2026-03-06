@@ -59,7 +59,7 @@ export function ProfilesList() {
     }, []);
 
     const filteredProfiles = useMemo(() => {
-        let result = profiles.filter((p) => p.role !== ('paciente' as string));
+        let result = profiles.filter((p) => p.role !== 'paciente');
 
         const q = filters.searchQuery.trim().toLowerCase();
         if (q) {

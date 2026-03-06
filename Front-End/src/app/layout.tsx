@@ -8,7 +8,11 @@ import { AuthLayout } from '@/features/auth/components/AuthLayout';
 export const metadata: Metadata = {
   title: 'PathSys',
   description: 'Sistema de gestión de patología',
-  icons: { icon: '/FavIco.ico' },
+  icons: {
+    icon: '/favico_derma.png',
+    shortcut: '/favico_derma.png',
+    apple: '/favico_derma.png',
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

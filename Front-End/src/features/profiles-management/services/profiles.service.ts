@@ -10,20 +10,22 @@ const ROLE_TO_BACKEND: Record<string, string> = {
     admin: 'administrator',
     patologo: 'pathologist',
     residente: 'resident',
-    recepcion: 'auxiliar',
     recepcionista: 'auxiliar',
+    recepcion: 'auxiliar',
     auxiliar: 'auxiliar',
     visitante: 'visitante',
     facturacion: 'visitante',
+    paciente: 'paciente',
 };
 
 const ROLE_TO_FRONTEND: Record<string, string> = {
     administrator: 'administrador',
     pathologist: 'patologo',
     resident: 'residente',
-    auxiliar: 'recepcion',
+    auxiliar: 'recepcionista',
     billing: 'visitante',
     visitante: 'visitante',
+    paciente: 'paciente',
 };
 
 function mapApiToProfile(api: Record<string, unknown>): Profile {

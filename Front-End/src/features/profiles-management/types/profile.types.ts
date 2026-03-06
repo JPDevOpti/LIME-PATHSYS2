@@ -2,8 +2,9 @@ export type ProfileRole =
     | 'administrador'
     | 'patologo'
     | 'residente'
-    | 'recepcion'
-    | 'visitante';
+    | 'recepcionista'
+    | 'visitante'
+    | 'paciente';
 
 export interface Profile {
     id: string;

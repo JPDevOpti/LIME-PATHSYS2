@@ -10,16 +10,18 @@ const ROLE_LABELS: Record<ProfileRole, string> = {
     administrador: 'Administrador',
     patologo: 'Patologo',
     residente: 'Residente',
-    recepcion: 'Auxiliar',
+    recepcionista: 'Auxiliar',
     visitante: 'Visitante',
+    paciente: 'Paciente',
 };
 
 const ROLE_STYLES: Record<ProfileRole, string> = {
     administrador: 'bg-violet-100 text-violet-800',
     patologo: 'bg-emerald-100 text-emerald-800',
     residente: 'bg-amber-100 text-amber-800',
-    recepcion: 'bg-sky-100 text-sky-800',
+    recepcionista: 'bg-sky-100 text-sky-800',
     visitante: 'bg-orange-100 text-orange-800',
+    paciente: 'bg-blue-100 text-blue-800',
 };
 
 interface ProfilesTableProps {

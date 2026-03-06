@@ -7,8 +7,9 @@ const ROLE_OPTIONS: { value: ProfileRole; label: string }[] = [
     { value: 'administrador', label: 'Administrador' },
     { value: 'patologo', label: 'Patologo' },
     { value: 'residente', label: 'Residente' },
-    { value: 'recepcion', label: 'Auxiliar administrativo' },
+    { value: 'recepcionista', label: 'Auxiliar administrativo' },
     { value: 'visitante', label: 'Visitante' },
+    { value: 'paciente', label: 'Paciente' },
     ];
 
 interface ProfileFormProps {

@@ -8,8 +8,9 @@ const ROLE_OPTIONS: { value: ProfileRole; label: string }[] = [
     { value: 'administrador', label: 'Administrador' },
     { value: 'patologo', label: 'Patologo' },
     { value: 'residente', label: 'Residente' },
-    { value: 'recepcion', label: 'Auxiliar' },
+    { value: 'recepcionista', label: 'Auxiliar' },
     { value: 'visitante', label: 'Visitante' },
+    { value: 'paciente', label: 'Paciente' },
 ];
 
 export interface EditProfileFormState {
@@ -110,9 +111,9 @@ export function EditProfileForm({ state, onChange }: EditProfileFormProps) {
                     />
                 </FormField>
 
-                {(role === 'administrador' || role === 'visitante') && (
+                {(role === 'administrador' || role === 'visitante' || role === 'paciente') && (
                     <FormField
-                        label={role === 'visitante' ? 'Documento (paciente vinculado)' : 'Documento'}
+                        label={role === 'visitante' || role === 'paciente' ? 'Documento (paciente vinculado)' : 'Documento'}
                         htmlFor="edit-document"
                     >
                         <Input
