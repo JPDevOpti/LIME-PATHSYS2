@@ -56,38 +56,28 @@ def _convert_ts(ts: Any) -> str:
     return str(ts)
 
 
-def _normalize_additional_notes(value: Any) -> Optional[list[str]]:
-    """Normaliza notas adicionales legacy a lista de strings."""
+def _normalize_additional_notes(value: Any) -> Optional[list[dict]]:
+    """Normaliza notas adicionales (legacy strings o dicts) a lista de {text, date}."""
     if value is None:
         return None
     if not isinstance(value, list):
-        return [str(value)]
+        return None
 
-    normalized: list[str] = []
+    normalized: list[dict] = []
     for item in value:
+        if isinstance(item, dict):
+            text = str(item.get("text") or item.get("note") or item.get("content") or "").strip()
+            date = item.get("date")
+            date_str = _convert_ts(date).strip() if date is not None else ""
+            if text:
+                normalized.append({"text": text, "date": date_str})
+            continue
+
         if isinstance(item, str):
             note = item.strip()
             if note:
-                normalized.append(note)
+                normalized.append({"text": note, "date": ""})
             continue
-
-        if isinstance(item, dict):
-            note_text = item.get("note") or item.get("text") or item.get("content") or ""
-            note_text = str(note_text).strip()
-            note_date = item.get("date")
-            if note_date is not None:
-                date_text = _convert_ts(note_date).strip()
-                if note_text:
-                    normalized.append(f"{date_text}: {note_text}".strip())
-                elif date_text:
-                    normalized.append(date_text)
-            elif note_text:
-                normalized.append(note_text)
-            continue
-
-        note = str(item).strip()
-        if note:
-            normalized.append(note)
 
     return normalized or None
 
@@ -185,7 +175,7 @@ class CaseRepository:
         self._users: Collection = db["users"]
 
     def _find_user_for_pathologist_ref(self, ref: dict[str, Any]) -> Optional[dict[str, Any]]:
-        projection = {"_id": 1, "name": 1, "pathologist_code": 1, "document": 1}
+        projection = {"_id": 1, "name": 1, "pathologist_code": 1, "document": 1, "medical_license": 1}
 
         code = str(ref.get("pathologist_code") or "").strip()
         if code:
@@ -241,6 +231,10 @@ class CaseRepository:
         if incoming_code:
             ref["pathologist_code"] = incoming_code
 
+        incoming_license = str(value.get("medical_license") or "").strip()
+        if incoming_license:
+            ref["medical_license"] = incoming_license
+
         user = self._find_user_for_pathologist_ref(value)
         if user:
             if not ref.get("id"):
@@ -250,6 +244,9 @@ class CaseRepository:
             user_code = str(user.get("pathologist_code") or "").strip()
             if user_code:
                 ref["pathologist_code"] = user_code
+            user_license = str(user.get("medical_license") or "").strip()
+            if user_license:
+                ref["medical_license"] = user_license
 
         return ref
 
@@ -656,6 +653,36 @@ class CaseRepository:
         )
         if result.matched_count == 0:
             return None
+        doc = self._coll.find_one({"_id": oid})
+        return _doc_to_case(doc) if doc else None
+
+    def add_note(self, id: str, text: str, date: str) -> Optional[dict]:
+        """Agrega una nota adicional al caso."""
+        try:
+            oid = ObjectId(id)
+        except Exception:
+            return None
+        note = {"text": text.strip(), "date": date}
+        self._coll.update_one({"_id": oid}, {"$push": {"additional_notes": note}})
+        doc = self._coll.find_one({"_id": oid})
+        return _doc_to_case(doc) if doc else None
+
+    def delete_note(self, id: str, note_index: int) -> Optional[dict]:
+        """Elimina una nota adicional por índice."""
+        try:
+            oid = ObjectId(id)
+        except Exception:
+            return None
+        # MongoDB no permite eliminar por índice directamente:
+        # se marca como None y luego se hace pull de nulls
+        self._coll.update_one(
+            {"_id": oid},
+            {"$unset": {f"additional_notes.{note_index}": 1}},
+        )
+        self._coll.update_one(
+            {"_id": oid},
+            {"$pull": {"additional_notes": None}},
+        )
         doc = self._coll.find_one({"_id": oid})
         return _doc_to_case(doc) if doc else None
 

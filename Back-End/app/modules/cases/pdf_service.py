@@ -168,15 +168,28 @@ class CasePdfService:
             self._get_date_from_date_info(case, "signed_at")
         )
         additional_tests_display = self._format_complementary_tests(complementary_tests)
-        additional_notes_display = (
-            [str(n).strip() for n in additional_notes if str(n).strip()]
-            if isinstance(additional_notes, list)
-            else []
-        )
+        additional_notes_display = []
+        if isinstance(additional_notes, list):
+            for n in additional_notes:
+                if isinstance(n, dict):
+                    t = str(n.get("text") or "").strip()
+                    if not t:
+                        continue
+                    raw_date = str(n.get("date") or "").strip()
+                    if raw_date:
+                        try:
+                            dt = datetime.fromisoformat(raw_date.replace("Z", "+00:00"))
+                            formatted = dt.strftime("%-d de %B de %Y, %H:%M")
+                        except Exception:
+                            formatted = raw_date
+                        additional_notes_display.append(f"{formatted} — {t}")
+                    else:
+                        additional_notes_display.append(t)
+                elif str(n).strip():
+                    additional_notes_display.append(str(n).strip())
         additional_report_reason = case.get("complementary_tests_reason") or ""
         has_additional_report = bool(
             additional_tests_display
-            or additional_notes_display
             or str(additional_report_reason).strip()
         )
 

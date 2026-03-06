@@ -156,6 +156,18 @@ class CaseService:
         if not self._repo.delete(id):
             raise not_found_exception("Case", id)
 
+    def add_note(self, id: str, text: str, date: str) -> dict:
+        result = self._repo.add_note(id, text, date)
+        if result is None:
+            raise not_found_exception("Case", id)
+        return result
+
+    def delete_note(self, id: str, note_index: int) -> dict:
+        result = self._repo.delete_note(id, note_index)
+        if result is None:
+            raise not_found_exception("Case", id)
+        return result
+
     @staticmethod
     def _normalize_birth_date(birth_date_raw: Any) -> str | None:
         """Devuelve birth_date como string YYYY-MM-DD o None."""

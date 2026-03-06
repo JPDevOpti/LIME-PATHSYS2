@@ -9,10 +9,11 @@ import { BODY_REGION_OPTIONS, TEST_OPTIONS } from '../data/case-options';
 import { SuccessModal } from '@/shared/components/overlay/SuccessModal';
 import { CloseButton } from '@/shared/components/ui/buttons';
 import { BaseCard } from '@/shared/components/base/BaseCard';
-import { FileText, User, Phone, MapPin, Building2, FlaskConical, UserRoundPen, History, ShieldCheck, Microscope, ZoomIn, ChevronLeft, ChevronRight, X as XIcon, Image } from 'lucide-react';
+import { FileText, User, Phone, MapPin, Building2, FlaskConical, UserRoundPen, History, ShieldCheck, Microscope, ZoomIn, ChevronLeft, ChevronRight, X as XIcon, Image, NotebookPen } from 'lucide-react';
 import { formatAge } from '@/shared/utils/formatAge';
 import { sanitizeHtml } from '@/shared/utils/sanitizeHtml';
 import { usePermissions } from '@/features/auth/hooks/usePermissions';
+import { AddNoteModal } from './AddNoteModal';
 
 interface CaseDetailsModalProps {
     visible: boolean;
@@ -67,6 +68,7 @@ export function CaseDetailsModal({ visible, caseData, onClose, onCaseUpdated }: 
     const [previousCases, setPreviousCases] = useState<Case[]>([]);
     const [showAssignPathologistModal, setShowAssignPathologistModal] = useState(false);
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+    const [showNoteModal, setShowNoteModal] = useState(false);
     const diagImages = caseData?.result?.diagnosis_images ?? [];
 
     const lightboxPrev = () => setLightboxIndex(i => (i! > 0 ? i! - 1 : diagImages.length - 1));
@@ -149,6 +151,7 @@ export function CaseDetailsModal({ visible, caseData, onClose, onCaseUpdated }: 
     );
 
     return (
+        <>
         <SuccessModal
             isOpen={visible}
             onClose={onClose}
@@ -160,6 +163,16 @@ export function CaseDetailsModal({ visible, caseData, onClose, onCaseUpdated }: 
             footer={
                 <div className="w-full flex justify-end items-center gap-4 flex-wrap">
                     <div className="flex gap-3 shrink-0">
+                        {isAdmin && caseData.status === 'Completado' && (
+                            <button
+                                type="button"
+                                onClick={() => setShowNoteModal(true)}
+                                className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-white bg-amber-500 hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-400 transition-colors"
+                            >
+                                <NotebookPen className="w-4 h-4" />
+                                Agregar nota
+                            </button>
+                        )}
                         {!isPatologo && (
                             <Link
                                 href={caseData.id ? `/cases/edit?id=${encodeURIComponent(caseData.id)}` : '#'}
@@ -666,7 +679,55 @@ export function CaseDetailsModal({ visible, caseData, onClose, onCaseUpdated }: 
                         </BaseCard>
                     </div>
                 )}
+
+                {/* ── NOTAS ADICIONALES ── */}
+                {isAdmin && caseData.status === 'Completado' && (
+                    <div className="w-full space-y-4">
+                        {caseData.additional_notes && caseData.additional_notes.length > 0 && (
+                            <BaseCard variant="muted" padding="md" className="bg-white">
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-2 pb-2">
+                                        <NotebookPen className="w-5 h-5 text-amber-500" />
+                                        <h4 className="text-sm font-semibold text-neutral-700">Notas adicionales</h4>
+                                    </div>
+                                    <div className="space-y-2">
+                                        {caseData.additional_notes.map((note, idx) => (
+                                            <div key={idx} className="flex items-start gap-3 rounded-lg border border-amber-100 bg-amber-50/50 px-3 py-2">
+                                                <div className="flex-1 min-w-0">
+                                                    {note.date && (
+                                                        <p className="text-xs text-neutral-400 mb-0.5">{formatDateTime(note.date)}</p>
+                                                    )}
+                                                    <p className="text-sm text-neutral-800 whitespace-pre-wrap">{note.text}</p>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    title="Eliminar nota"
+                                                    onClick={async () => {
+                                                        if (!caseData.id) return;
+                                                        const updated = await caseService.deleteNote(caseData.id, idx);
+                                                        onCaseUpdated?.(updated);
+                                                    }}
+                                                    className="shrink-0 mt-0.5 w-6 h-6 flex items-center justify-center rounded-full text-neutral-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                                >
+                                                    <XIcon className="w-3.5 h-3.5" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </BaseCard>
+                        )}
+                    </div>
+                )}
             </div>
         </SuccessModal>
+
+        <AddNoteModal
+            isOpen={showNoteModal}
+            caseId={caseData.id}
+            onClose={() => setShowNoteModal(false)}
+            onSaved={(updated) => { onCaseUpdated?.(updated); setShowNoteModal(false); }}
+        />
+        </>
     );
 }

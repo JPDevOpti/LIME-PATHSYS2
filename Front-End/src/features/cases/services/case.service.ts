@@ -5,6 +5,7 @@ import {
     UpdateCaseRequest,
     Case,
     CaseFilters,
+    CaseNote,
     TestInfo,
     SampleInfo,
     AssignedPathologist
@@ -73,6 +74,7 @@ function apiToCase(raw: Record<string, unknown>): Case {
         complementary_tests: (raw.complementary_tests as Case['complementary_tests']) ?? undefined,
         complementary_tests_reason: raw.complementary_tests_reason as string | undefined,
         delivered_to: raw.delivered_to as string | undefined,
+        additional_notes: (raw.additional_notes as CaseNote[] | undefined) ?? undefined,
     };
 }
 
@@ -311,6 +313,21 @@ export const caseService = {
 
     async deleteCase(id: string): Promise<void> {
         await apiClient.delete(`${API_BASE}/${id}`);
+    },
+
+    async addNote(caseId: string, text: string): Promise<Case> {
+        const raw = await apiClient.post<Record<string, unknown>>(
+            `${API_BASE}/${caseId}/notes`,
+            { text },
+            getUserHeaders()
+        );
+        return apiToCase(raw);
+    },
+
+    async deleteNote(caseId: string, noteIndex: number): Promise<Case> {
+        await apiClient.delete(`${API_BASE}/${caseId}/notes/${noteIndex}`);
+        const raw = await apiClient.get<Record<string, unknown>>(`${API_BASE}/${caseId}`);
+        return apiToCase(raw);
     },
 
     async getAllCasesForExport(filters?: CaseFilters): Promise<Case[]> {

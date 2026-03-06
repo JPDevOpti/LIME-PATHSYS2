@@ -120,6 +120,11 @@ export interface CaseResult {
     diagnosis_images?: string[];
 }
 
+export interface CaseNote {
+    text: string;
+    date: string;
+}
+
 export interface Case {
     id: string;
     case_code: string;
@@ -142,6 +147,7 @@ export interface Case {
     complementary_tests?: ComplementaryTestRequest[];
     complementary_tests_reason?: string;
     delivered_to?: string;
+    additional_notes?: CaseNote[];
 }
 
 /** Utilitario: extrae un timestamp de date_info por acción */

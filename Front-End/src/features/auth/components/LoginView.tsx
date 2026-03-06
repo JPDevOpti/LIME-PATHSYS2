@@ -41,7 +41,7 @@ export function LoginView() {
     <div className="relative min-h-screen">
       <div className="fixed inset-0 z-0">
         <Image
-          src="/image.png?v=20260217"
+          src="/image.png?v=20260306"
           alt="Fondo"
           fill
           className="object-cover"

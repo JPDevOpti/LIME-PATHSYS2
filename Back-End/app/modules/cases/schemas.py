@@ -1,6 +1,6 @@
 from typing import Any, Literal, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 from app.modules.patients.schemas import (
     EntityInfoSchema,
@@ -88,6 +88,12 @@ class AssignedPathologistSchema(BaseModel):
     id: str
     name: str
     pathologist_code: Optional[str] = None
+    medical_license: Optional[str] = None
+
+
+class NoteSchema(BaseModel):
+    text: str
+    date: str
 
 
 # Create
@@ -150,7 +156,7 @@ class CaseResponse(BaseModel):
     observations: Optional[str] = None
     entity: Optional[str] = None
     previous_study: Optional[Any] = None
-    additional_notes: Optional[list[str]] = None
+    additional_notes: Optional[list[NoteSchema]] = None
     complementary_tests: Optional[list[ComplementaryTestSchema]] = None
     complementary_tests_reason: Optional[str] = None
     approval_state: Optional[str] = None
@@ -161,24 +167,6 @@ class CaseResponse(BaseModel):
     date_info: Optional[list[DateEntrySchema]] = None
 
     model_config = {"from_attributes": True}
-
-    @field_validator("additional_notes", mode="before")
-    @classmethod
-    def normalize_additional_notes(cls, v: Any) -> Optional[list[str]]:
-        if v is None:
-            return None
-        result = []
-        for item in v:
-            if isinstance(item, str):
-                result.append(item)
-            elif isinstance(item, dict):
-                note = item.get("note") or item.get("text") or item.get("content") or ""
-                date = item.get("date")
-                if date:
-                    result.append(f"{date}: {note}".strip(": "))
-                elif note:
-                    result.append(note)
-        return result or None
 
 
 class CaseListResponse(BaseModel):

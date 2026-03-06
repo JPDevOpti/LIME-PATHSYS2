@@ -19,6 +19,13 @@ from datetime import datetime
 from pymongo import MongoClient, InsertOne
 from pymongo.errors import BulkWriteError
 
+try:
+    from passlib.context import CryptContext
+    _pwd_context = CryptContext(schemes=["argon2", "bcrypt"], deprecated="auto")
+except ImportError:
+    print("ERROR: instala passlib:  pip3 install 'passlib[argon2]'")
+    sys.exit(1)
+
 # ── Configuración ─────────────────────────────────────────────────────────────
 
 ATLAS_URL  = os.environ.get("LEGACY_ATLAS_URI", "")
@@ -119,6 +126,78 @@ def transform(raw: dict, seq: int, now: datetime) -> dict:
             "timestamp":  created_at,
         }],
     }
+
+
+def create_patient_users(db, batch_size: int, dry_run: bool) -> int:
+    """Crea un usuario 'paciente' por cada paciente que no tenga uno ya."""
+    patients_coll = db["patients"]
+    users_coll    = db["users"]
+
+    existing_emails: set[str] = {
+        u["email"]
+        for u in users_coll.find(
+            {"role": "paciente", "email": {"$regex": r"@paciente\.dermapath\.local$"}},
+            {"email": 1},
+        )
+    }
+    print(f"  Usuarios paciente ya existentes : {len(existing_emails):,}")
+
+    user_batch: list[InsertOne] = []
+    created = 0
+    now = datetime.utcnow()
+
+    for patient in patients_coll.find(
+        {},
+        {"_id": 1, "full_name": 1, "identification_number": 1, "created_at": 1},
+    ):
+        id_num = str(patient.get("identification_number") or "").strip()
+        if not id_num:
+            continue
+
+        email = f"{id_num}@paciente.dermapath.local"
+        if email in existing_emails:
+            continue
+
+        patient_id  = str(patient["_id"])
+        full_name   = patient.get("full_name") or id_num
+        created_at  = patient.get("created_at") or now
+
+        if dry_run:
+            print(f"  [DRY-RUN] usuario paciente: {email}")
+            created += 1
+            existing_emails.add(email)
+            continue
+
+        user_doc = {
+            "name":          full_name,
+            "email":         email,
+            "password_hash": _pwd_context.hash(id_num),
+            "role":          "paciente",
+            "document":      id_num,
+            "patient_id":    patient_id,
+            "is_active":     True,
+            "created_at":    created_at,
+            "updated_at":    created_at,
+        }
+        user_batch.append(InsertOne(user_doc))
+        existing_emails.add(email)
+
+        if len(user_batch) >= batch_size:
+            try:
+                result = users_coll.bulk_write(user_batch, ordered=False)
+                created += result.inserted_count
+            except BulkWriteError as bwe:
+                created += bwe.details.get("nInserted", 0)
+            user_batch = []
+
+    if user_batch:
+        try:
+            result = users_coll.bulk_write(user_batch, ordered=False)
+            created += result.inserted_count
+        except BulkWriteError as bwe:
+            created += bwe.details.get("nInserted", 0)
+
+    return created
 
 
 def get_next_seq(counters_coll) -> int:
@@ -247,6 +326,13 @@ def run(
             stats["errors"]   += len(bwe.details.get("writeErrors", []))
 
     atlas.close()
+
+    # ── Crear usuarios paciente ───────────────────────────────────────────────
+    print(f"\n{'─'*62}")
+    print("Creando usuarios paciente...")
+    users_created = create_patient_users(local[dest_db], batch_size, dry_run)
+    print(f"  Usuarios paciente creados: {users_created:,}")
+
     local.close()
 
     # ── Resumen ───────────────────────────────────────────────────────────────
@@ -258,6 +344,7 @@ def run(
     print(f"  Saltados (inválidos)  : {stats['skipped_invalid']:,}")
     print(f"  Errores               : {stats['errors']:,}")
     print(f"  Total procesados      : {processed:,}")
+    print(f"  Usuarios paciente     : {users_created:,}")
     if dry_run:
         print("\n  DRY-RUN: ningún cambio realizado.")
     print("=" * 62)

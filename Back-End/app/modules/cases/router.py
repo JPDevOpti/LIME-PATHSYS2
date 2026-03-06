@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -217,3 +218,28 @@ def delete_case(
     _: str = Depends(get_current_user_id),
 ):
     service.delete(id)
+
+
+class NoteCreate(BaseModel):
+    text: str
+
+
+@router.post("/{id}/notes", response_model=CaseResponse)
+def add_note(
+    id: str,
+    data: NoteCreate,
+    service: CaseService = Depends(get_case_service),
+    _: str = Depends(get_current_user_id),
+):
+    date_str = datetime.now(UTC).isoformat()
+    return service.add_note(id, data.text, date_str)
+
+
+@router.delete("/{id}/notes/{note_index}", status_code=204)
+def delete_note(
+    id: str,
+    note_index: int,
+    service: CaseService = Depends(get_case_service),
+    _: str = Depends(get_current_user_id),
+):
+    service.delete_note(id, note_index)

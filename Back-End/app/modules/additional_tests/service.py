@@ -147,7 +147,6 @@ class AdditionalTestsService:
             raise not_found_exception("Patient", "unknown")
 
         original_code = case.get("case_code", "")
-        new_custom_code = f"{original_code}-1"
 
         # Heredar patólogos si existen
         assigned_pathologist = None
@@ -194,7 +193,7 @@ class AdditionalTestsService:
             assistant_pathologists=assistant_pathologists,
             previous_study=original_code
         )
-        new_case = self._case_service.create(create_data, created_by_email=None, custom_case_code=new_custom_code)
+        new_case = self._case_service.create(create_data, created_by_email=None)
         self._case_repo.update_approval_state(case["id"], "approved")
         return {
             "data": {"new_case": new_case},

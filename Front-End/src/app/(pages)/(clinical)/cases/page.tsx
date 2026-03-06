@@ -168,7 +168,15 @@ function CasesListInner({ isRestrictedView, lockedPathologist, lockedIdentificat
                 canExport={!isRestrictedView && totalItems > 0 && !isExporting}
                 onRefresh={loadCases}
                 onExport={handleExport}
-                onSearch={(f) => applySearch(f)}
+                onSearch={(f) => {
+                    if (lockedPathologist && f.search.trim()) {
+                        // Patólogo buscando por código exacto: desactiva el filtro de patólogo asignado
+                        // y restringe a casos Completados para que pueda ver cualquier resultado
+                        applySearch({ ...f, pathologistName: '', status: 'Completado' });
+                    } else {
+                        applySearch(f);
+                    }
+                }}
                 onClear={clearFilters}
                 lockedPathologist={lockedPathologist}
                 lockedIdentificationNumber={lockedIdentificationNumber}

@@ -257,7 +257,7 @@ def build_pathologists_maps(users_coll):
 
     for u in users_coll.find(
         {"role": "pathologist"},
-        {"_id": 1, "name": 1, "pathologist_code": 1, "document": 1},
+        {"_id": 1, "name": 1, "pathologist_code": 1, "document": 1, "medical_license": 1},
     ):
         oid = str(u.get("_id") or "").strip()
         if oid:
@@ -424,8 +424,10 @@ def build_pathologist(
         return None
 
     return {
-        "id": str(candidate.get("_id")),
-        "name": candidate.get("name") or raw.get("name", ""),
+        "id":               str(candidate.get("_id")),
+        "name":             candidate.get("name") or raw.get("name", ""),
+        "pathologist_code": str(candidate.get("pathologist_code") or "").strip() or None,
+        "medical_license":  str(candidate.get("medical_license") or "").strip() or None,
     }
 
 
