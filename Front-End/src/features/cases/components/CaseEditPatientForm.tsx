@@ -106,7 +106,6 @@ export function CaseEditPatientForm({
         return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
     };
 
-    // Opciones de municipios según el departamento seleccionado
     const municipalityOptions = useMemo((): ComboboxOption[] => {
         const dept = formData.location?.department;
         if (dept && COLOMBIA_MUNICIPALITIES_BY_DEPARTMENT[dept]) {

@@ -16,12 +16,12 @@ router = APIRouter()
 @router.get("", response_model=PatientListResponse)
 def list_patients(
     search: str | None = Query(None),
-    created_at_from: str | None = Query(None, alias="created_at_from"),
-    created_at_to: str | None = Query(None, alias="created_at_to"),
+    created_at_from: str | None = Query(None),
+    created_at_to: str | None = Query(None),
     entity: str | None = Query(None),
     care_type: str | None = Query(None),
     gender: str | None = Query(None),
-    municipality_code: str | None = Query(None, alias="municipality_code"),
+    municipality_code: str | None = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100000),
     service: PatientService = Depends(get_patient_service),

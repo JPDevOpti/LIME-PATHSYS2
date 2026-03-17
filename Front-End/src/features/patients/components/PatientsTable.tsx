@@ -56,14 +56,12 @@ interface PatientsTableProps {
 
 const formatDate = (dateStr?: string) => {
     if (!dateStr) return 'N/A';
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('es-CO', {
+    return new Date(dateStr).toLocaleDateString('es-CO', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric'
     });
 };
-
 
 export function PatientsTable({
     patients,

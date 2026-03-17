@@ -9,6 +9,52 @@ import { BaseCard } from '@/shared/components/base/BaseCard';
 import { FileText, User, Phone, MapPin, Building2, FlaskConical, List, History } from 'lucide-react';
 import { formatAge } from '@/shared/utils/formatAge';
 
+const priorityLabels: Record<string, string> = {
+    normal: 'Normal',
+    prioritario: 'Prioritario'
+};
+
+const formatDateTime = (dateStr?: string) => {
+    if (!dateStr) return 'No especificado';
+    return new Date(dateStr).toLocaleString('es-CO', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+};
+
+const formatDate = (dateStr?: string) => {
+    if (!dateStr) return undefined;
+    const normalized = !dateStr.includes('T') ? `${dateStr}T00:00:00` : dateStr;
+    return new Date(normalized).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
+};
+
+const InfoItem = ({ label, value }: { label: string; value?: string | number | boolean }) => {
+    if (value === undefined || value === null || String(value).trim() === '') return null;
+    return (
+        <div className="flex flex-col gap-1">
+            <p className="text-xs font-medium text-neutral-500">{label}</p>
+            <p className="text-sm text-neutral-900 break-all">{value === true ? 'Sí' : value === false ? 'No' : value}</p>
+        </div>
+    );
+};
+
+const PatientSection = ({ icon: Icon, sectionTitle, children }: { icon: React.ElementType; sectionTitle: string; children: React.ReactNode }) => (
+    <BaseCard variant="muted" padding="md">
+        <div className="space-y-3">
+            <div className="flex items-center gap-2 pb-2 border-b border-neutral-200">
+                <Icon className="w-4 h-4 text-lime-brand-600" />
+                <h4 className="text-sm font-semibold text-neutral-700">{sectionTitle}</h4>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {children}
+            </div>
+        </div>
+    </BaseCard>
+);
+
 interface CaseSuccessModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -17,53 +63,6 @@ interface CaseSuccessModalProps {
 }
 
 export function CaseSuccessModal({ isOpen, onClose, caseData, variant = 'create' }: CaseSuccessModalProps) {
-    const formatDateTime = (dateStr?: string) => {
-        if (!dateStr) return 'No especificado';
-        const date = new Date(dateStr);
-        return date.toLocaleString('es-CO', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
-
-    const formatDate = (dateStr?: string) => {
-        if (!dateStr) return undefined;
-        const normalized = !dateStr.includes('T') ? `${dateStr}T00:00:00` : dateStr;
-        return new Date(normalized).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
-    };
-
-    const InfoItem = ({ label, value }: { label: string; value?: string | number | boolean }) => {
-        if (value === undefined || value === null || String(value).trim() === '') return null;
-        return (
-            <div className="flex flex-col gap-1">
-                <p className="text-xs font-medium text-neutral-500">{label}</p>
-                <p className="text-sm text-neutral-900 break-all">{value === true ? 'Sí' : value === false ? 'No' : value}</p>
-            </div>
-        );
-    };
-
-    const PatientSection = ({ icon: Icon, sectionTitle, children }: { icon: React.ElementType; sectionTitle: string; children: React.ReactNode }) => (
-        <BaseCard variant="muted" padding="md">
-            <div className="space-y-3">
-                <div className="flex items-center gap-2 pb-2 border-b border-neutral-200">
-                    <Icon className="w-4 h-4 text-lime-brand-600" />
-                    <h4 className="text-sm font-semibold text-neutral-700">{sectionTitle}</h4>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {children}
-                </div>
-            </div>
-        </BaseCard>
-    );
-
-    const priorityLabels: Record<string, string> = {
-        normal: 'Normal',
-        prioritario: 'Prioritario'
-    };
-
     const description =
         variant === 'edit' ? 'El caso ha sido actualizado en el sistema' : '';
     const patient = caseData.patient;
@@ -103,7 +102,6 @@ export function CaseSuccessModal({ isOpen, onClose, caseData, variant = 'create'
             }
         >
             <div className="space-y-6">
-                {/* Sección 1: Información del caso */}
                 <BaseCard variant="muted" padding="md">
                     <div className="space-y-4">
                         <div className="flex items-center gap-2 pb-2 border-b border-neutral-200">
@@ -183,7 +181,6 @@ export function CaseSuccessModal({ isOpen, onClose, caseData, variant = 'create'
                     </BaseCard>
                 )}
 
-                {/* Sección 2: Datos del paciente */}
                 <div>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div className="space-y-6">

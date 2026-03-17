@@ -29,7 +29,13 @@ import sys
 from pathlib import Path
 from typing import Dict, List
 
+from dotenv import load_dotenv
+from pymongo import MongoClient
+
 BASE_DIR = Path(__file__).resolve().parent
+
+# Carga .env desde Back-End/ (2 niveles arriba del script)
+load_dotenv(BASE_DIR.parent.parent / ".env")
 
 SCRIPTS: Dict[str, str] = {
     "entities": "migrate_entities_direct.py",
@@ -54,7 +60,11 @@ DEFAULT_ORDER: List[str] = [
 ]
 
 DEST_ATLAS_URL = os.environ.get("DEST_ATLAS_URI", "")
-DEFAULT_DEST_URL = "mongodb://localhost:27017"
+DEFAULT_DEST_URL = (
+    os.environ.get("DEST_ATLAS_URI")
+    or os.environ.get("MONGODB_URI")
+    or "mongodb://localhost:27017"
+)
 DEFAULT_DEST_DB = "pathsys"
 
 
@@ -157,6 +167,11 @@ def main() -> int:
         default=DEFAULT_DEST_DB,
         help="Base de datos destino",
     )
+    parser.add_argument(
+        "--drop",
+        action="store_true",
+        help="Elimina la BD destino antes de migrar (NO toca Atlas/origen)",
+    )
 
     args = parser.parse_args()
 
@@ -181,7 +196,22 @@ def main() -> int:
     print(f"Batch cases     : {args.batch_size_cases}")
     print(f"Destino DB      : {args.dest_db}")
     print(f"Destino tipo    : {'Atlas' if args.to_atlas_destination else 'Custom/Local'}")
+    print(f"Drop destino    : {'SÍ (se borrará ' + args.dest_db + ')' if args.drop and not args.dry_run else 'No'}")
     print("-" * 72)
+
+    # ── Drop destino si se solicita (nunca en dry-run) ────────────────────────
+    if args.drop and not args.dry_run:
+        print(f"\n[DROP] Eliminando base de datos destino...")
+        print(f"       URL : {effective_dest_url}")
+        print(f"       DB  : {args.dest_db}")
+        try:
+            drop_client = MongoClient(effective_dest_url, serverSelectionTimeoutMS=10000)
+            drop_client.drop_database(args.dest_db)
+            drop_client.close()
+            print(f"[DROP] Base de datos '{args.dest_db}' eliminada.\n")
+        except Exception as exc:
+            print(f"[DROP] ERROR al eliminar la BD: {exc}")
+            return 1
 
     results = []
 

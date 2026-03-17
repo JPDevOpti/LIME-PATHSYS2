@@ -12,9 +12,7 @@ interface EditPatientModalProps {
     isOpen: boolean;
     onClose: () => void;
     patient: Patient | null;
-    /** Se llama con el paciente actualizado al guardar exitosamente */
     onSuccess?: (updatedPatient: Patient) => void;
-    /** Oculta "Create case" en el modal de éxito (ya estamos en crear caso) */
     hideCrearCasoLink?: boolean;
 }
 

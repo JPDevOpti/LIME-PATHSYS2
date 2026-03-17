@@ -16,7 +16,6 @@ interface PatientSearchProps {
     onUpdateIdentificationNumber: (value: string) => void;
     onSearch: () => void;
     onClear: () => void;
-    /** Muestra botón para crear paciente cuando no existe */
     createPatientHref?: string;
 }
 
@@ -46,7 +45,6 @@ export function PatientSearch({
     return (
         <div className="bg-neutral-100 rounded-lg p-3 sm:p-4 lg:p-6 border border-neutral-200">
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-end">
-                {/* Identification Type */}
                 <div className="sm:w-64">
                     <Select
                         value={identificationType || ''}
@@ -56,7 +54,6 @@ export function PatientSearch({
                     />
                 </div>
 
-                {/* Identification Number */}
                 <div className="flex-1">
                     <Input
                         type="text"
@@ -73,7 +70,6 @@ export function PatientSearch({
                     />
                 </div>
 
-                {/* Action Buttons */}
                 <div className="flex gap-2 sm:gap-3">
                     <SearchButton
                         onClick={onSearch}
@@ -90,7 +86,6 @@ export function PatientSearch({
                 </div>
             </div>
 
-            {/* Error Message */}
             {errorMessage && (
                 <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg flex flex-row items-center justify-between gap-3 flex-wrap">
                     <p className="text-sm text-red-600">{errorMessage}</p>

@@ -86,13 +86,3 @@ class PatientListResponse(BaseModel):
     total: int
 
 
-class PatientFiltersSchema(BaseModel):
-    search: Optional[str] = None
-    created_at_from: Optional[str] = None
-    created_at_to: Optional[str] = None
-    entity: Optional[str] = None
-    care_type: Optional[str] = None
-    gender: Optional[str] = None
-    municipality_code: Optional[str] = None
-    skip: Optional[int] = Field(None, ge=0)
-    limit: Optional[int] = Field(None, ge=1, le=100)

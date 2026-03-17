@@ -1,4 +1,3 @@
-// Opciones para región del cuerpo (simplificado - consumir de API en producción)
 export const BODY_REGION_OPTIONS = [
     { value: 'cerebro', label: 'Cerebro' },
     { value: 'piel', label: 'Piel' },
@@ -18,7 +17,7 @@ export const BODY_REGION_OPTIONS = [
     { value: 'otro', label: 'Otro' }
 ];
 
-// Opciones para pruebas (simplificado - consumir de API en producción)
+
 export const TEST_OPTIONS = [
     { value: 'BIOPSIA', label: 'Biopsia' },
     { value: 'CITOLOGIA', label: 'Citología' },

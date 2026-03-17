@@ -39,9 +39,6 @@ export interface CreateCaseRequest {
 }
 
 export interface UpdateCaseRequest extends Omit<CreateCaseRequest, 'patientId'> {
-    care_type?: CareType;
-    assigned_pathologist?: AssignedPathologist;
-    assistant_pathologists?: AssignedPathologist[];
     status?: CaseStatus;
 }
 
@@ -150,7 +147,6 @@ export interface Case {
     additional_notes?: CaseNote[];
 }
 
-/** Utilitario: extrae un timestamp de date_info por acción */
 export function getDateFromDateInfo(dateInfo: DateEntry[] | undefined, action: DateEntryAction): string | undefined {
     if (!dateInfo || dateInfo.length === 0) return undefined;
     return dateInfo[0][action] as string | undefined;

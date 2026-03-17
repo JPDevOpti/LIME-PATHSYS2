@@ -49,8 +49,6 @@ function buildCaseEdits(cases: Case[]): CaseEdit[] {
     });
 }
 
-// ─── Test adder subcomponent ────────────────────────────────────────────────
-
 interface TestAdderProps {
     allTests: LabTest[];
     existingCodes: Set<string>;
@@ -74,7 +72,6 @@ function TestAdder({ allTests, existingCodes, onAdd, disabled }: TestAdderProps)
         ).slice(0, 20)
         : allTests.slice(0, 20);
 
-    // Recalculate dropdown position whenever it opens
     useEffect(() => {
         if (!open || !inputRef.current) return;
         const rect = inputRef.current.getBoundingClientRect();
@@ -139,7 +136,6 @@ function TestAdder({ allTests, existingCodes, onAdd, disabled }: TestAdderProps)
         <div className="mt-3 pt-3 border-t border-dashed border-gray-200">
             <p className="text-xs font-medium text-gray-500 mb-2">Agregar prueba</p>
             <div className="flex gap-2" ref={wrapperRef}>
-                {/* Search */}
                 <div className="relative flex-1">
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
                     <input
@@ -154,7 +150,6 @@ function TestAdder({ allTests, existingCodes, onAdd, disabled }: TestAdderProps)
                     />
                     {dropdown}
                 </div>
-                {/* Quantity */}
                 <input
                     type="number"
                     min={1}
@@ -164,7 +159,6 @@ function TestAdder({ allTests, existingCodes, onAdd, disabled }: TestAdderProps)
                     className="w-16 rounded-lg border border-gray-300 px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-1 focus:ring-green-500 disabled:bg-gray-50"
                     title="Cantidad"
                 />
-                {/* Add button */}
                 <button
                     type="button"
                     onClick={handleAdd}
@@ -182,8 +176,6 @@ function TestAdder({ allTests, existingCodes, onAdd, disabled }: TestAdderProps)
         </div>
     );
 }
-
-// ─── Main modal ──────────────────────────────────────────────────────────────
 
 export function MarkDeliveredModal({ isOpen, cases, onClose, onConfirm }: MarkDeliveredModalProps) {
     const [deliveredTo, setDeliveredTo] = useState('');
@@ -255,7 +247,6 @@ export function MarkDeliveredModal({ isOpen, cases, onClose, onConfirm }: MarkDe
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-                {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                     <div className="flex items-center gap-2">
                         <PackageCheck className="w-5 h-5 text-green-600" />
@@ -267,9 +258,7 @@ export function MarkDeliveredModal({ isOpen, cases, onClose, onConfirm }: MarkDe
                     </button>
                 </div>
 
-                {/* Body */}
                 <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-                    {/* Entregado a */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Entregado a <span className="text-red-500">*</span>
@@ -285,7 +274,6 @@ export function MarkDeliveredModal({ isOpen, cases, onClose, onConfirm }: MarkDe
                         />
                     </div>
 
-                    {/* Cases list */}
                     <div>
                         <p className="text-sm font-medium text-gray-700 mb-2">
                             Casos a entregar ({caseEdits.length})
@@ -293,7 +281,6 @@ export function MarkDeliveredModal({ isOpen, cases, onClose, onConfirm }: MarkDe
                         <div className="space-y-2">
                             {caseEdits.map((ce, cIdx) => (
                                 <div key={ce.caseId} className="border border-gray-200 rounded-lg overflow-hidden">
-                                    {/* Case header */}
                                     <button
                                         type="button"
                                         onClick={() => toggleExpanded(cIdx)}
@@ -313,7 +300,6 @@ export function MarkDeliveredModal({ isOpen, cases, onClose, onConfirm }: MarkDe
                                         }
                                     </button>
 
-                                    {/* Tests list */}
                                     {ce.expanded && (
                                         <div className="px-4 py-3 bg-white">
                                             {ce.tests.length === 0 ? (
@@ -373,7 +359,6 @@ export function MarkDeliveredModal({ isOpen, cases, onClose, onConfirm }: MarkDe
                     )}
                 </div>
 
-                {/* Footer */}
                 <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
                     <button type="button" onClick={onClose} disabled={isLoading}
                         className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50">

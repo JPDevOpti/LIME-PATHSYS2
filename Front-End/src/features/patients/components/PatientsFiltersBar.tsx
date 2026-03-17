@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { BaseCard, BaseButton } from '@/shared/components/base';
-import { Input, Select } from '@/shared/components/ui/form';
-import { FormField } from '@/shared/components/ui/form';
+import { Input, Select, FormField } from '@/shared/components/ui/form';
 import { SearchButton } from '@/shared/components/ui/buttons';
 import { Search, Trash2, FileSpreadsheet } from 'lucide-react';
 import type { PatientListFilters } from '../hooks/usePatientList';
@@ -12,22 +11,12 @@ import { EntitiesCombobox } from '@/shared/components/lists';
 interface PatientsFiltersBarProps {
     filters: PatientListFilters;
     onFiltersChange: (updates: Partial<PatientListFilters>) => void;
-    totalFiltered: number;
-    totalAll: number;
     isLoading?: boolean;
     canExport?: boolean;
-    onRefresh: () => void;
     onExport: () => void;
     onSearch: (filters: PatientListFilters) => void;
     onClear: () => void;
 }
-
-const ENTITY_OPTIONS = [
-    { value: '', label: 'Todas' },
-    { value: 'Hospital General', label: 'Hospital General' },
-    { value: 'Clinica Las Americas', label: 'Clinica Las Americas' },
-    { value: 'Entidad 1', label: 'Entidad 1' }
-];
 
 const CARE_TYPE_OPTIONS = [
     { value: '', label: 'Todos' },
@@ -44,18 +33,14 @@ const GENDER_OPTIONS = [
 export function PatientsFiltersBar({
     filters,
     onFiltersChange,
-    totalFiltered,
-    totalAll,
     isLoading = false,
     canExport = false,
-    onRefresh,
     onExport,
     onSearch,
     onClear
 }: PatientsFiltersBarProps) {
     const [localFilters, setLocalFilters] = useState<PatientListFilters>(filters);
 
-    // Sincronizar estado local cuando los filtros externos cambian (ej. al limpiar)
     useEffect(() => {
         setLocalFilters(filters);
     }, [filters]);
@@ -66,9 +51,6 @@ export function PatientsFiltersBar({
 
     const handleSearchClick = () => {
         onFiltersChange(localFilters);
-        // El onSearch del padre suele disparar la carga, 
-        // pero aseguraros de que usePatientList no dispare antes de onFiltersChange.
-        // En este caso usePatientList reacciona a los filtros.
         onSearch(localFilters);
     };
     return (
@@ -119,13 +101,13 @@ export function PatientsFiltersBar({
                         <FormField label="Entidad">
                             <EntitiesCombobox
                                 value={localFilters.entity}
-                                onChange={() => { }}
+                                onChange={() => {}}
                                 onEntitySelected={(_code, name) => handleLocalChange({ entity: name })}
                                 placeholder="Buscar entidad..."
                             />
                         </FormField>
                     </div>
-                    <div className="md:col-span-1 border-hidden">
+                    <div className="md:col-span-1">
                         <FormField label="Tipo de atención">
                             <Select
                                 value={localFilters.care_type}

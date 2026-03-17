@@ -62,6 +62,39 @@ const AUDIT_ACTION_LABELS: Record<string, string> = {
     transcribed: 'Transcrito',
 };
 
+const InfoItem = ({ label, value }: { label: string; value?: string | number | boolean }) => {
+    if (value === undefined || value === null || String(value).trim() === '') return null;
+    return (
+        <div className="flex flex-col gap-1">
+            <p className="text-xs font-medium text-neutral-500">{label}</p>
+            <p className="text-sm text-neutral-900 break-all">
+                {value === true ? 'Sí' : value === false ? 'No' : value}
+            </p>
+        </div>
+    );
+};
+
+const PatientSection = ({
+    icon: Icon,
+    sectionTitle,
+    children
+}: {
+    icon: React.ElementType;
+    sectionTitle: string;
+    children: React.ReactNode;
+}) => (
+    <BaseCard variant="muted" padding="md" className="bg-white">
+        <div className="space-y-3">
+            <div className="flex items-center gap-2 pb-2">
+                <Icon className="w-5 h-5 text-lime-brand-600" />
+                <h4 className="text-sm font-semibold text-neutral-700">{sectionTitle}</h4>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {children}
+            </div>
+        </div>
+    </BaseCard>
+);
 
 export function CaseDetailsModal({ visible, caseData, onClose, onCaseUpdated }: CaseDetailsModalProps) {
     const { isPatologo, isAdmin } = usePermissions();
@@ -86,40 +119,6 @@ export function CaseDetailsModal({ visible, caseData, onClose, onCaseUpdated }: 
     }, [visible, caseData?.id, caseData?.patient?.id]);
 
     if (!caseData) return null;
-
-    const InfoItem = ({ label, value }: { label: string; value?: string | number | boolean }) => {
-        if (value === undefined || value === null || String(value).trim() === '') return null;
-        return (
-            <div className="flex flex-col gap-1">
-                <p className="text-xs font-medium text-neutral-500">{label}</p>
-                <p className="text-sm text-neutral-900 break-all">
-                    {value === true ? 'Sí' : value === false ? 'No' : value}
-                </p>
-            </div>
-        );
-    };
-
-    const PatientSection = ({
-        icon: Icon,
-        sectionTitle,
-        children
-    }: {
-        icon: React.ElementType;
-        sectionTitle: string;
-        children: React.ReactNode;
-    }) => (
-        <BaseCard variant="muted" padding="md" className="bg-white">
-            <div className="space-y-3">
-                <div className="flex items-center gap-2 pb-2">
-                    <Icon className="w-5 h-5 text-lime-brand-600" />
-                    <h4 className="text-sm font-semibold text-neutral-700">{sectionTitle}</h4>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {children}
-                </div>
-            </div>
-        </BaseCard>
-    );
 
     const patient = caseData.patient;
     const hasAdditionalTestsRequest = Boolean(caseData.complementary_tests && caseData.complementary_tests.length > 0);
@@ -333,7 +332,9 @@ export function CaseDetailsModal({ visible, caseData, onClose, onCaseUpdated }: 
                                     {caseData.date_info[0].transcribed_at && (
                                         <div className="flex flex-col gap-1">
                                             <p className="text-xs font-medium text-neutral-500">Fecha de transcripción</p>
-                                            <p className="text-sm text-neutral-900">{formatDateTime(caseData.date_info[0].transcribed_at)}</p>
+                                            <p className="text-sm text-neutral-900">
+                                                {formatDateTime(caseData.date_info[0].transcribed_at)}
+                                            </p>
                                         </div>
                                     )}
                                     {caseData.date_info[0].signed_at && (
@@ -345,7 +346,17 @@ export function CaseDetailsModal({ visible, caseData, onClose, onCaseUpdated }: 
                                     {caseData.date_info[0].delivered_at && (
                                         <div className="flex flex-col gap-1">
                                             <p className="text-xs font-medium text-neutral-500">Fecha de entrega</p>
-                                            <p className="text-sm text-neutral-900">{formatDateTime(caseData.date_info[0].delivered_at)}</p>
+                                            <p className="text-sm text-neutral-900">
+                                                {formatDateTime(caseData.date_info[0].delivered_at)}
+                                            </p>
+                                        </div>
+                                    )}
+                                    {caseData.delivered_to && (
+                                        <div className="flex flex-col gap-1">
+                                            <p className="text-xs font-medium text-neutral-500">Entregado a</p>
+                                            <p className="text-sm text-neutral-900 break-all">
+                                                {caseData.delivered_to}
+                                            </p>
                                         </div>
                                     )}
                                 </div>

@@ -42,7 +42,6 @@ interface PatientFormProps {
     onCloseSuccess?: (patient?: Patient) => void;
     onCancel?: () => void;
     onDelete?: () => void | Promise<void>;
-    /** Oculta "Crear caso" en el modal de éxito (ej: cuando se edita desde crear caso) */
     hideCrearCasoLink?: boolean;
 }
 
@@ -89,13 +88,11 @@ export function PatientForm({ initialData, isEditMode = false, onCloseSuccess, o
         }
     }, [initialData]);
 
-    // Opciones de municipios según el departamento seleccionado
     const municipalityOptions = useMemo((): ComboboxOption[] => {
         const dept = formData.location?.department;
         if (dept && COLOMBIA_MUNICIPALITIES_BY_DEPARTMENT[dept]) {
             return COLOMBIA_MUNICIPALITIES_BY_DEPARTMENT[dept].map(m => ({ value: m, label: m }));
         }
-        // Sin departamento seleccionado: mostrar todos
         return Object.values(COLOMBIA_MUNICIPALITIES_BY_DEPARTMENT)
             .flat()
             .map(m => ({ value: m, label: m }));
@@ -148,7 +145,6 @@ export function PatientForm({ initialData, isEditMode = false, onCloseSuccess, o
     const validateForm = (): boolean => {
         const errors: Record<string, string> = {};
 
-        // Campos obligatorios según backend
         errors.identification_type = !formData.identification_type?.trim() ? 'Requerido' : '';
         errors.identification_number = validateField('identification_number', formData.identification_number);
         errors.first_name = validateField('first_name', formData.first_name);
@@ -156,11 +152,32 @@ export function PatientForm({ initialData, isEditMode = false, onCloseSuccess, o
         errors.gender = !formData.gender?.trim() ? 'Requerido' : '';
         errors.care_type = !formData.care_type?.trim() ? 'Requerido' : '';
         errors.entity_name = !formData.entity_info?.entity_name?.trim() ? 'Requerido' : '';
-        // Opcionales con validación de formato si tienen valor
         errors.birth_date = validateField('birth_date', formData.birth_date);
         errors.age = validateField('age', formData.age);
         errors.email = validateField('email', formData.email);
         errors.phone = validateField('phone', formData.phone);
+
+        // Reglas de edad vs tipo de documento
+        const effectiveAge = (() => {
+            if (typeof formData.age === 'number') return formData.age;
+            if (formData.birth_date) {
+                const birth = new Date(formData.birth_date);
+                const today = new Date();
+                let age = today.getFullYear() - birth.getFullYear();
+                const monthDiff = today.getMonth() - birth.getMonth();
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
+                return age >= 0 ? age : undefined;
+            }
+            return undefined;
+        })();
+
+        if (formData.identification_type === 'CC' && typeof effectiveAge === 'number' && effectiveAge < 18) {
+            errors.identification_type = 'CC solo para mayores de 18 años';
+        }
+
+        if (formData.identification_type === 'TI' && typeof effectiveAge === 'number' && effectiveAge > 18) {
+            errors.identification_type = 'TI solo para menores de 18 años';
+        }
 
         Object.keys(errors).forEach(key => { if (!errors[key]) delete errors[key]; });
         setFieldErrors(errors);
@@ -198,7 +215,6 @@ export function PatientForm({ initialData, isEditMode = false, onCloseSuccess, o
         return fieldErrors[fieldName] ?? '';
     };
 
-    // Formato visual del teléfono: XXX-XXX-XXXX
     const formatPhoneDisplay = (digits: string): string => {
         const d = digits.replace(/\D/g, '').slice(0, 10);
         if (d.length <= 3) return d;
@@ -206,7 +222,6 @@ export function PatientForm({ initialData, isEditMode = false, onCloseSuccess, o
         return `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`;
     };
 
-    // Elimina strings vacíos de campos opcionales antes de enviar al backend
     const sanitizePayload = (data: Omit<CreatePatientRequest, 'age'>) => {
         const optionalStrFields = ['second_name', 'second_lastname', 'birth_date', 'phone', 'email', 'observations'] as const;
         const out: any = { ...data };
@@ -227,28 +242,19 @@ export function PatientForm({ initialData, isEditMode = false, onCloseSuccess, o
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        // Validate form
         if (!validateForm()) return;
 
         setIsLoading(true);
         setError(null);
 
         try {
-            let savedPatient: Patient;
             const { age, ...raw } = formData;
             const dataToSend = sanitizePayload(raw);
-
-            if (isEditMode && initialData?.id) {
-                savedPatient = await patientService.updatePatient(initialData.id, dataToSend, userEmail);
-                setSuccessPatient(savedPatient);
-                setShowSuccessModal(true);
-            } else {
-                savedPatient = await patientService.createPatient(dataToSend, userEmail);
-                setSuccessPatient(savedPatient);
-                setShowSuccessModal(true);
-            }
-
+            const savedPatient = isEditMode && initialData?.id
+                ? await patientService.updatePatient(initialData.id, dataToSend, userEmail)
+                : await patientService.createPatient(dataToSend, userEmail);
+            setSuccessPatient(savedPatient);
+            setShowSuccessModal(true);
         } catch (err: any) {
             setError({ message: err.message || 'Error al guardar paciente', type: 'submit' });
         } finally {
@@ -286,51 +292,45 @@ export function PatientForm({ initialData, isEditMode = false, onCloseSuccess, o
         onCancel?.();
     };
 
-    // Helper functions for age and birth date synchronization
     const calculateAgeFromBirthDate = (birthDate: string): number | null => {
         if (!birthDate) return null;
         const birth = new Date(birthDate);
         const today = new Date();
         let age = today.getFullYear() - birth.getFullYear();
         const monthDiff = today.getMonth() - birth.getMonth();
-
-        // Adjust age if birthday hasn't occurred yet this year
-        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-            age--;
-        }
-
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
         return age >= 0 ? age : null;
     };
 
     const calculateBirthDateFromAge = (age: number): string => {
-        const today = new Date();
-        const birthYear = today.getFullYear() - age;
-        // Use January 1st of that year as approximate birth date
-        return `${birthYear}-01-01`;
+        return `${new Date().getFullYear() - age}-01-01`;
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
 
-        // Sanitize input based on field type
         let sanitizedValue = value;
 
-        // Restriction rules
         if (name === 'identification_number') {
             sanitizedValue = value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 20);
         } else if (['first_name', 'second_name', 'first_lastname', 'second_lastname'].includes(name)) {
-            // Only letters and spaces
             sanitizedValue = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+            sanitizedValue = sanitizedValue
+                .split(' ')
+                .map(word => word ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : '')
+                .join(' ');
         } else if (name === 'age') {
-            // Only numbers
             sanitizedValue = value.replace(/[^0-9]/g, '');
         } else if (name === 'phone') {
             sanitizedValue = value.replace(/\D/g, '').slice(0, 10);
+        } else if (name === 'email') {
+            sanitizedValue = value.toLowerCase();
+        } else if (name === 'entity_info.eps_name') {
+            sanitizedValue = value.toLowerCase();
         }
 
         if (fieldErrors[name]) setFieldErrors(prev => { const n = { ...prev }; delete n[name]; return n; });
 
-        // Handle age and birth_date synchronization
         if (name === 'birth_date' && sanitizedValue) {
             const calculatedAge = calculateAgeFromBirthDate(sanitizedValue);
             setFormData(prev => ({
@@ -351,7 +351,6 @@ export function PatientForm({ initialData, isEditMode = false, onCloseSuccess, o
                 return;
             }
         } else if (name === 'age' && !sanitizedValue) {
-            // If age is cleared, don't clear birth_date
             setFormData(prev => ({ ...prev, age: undefined }));
             return;
         }
@@ -381,11 +380,7 @@ export function PatientForm({ initialData, isEditMode = false, onCloseSuccess, o
 
     const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-
-        // Mark field as touched
         setTouched(prev => ({ ...prev, [name]: true }));
-
-        // Validate field
         const error = validateField(name, value);
         if (error) {
             setFieldErrors(prev => ({ ...prev, [name]: error }));
@@ -398,13 +393,12 @@ export function PatientForm({ initialData, isEditMode = false, onCloseSuccess, o
             location: {
                 ...prev.location,
                 department: slug,
-                municipality: '' // Reset municipality when department changes
+                municipality: ''
             }
         }));
     };
 
     const handleMunicipalityChange = (municipalityName: string) => {
-        // Find the department that contains this municipality
         let deptSlug = formData.location?.department || '';
         if (!deptSlug || !COLOMBIA_MUNICIPALITIES_BY_DEPARTMENT[deptSlug]?.includes(municipalityName)) {
             const found = Object.entries(COLOMBIA_MUNICIPALITIES_BY_DEPARTMENT).find(
@@ -426,9 +420,7 @@ export function PatientForm({ initialData, isEditMode = false, onCloseSuccess, o
         <BaseCard padding="lg">
             <form onSubmit={handleSubmit} className="space-y-6" noValidate>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Left Column */}
                     <div className="space-y-6">
-                        {/* Identification */}
                         <BaseCard title="Identificación" variant="muted">
                             <div className="grid grid-cols-1 gap-4">
                                 <FormField label="Tipo de Identificación" required>
@@ -459,7 +451,6 @@ export function PatientForm({ initialData, isEditMode = false, onCloseSuccess, o
                             </div>
                         </BaseCard>
 
-                        {/* Personal Info */}
                         <BaseCard title="Información Personal" variant="muted">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <FormField label="Primer Nombre" required>
@@ -569,9 +560,7 @@ export function PatientForm({ initialData, isEditMode = false, onCloseSuccess, o
                         </BaseCard>
                     </div>
 
-                    {/* Right Column */}
                     <div className="space-y-6">
-                        {/* Entity & Care Type */}
                         <BaseCard title="Atención" variant="muted">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <FormField label="Entidad" required>
@@ -627,7 +616,6 @@ export function PatientForm({ initialData, isEditMode = false, onCloseSuccess, o
                             </div>
                         </BaseCard>
 
-                        {/* Location */}
                         <BaseCard title="Ubicación" variant="muted">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <FormField label="Departamento">
@@ -660,7 +648,6 @@ export function PatientForm({ initialData, isEditMode = false, onCloseSuccess, o
                             </div>
                         </BaseCard>
 
-                        {/* Observaciones */}
                         <BaseCard variant="muted">
                             <FormField label="Observaciones">
                                 <Textarea
@@ -678,7 +665,6 @@ export function PatientForm({ initialData, isEditMode = false, onCloseSuccess, o
                     <FormErrorAlert message={error.message} type={error.type} field={error.field} errors={error.errors} />
                 )}
 
-                {/* Actions */}
                 <div className="flex flex-wrap justify-end items-center gap-3 pt-4 border-t border-neutral-200" dir="ltr">
                     <button
                         type="button"
@@ -723,7 +709,6 @@ export function PatientForm({ initialData, isEditMode = false, onCloseSuccess, o
                 />
             )}
 
-            {/* Success Modal */}
             {successPatient && (
                 <PatientSuccessModal
                     isOpen={showSuccessModal}

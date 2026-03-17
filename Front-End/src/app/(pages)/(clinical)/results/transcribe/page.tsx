@@ -149,13 +149,16 @@ export default function TranscribeResultsPage() {
         setSearchError('');
 
         try {
+            // Guardar progreso debe permitir que el backend avance el estado (En recepción → Corte macro, etc.),
+            // pero cuando todo está completo (botón "Completar para Firma") no debe cambiar el estado a "Por firmar".
+            const skipStateUpdate = complete;
             const updated = await resultsService.updateCaseResult(caseData.id, {
                 method: sections.method?.filter((m) => m?.trim()),
                 macro_result: sections.macro || undefined,
                 micro_result: sections.micro || undefined,
                 diagnosis: sections.diagnosis || undefined,
                 diagnosisImages: sections.diagnosisImages,
-            }, !complete);
+            }, skipStateUpdate);
             if (updated) setCaseData(updated);
             setSuccessType(complete ? 'complete' : 'progress');
             setShowSuccessModal(true);

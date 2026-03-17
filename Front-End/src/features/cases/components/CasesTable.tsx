@@ -74,8 +74,6 @@ const priorityLabels: Record<string, string> = {
   prioritario: "Prioritario",
 };
 
-// No longer computing age in table
-
 function formatDateTime(dateStr?: string): string {
   if (!dateStr) return "N/A";
   const d = new Date(dateStr);
@@ -224,7 +222,6 @@ export function CasesTable({
         <table className="min-w-full text-base">
           <thead>
             <tr className="border-b border-gray-200 bg-gray-50">
-              {/* Checkbox column */}
               {!isPaciente && (
                 <th className="px-2 py-2 text-center w-[3%]">
                   <input
@@ -286,7 +283,6 @@ export function CasesTable({
                         : ""
                   }`}
                 >
-                  {/* Checkbox cell */}
                   {!isPaciente && (
                     <td className="px-2 py-3 text-center">
                       <input

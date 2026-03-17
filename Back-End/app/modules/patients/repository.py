@@ -1,17 +1,16 @@
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
-from app.core.date_utils import format_iso_datetime
 
 from bson import ObjectId
 from pymongo.collection import Collection
 from pymongo.database import Database
 from pymongo.cursor import Cursor
 from pymongo.errors import DuplicateKeyError
-from fastapi import HTTPException
 
+from app.core.date_utils import format_iso_datetime
+from app.core.exceptions import conflict_exception
 
-# Migración: valores numéricos antiguos a siglas
 _ID_TYPE_LEGACY_TO_SIGLA = {
     0: "NN", 1: "CC", 2: "CE", 3: "TI", 4: "PA",
     5: "RC", 6: "DE", 7: "NIT", 8: "CD", 9: "SC",
@@ -19,7 +18,6 @@ _ID_TYPE_LEGACY_TO_SIGLA = {
 
 
 def _doc_to_patient(doc: dict) -> dict:
-    """Convierte documento MongoDB a formato API (id string, fechas ISO)."""
     if not doc:
         return {}
     out = dict(doc)
@@ -30,11 +28,9 @@ def _doc_to_patient(doc: dict) -> dict:
             out[key] = format_iso_datetime(out[key])
     if "birth_date" in out and isinstance(out.get("birth_date"), datetime):
         out["birth_date"] = out["birth_date"].strftime("%Y-%m-%d")
-    # Migración: identification_type numérico a sigla
     it = out.get("identification_type")
     if isinstance(it, int) and it in _ID_TYPE_LEGACY_TO_SIGLA:
         out["identification_type"] = _ID_TYPE_LEGACY_TO_SIGLA[it]
-    # audit_info: serializar timestamps si son datetime
     if "audit_info" in out and isinstance(out["audit_info"], list):
         for entry in out["audit_info"]:
             if isinstance(entry, dict) and "timestamp" in entry and isinstance(entry["timestamp"], datetime):
@@ -112,12 +108,9 @@ class PatientRepository:
             query["gender"] = gender.strip()
 
         if municipality_code and municipality_code.strip():
-            code = municipality_code.strip()
-            and_conditions.append({
-                "$or": [
-                    {"location.municipality": {"$regex": code, "$options": "i"}},
-                ]
-            })
+            and_conditions.append(
+                {"location.municipality": {"$regex": re.escape(municipality_code.strip()), "$options": "i"}}
+            )
 
         if and_conditions:
             query["$and"] = and_conditions
@@ -141,7 +134,6 @@ class PatientRepository:
 
     @staticmethod
     def _clean_empty_strings(data: dict) -> dict:
-        """Convierte strings vacíos a None en campos opcionales para no violar restricciones del backend."""
         optional_str_fields = {
             "second_name", "second_lastname", "birth_date", "phone", "email", "observations"
         }
@@ -168,7 +160,7 @@ class PatientRepository:
             data.get("second_lastname") or "",
         ]
         data["full_name"] = " ".join(p for p in parts if p).strip()
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         data["created_at"] = now
         data["updated_at"] = now
         user_email = created_by_email or "system"
@@ -178,10 +170,7 @@ class PatientRepository:
         try:
             result = self._coll.insert_one(data)
         except DuplicateKeyError:
-            raise HTTPException(
-                status_code=409,
-                detail="Ya existe un paciente con ese tipo y número de identificación."
-            )
+            raise conflict_exception("Ya existe un paciente con ese tipo y número de identificación.")
         doc = self._coll.find_one({"_id": result.inserted_id})
         return _doc_to_patient(doc)
 
@@ -199,8 +188,8 @@ class PatientRepository:
             del data["created_at"]
         if "audit_info" in data:
             del data["audit_info"]
-        data["updated_at"] = datetime.utcnow()
-        parts = []
+        now = datetime.now(timezone.utc)
+        data["updated_at"] = now
         if "first_name" in data or "first_lastname" in data:
             doc = self._coll.find_one({"_id": oid})
             if doc:
@@ -210,17 +199,14 @@ class PatientRepository:
                 sl = data.get("second_lastname", doc.get("second_lastname") or "")
                 data["full_name"] = " ".join(p for p in [fn, sn, fl, sl] if p).strip()
         user_email = updated_by_email or "system"
-        audit_entry = {"action": "updated", "user_email": user_email, "timestamp": datetime.utcnow()}
+        audit_entry = {"action": "updated", "user_email": user_email, "timestamp": now}
         try:
             self._coll.update_one(
                 {"_id": oid},
                 {"$set": data, "$push": {"audit_info": audit_entry}},
             )
         except DuplicateKeyError:
-            raise HTTPException(
-                status_code=409,
-                detail="Ya existe un paciente con ese tipo y número de identificación."
-            )
+            raise conflict_exception("Ya existe un paciente con ese tipo y número de identificación.")
         doc = self._coll.find_one({"_id": oid})
         return _doc_to_patient(doc) if doc else None
 

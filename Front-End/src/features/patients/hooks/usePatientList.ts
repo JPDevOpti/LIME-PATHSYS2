@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Patient, PatientFilters, CareType, Gender } from '../types/patient.types';
 import { patientService } from '../services/patient.service';
 
@@ -44,14 +44,26 @@ function toPatientFilters(f: PatientListFilters): PatientFilters {
     };
 }
 
+function getSortValue(p: Patient, key: PatientSortKey): string | number {
+    switch (key) {
+        case 'patient_code': return p.patient_code ?? '';
+        case 'full_name': return p.full_name ?? '';
+        case 'identification_number': return p.identification_number ?? '';
+        case 'entity': return p.entity_info?.entity_name ?? '';
+        case 'care_type': return p.care_type ?? '';
+        case 'gender': return p.gender ?? '';
+        case 'age': return p.age ?? 0;
+        case 'created_at': return p.created_at ? new Date(p.created_at).getTime() : 0;
+        default: return '';
+    }
+}
+
 export function usePatientList() {
     const [patients, setPatients] = useState<Patient[]>([]);
     const [totalItems, setTotalItems] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
     const [filters, setFilters] = useState<PatientListFilters>(defaultFilters);
-
     const [sortKey, setSortKey] = useState<PatientSortKey>('created_at');
     const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
     const [currentPage, setCurrentPage] = useState(1);
@@ -62,13 +74,11 @@ export function usePatientList() {
         setError(null);
         const f = overrideFilters ?? filters;
         try {
-            const skip = (currentPage - 1) * itemsPerPage;
-            const apiFilters: PatientFilters = {
+            const { data, total } = await patientService.getPatients({
                 ...toPatientFilters(f),
-                skip,
+                skip: (currentPage - 1) * itemsPerPage,
                 limit: itemsPerPage
-            };
-            const { data, total } = await patientService.getPatients(apiFilters);
+            });
             setPatients(data);
             setTotalItems(total);
         } catch {
@@ -84,52 +94,30 @@ export function usePatientList() {
         loadPatients();
     }, [loadPatients]);
 
+    const filteredPatients = useMemo(() =>
+        [...patients].sort((a, b) => {
+            const va = getSortValue(a, sortKey);
+            const vb = getSortValue(b, sortKey);
+            const cmp = typeof va === 'string' && typeof vb === 'string'
+                ? va.localeCompare(vb, 'es')
+                : (va as number) - (vb as number);
+            return sortOrder === 'asc' ? cmp : -cmp;
+        }),
+        [patients, sortKey, sortOrder]
+    );
+
+    const totalPages = itemsPerPage > 0 ? Math.max(1, Math.ceil(totalItems / itemsPerPage)) : 1;
+
     const sortBy = useCallback((key: PatientSortKey) => {
         setSortKey(key);
-        setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'));
+        setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+        setCurrentPage(1);
     }, []);
 
     const clearFilters = useCallback(() => {
         setFilters(defaultFilters);
         setCurrentPage(1);
     }, []);
-
-    const getSortValue = (p: Patient, key: PatientSortKey): string | number => {
-        switch (key) {
-            case 'patient_code':
-                return p.patient_code ?? '';
-            case 'full_name':
-                return p.full_name ?? '';
-            case 'identification_number':
-                return p.identification_number ?? '';
-            case 'entity':
-                return p.entity_info?.entity_name ?? '';
-            case 'care_type':
-                return p.care_type ?? '';
-            case 'gender':
-                return p.gender ?? '';
-            case 'age':
-                return p.age ?? 0;
-            case 'created_at':
-                return p.created_at ? new Date(p.created_at).getTime() : 0;
-            default:
-                return '';
-        }
-    };
-
-    const sortedPatients = [...patients].sort((a, b) => {
-        const va = getSortValue(a, sortKey);
-        const vb = getSortValue(b, sortKey);
-        const cmp = typeof va === 'string' && typeof vb === 'string'
-            ? va.localeCompare(vb, 'es')
-            : (va as number) - (vb as number);
-        return sortOrder === 'asc' ? cmp : -cmp;
-    });
-
-    const totalPages = itemsPerPage > 0
-        ? Math.max(1, Math.ceil(totalItems / itemsPerPage))
-        : 1;
-    const paginatedPatients = sortedPatients;
 
     const updateFilters = useCallback((updates: Partial<PatientListFilters>) => {
         setFilters(prev => ({ ...prev, ...updates }));
@@ -140,10 +128,6 @@ export function usePatientList() {
         setCurrentPage(1);
         loadPatients(overrideFilters);
     }, [loadPatients]);
-
-    const setCurrentPageAndLoad = useCallback((page: number) => {
-        setCurrentPage(page);
-    }, []);
 
     const setItemsPerPageAndLoad = useCallback((value: number) => {
         setItemsPerPage(value);
@@ -163,11 +147,10 @@ export function usePatientList() {
         sortKey,
         sortOrder,
         currentPage,
-        setCurrentPage: setCurrentPageAndLoad,
+        setCurrentPage,
         itemsPerPage,
         setItemsPerPage: setItemsPerPageAndLoad,
-        filteredPatients: sortedPatients,
-        paginatedPatients,
+        filteredPatients,
         totalPages,
         totalItems,
         loadPatients,

@@ -28,7 +28,7 @@ from pymongo.errors import BulkWriteError
 
 ATLAS_URL = os.environ.get("LEGACY_ATLAS_URI", "")
 ATLAS_DB  = "lime_pathsys"
-LOCAL_URL = "mongodb://localhost:27017"
+LOCAL_URL = os.environ.get("DEST_ATLAS_URI", "mongodb://localhost:27017")
 LOCAL_DB  = "pathsys"
 
 BATCH_SIZE = 200

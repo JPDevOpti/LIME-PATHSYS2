@@ -15,15 +15,40 @@ interface PatientInfoCardProps {
     badgeLabel?: string;
     emptyStateMessage?: string;
     emptyStateSubtext?: string;
-    /** Refetch cuando se crea un caso nuevo */
     lastCaseCreatedAt?: string | null;
-    /** Si true, muestra botón editar que abre modal de edición */
     editable?: boolean;
-    /** Se llama con el paciente actualizado al guardar en el modal (requiere editable) */
     onPatientUpdated?: (patient: Patient) => void;
-    /** Oculta "Crear caso" en el modal de éxito del formulario de edición */
     hideCrearCasoLink?: boolean;
 }
+
+const formatDate = (dateStr?: string) => {
+    if (!dateStr) return '';
+    const normalized = !dateStr.includes('T') ? `${dateStr}T00:00:00` : dateStr;
+    return new Date(normalized).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
+};
+
+const formatDateTime = (dateStr?: string) => {
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleString('es-CO', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+};
+
+const getAuditInfoText = (p: Patient): string | null => {
+    const audit = p.audit_info;
+    if (!audit || audit.length === 0) return null;
+    const created = audit.find((e) => e.action === 'created');
+    const lastUpdated = audit.filter((e) => e.action === 'updated').pop() ?? created;
+    const parts: string[] = [];
+    if (created) parts.push(`Creado por ${created.user_email} el ${formatDate(created.timestamp)}`);
+    if (lastUpdated && lastUpdated !== created)
+        parts.push(`Última actualización por ${lastUpdated.user_email} el ${formatDate(lastUpdated.timestamp)}`);
+    return parts.length > 0 ? parts.join(' | ') : null;
+};
 
 const InfoItem = ({ label, value }: { label: string; value?: string | number }) => {
     if (value === undefined || value === null || String(value).trim() === '') return null;
@@ -81,35 +106,6 @@ export function PatientInfoCard({
         caseService.getCasesByPatientId(patient.id).then(setPreviousCases).finally(() => setLoadingCases(false));
     }, [patient?.id, lastCaseCreatedAt]);
 
-    const formatDate = (dateStr?: string) => {
-        if (!dateStr) return '';
-        const normalized = !dateStr.includes('T') ? `${dateStr}T00:00:00` : dateStr;
-        return new Date(normalized).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
-    };
-
-    const formatDateTime = (dateStr?: string) => {
-        if (!dateStr) return '';
-        return new Date(dateStr).toLocaleString('es-CO', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
-
-    const getAuditInfoText = (p: Patient): string | null => {
-        const audit = p.audit_info;
-        if (!audit || audit.length === 0) return null;
-        const created = audit.find((e) => e.action === 'created');
-        const lastUpdated = audit.filter((e) => e.action === 'updated').pop() ?? created;
-        const parts: string[] = [];
-        if (created) parts.push(`Creado por ${created.user_email} el ${formatDate(created.timestamp)}`);
-        if (lastUpdated && lastUpdated !== created)
-            parts.push(`Última actualización por ${lastUpdated.user_email} el ${formatDate(lastUpdated.timestamp)}`);
-        return parts.length > 0 ? parts.join(' | ') : null;
-    };
-
     if (!patient) {
         return (
             <BaseCard variant="default" padding="lg" className="bg-white border border-neutral-200">
@@ -125,7 +121,6 @@ export function PatientInfoCard({
     return (
         <BaseCard variant="default" padding="lg" className="bg-white border border-neutral-200">
             <div className="space-y-6">
-                {/* Header */}
                 <div className="flex items-center justify-between pb-4 border-b border-neutral-200">
                     <h3 className="text-lg font-bold text-neutral-900">Información del Paciente</h3>
                     {editable ? (
@@ -145,13 +140,11 @@ export function PatientInfoCard({
                     )}
                 </div>
 
-                {/* Identificación */}
                 <Section icon={FileText} title="Identificación">
                     <InfoItem label="Código del Paciente" value={patient.patient_code} />
                     <InfoItem label="Número de Identificación" value={patient.identification_number} />
                 </Section>
 
-                {/* Información Personal */}
                 <Section icon={User} title="Información Personal">
                     <InfoItem label="Nombre Completo" value={patient.full_name} />
                     <InfoItem label="Sexo" value={patient.gender} />
@@ -159,14 +152,12 @@ export function PatientInfoCard({
                     <InfoItem label="Edad" value={formatAge(patient.age, patient.birth_date)} />
                 </Section>
 
-                {/* Atención */}
                 <Section icon={Building2} title="Atención">
                     <InfoItem label="Entidad" value={patient.entity_info?.entity_name} />
                     <InfoItem label="EPS" value={patient.entity_info?.eps_name} />
                     <InfoItem label="Tipo de Atención" value={patient.care_type} />
                 </Section>
 
-                {/* Casos previos */}
                 <div className="bg-neutral-100 rounded-lg p-4 border border-neutral-200">
                     <div className="flex items-center gap-2 pb-3">
                         <ClipboardList className="w-5 h-5 text-lime-brand-600" />
@@ -211,13 +202,11 @@ export function PatientInfoCard({
                     )}
                 </div>
 
-                {/* Contacto */}
                 <Section icon={Phone} title="Contacto">
                     <InfoItem label="Teléfono" value={patient.phone} />
                     <InfoItem label="Correo Electrónico" value={patient.email} />
                 </Section>
 
-                {/* Ubicación */}
                 <Section icon={MapPin} title="Ubicación">
                     <InfoItem label="País" value={patient.location?.country} />
                     <InfoItem label="Departamento" value={patient.location?.department} />
@@ -225,7 +214,6 @@ export function PatientInfoCard({
                     <InfoItem label="Dirección" value={patient.location?.address} />
                 </Section>
 
-                {/* Observaciones */}
                 {patient.observations && (
                     <div className="bg-neutral-100 rounded-lg p-4 border border-neutral-200">
                         <div className="flex items-center gap-2 pb-2">
@@ -238,12 +226,14 @@ export function PatientInfoCard({
                     </div>
                 )}
 
-                {/* Información administrativa */}
-                {getAuditInfoText(patient) && (
-                    <div className="pt-4 mt-4 border-t border-neutral-200 text-left text-sm text-neutral-500">
-                        {getAuditInfoText(patient)}
-                    </div>
-                )}
+                {(() => {
+                    const auditText = getAuditInfoText(patient);
+                    return auditText ? (
+                        <div className="pt-4 mt-4 border-t border-neutral-200 text-left text-sm text-neutral-500">
+                            {auditText}
+                        </div>
+                    ) : null;
+                })()}
             </div>
 
             {editable && (

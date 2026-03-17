@@ -1,10 +1,12 @@
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any, Optional
 
-from app.core.exceptions import conflict_exception, not_found_exception
+from app.core.exceptions import not_found_exception
 from app.modules.patients.repository import PatientRepository
 from app.modules.patients.schemas import PatientCreate, PatientUpdate
 from app.security import get_password_hash
+
+_PATIENT_EMAIL_DOMAIN = "paciente.dermapath.local"
 
 if TYPE_CHECKING:
     from app.modules.cases.repository import CaseRepository
@@ -67,14 +69,12 @@ class PatientService:
             return
         patient_id = str(patient.get("id") or patient.get("_id") or "")
 
-        # Vincular visitantes existentes con el mismo número de documento
         existing_users = self._users_repo.find_by_document(identification_number)
         for u in existing_users:
             if u.get("role") == "visitante" and not u.get("patient_id"):
                 self._users_repo.set_patient_id(u["id"], patient_id)
 
-        # Crear usuario paciente si no existe
-        email = f"{identification_number}@paciente.dermapath.local"
+        email = f"{identification_number}@{_PATIENT_EMAIL_DOMAIN}"
         if self._users_repo.email_exists(email):
             return
         now = datetime.now(timezone.utc)

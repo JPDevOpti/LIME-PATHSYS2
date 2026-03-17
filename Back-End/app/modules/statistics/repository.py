@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, List
 
 from pymongo.collection import Collection
 from pymongo.database import Database
@@ -26,6 +26,7 @@ class StatisticsRepository:
     def __init__(self, db: Database):
         self.cases: Collection = db["cases"]
         self.tests_col: Collection = db["tests"]
+        self.entities_col: Collection = db["entities"]
 
     def _hama_exclusion(self) -> dict[str, Any]:
         entity_name_pattern = "h[aá]ma|alma\\s*m[aá]ter|alma\\s*m[aá]ter\\s*de\\s*antioquia"
@@ -241,6 +242,7 @@ class StatisticsRepository:
     # ── Entidades ──────────────────────────────────────────────────────────────
 
     def get_entities_report(self, year: int, month: int) -> dict[str, Any]:
+        # Métricas de casos por entidad (solo entidades con al menos un caso en el período)
         match = self._base_match(year, month, completed_only=True, exclude_hama=True)
 
         pipeline = [
@@ -268,23 +270,63 @@ class StatisticsRepository:
                     "avg_time": {"$avg": "$opp_time"},
                 }
             },
-            {"$sort": {"total": -1}},
         ]
 
         raw = list(self.cases.aggregate(pipeline))
-        entities = []
+        aggregated_by_name: dict[str, dict[str, Any]] = {}
         for r in raw:
             nombre = r["_id"] or "Sin entidad"
-            entities.append({
-                "nombre": nombre,
-                "codigo": nombre,
-                "ambulatorios": r["ambulatorios"],
-                "hospitalizados": r["hospitalizados"],
-                "total": r["total"],
-                "dentroOportunidad": r["dentro"],
-                "fueraOportunidad": r["fuera"],
-                "tiempoPromedio": round(r["avg_time"], 1) if r.get("avg_time") is not None else 0.0,
-            })
+            aggregated_by_name[nombre] = r
+
+        # Catálogo de entidades activas (todas, aunque no tengan casos), excluyendo HAMA/Alma Máter
+        entity_name_pattern = "h[aá]ma|alma\\s*m[aá]ter|alma\\s*m[aá]ter\\s*de\\s*antioquia"
+        entity_code_pattern = "^HAMA(?:[-_].*)?$"
+        entities_cursor = self.entities_col.find(
+            {
+                "is_active": True,
+                "$nor": [
+                    {"code": {"$regex": entity_code_pattern, "$options": "i"}},
+                    {"name": {"$regex": entity_name_pattern, "$options": "i"}},
+                ],
+            },
+            {"name": 1, "code": 1},
+        )
+
+        entities: list[dict[str, Any]] = []
+        for doc in entities_cursor:
+            nombre = doc.get("name") or "Sin entidad"
+            codigo = doc.get("code") or nombre
+            stats = aggregated_by_name.get(nombre)
+            if stats:
+                ambulatorios = stats["ambulatorios"]
+                hospitalizados = stats["hospitalizados"]
+                total = stats["total"]
+                dentro = stats["dentro"]
+                fuera = stats["fuera"]
+                avg_time = round(stats["avg_time"], 1) if stats.get("avg_time") is not None else 0.0
+            else:
+                ambulatorios = 0
+                hospitalizados = 0
+                total = 0
+                dentro = 0
+                fuera = 0
+                avg_time = 0.0
+
+            entities.append(
+                {
+                    "nombre": nombre,
+                    "codigo": codigo,
+                    "ambulatorios": ambulatorios,
+                    "hospitalizados": hospitalizados,
+                    "total": total,
+                    "dentroOportunidad": dentro,
+                    "fueraOportunidad": fuera,
+                    "tiempoPromedio": avg_time,
+                }
+            )
+
+        # Ordenar por total descendente (entidades sin casos quedarán al final)
+        entities.sort(key=lambda e: e["total"], reverse=True)
 
         total_amb = sum(e["ambulatorios"] for e in entities)
         total_hosp = sum(e["hospitalizados"] for e in entities)
@@ -488,9 +530,19 @@ class StatisticsRepository:
         ]
 
     def get_available_entities(self) -> List[str]:
-        """Devuelve los nombres únicos de entidades que tienen al menos un caso."""
-        raw = self.cases.distinct("patient_info.entity_info.entity_name", self._hama_exclusion())
-        return sorted([r for r in raw if r and isinstance(r, str)])
+        """Devuelve los nombres únicos de entidades activas, excluyendo HAMA/Alma Máter."""
+        entity_name_pattern = "h[aá]ma|alma\\s*m[aá]ter|alma\\s*m[aá]ter\\s*de\\s*antioquia"
+        entity_code_pattern = "^HAMA(?:[-_].*)?$"
+        query: dict[str, Any] = {
+            "is_active": True,
+            "$nor": [
+                {"code": {"$regex": entity_code_pattern, "$options": "i"}},
+                {"name": {"$regex": entity_name_pattern, "$options": "i"}},
+            ],
+        }
+        raw = self.entities_col.find(query, {"name": 1})
+        names = {doc.get("name") for doc in raw if doc.get("name")}
+        return sorted(names)
 
     def get_available_pathologists(self) -> List[str]:
         """Devuelve los nombres únicos de patólogos asignados que tienen al menos un caso."""

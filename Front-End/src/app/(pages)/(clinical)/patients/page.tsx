@@ -33,7 +33,7 @@ export default function PatientsListPage() {
         setCurrentPage,
         itemsPerPage,
         setItemsPerPage,
-        paginatedPatients,
+        filteredPatients,
         totalPages,
         totalItems,
         loadPatients,
@@ -77,11 +77,8 @@ export default function PatientsListPage() {
             <PatientsFiltersBar
                 filters={filters}
                 onFiltersChange={setFilters}
-                totalFiltered={totalItems}
-                totalAll={totalItems}
                 isLoading={isLoading || isExporting}
                 canExport={totalItems > 0 && !isExporting}
-                onRefresh={() => loadPatients()}
                 onExport={handleExport}
                 onSearch={applySearch}
                 onClear={clearFilters}
@@ -108,7 +105,7 @@ export default function PatientsListPage() {
 
             {!isLoading && !error && (
                 <PatientsTable
-                    patients={paginatedPatients}
+                    patients={filteredPatients}
                     columns={COLUMNS}
                     sortKey={sortKey}
                     sortOrder={sortOrder}
@@ -120,10 +117,7 @@ export default function PatientsListPage() {
                     onSort={sortBy}
                     onPrevPage={() => setCurrentPage(Math.max(1, currentPage - 1))}
                     onNextPage={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                    onItemsPerPageChange={v => {
-                        setItemsPerPage(v);
-                        setCurrentPage(1);
-                    }}
+                    onItemsPerPageChange={setItemsPerPage}
                     onViewDetails={p => setDetailPatient(p)}
                 />
             )}

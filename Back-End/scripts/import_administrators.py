@@ -21,6 +21,11 @@ import json
 import os
 import sys
 from datetime import datetime
+from pathlib import Path
+
+# Carga .env desde Back-End/ antes de importar módulos de la app
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

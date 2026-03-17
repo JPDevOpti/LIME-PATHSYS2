@@ -185,9 +185,10 @@ export default function SignResultsPage() {
         setShowValidation(true);
         setSearchError('');
         try {
-            // Si el caso está en "Por entregar", no saltarse la actualización de estado
-            // para que el backend lo recalcule (normalmente → "Por firmar")
-            const skipStateUpdate = caseData.status !== 'Por entregar';
+            // Guardar progreso debe permitir que el backend avance el estado (En recepción → Corte macro, etc.),
+            // pero cuando todos los campos requeridos para firma están completos, no debe cambiar el estado a "Por firmar".
+            const allRequiredFilled = missingFieldsSign.length === 0;
+            const skipStateUpdate = allRequiredFilled;
             const updated = await resultsService.updateCaseResult(caseData.id, {
                 method: sections.method?.filter((m) => m?.trim()),
                 macro_result: sections.macro || undefined,

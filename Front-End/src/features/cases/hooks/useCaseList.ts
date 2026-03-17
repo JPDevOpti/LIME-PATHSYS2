@@ -71,18 +71,24 @@ export function useCaseList(initialFilters?: Partial<CaseListFilters>) {
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
     const loadCases = useCallback(
-        async (overrideFilters?: CaseListFilters, overridePage?: number, overrideSort?: { key: CaseSortKey; order: SortOrder }) => {
+        async (
+            overrideFilters?: CaseListFilters,
+            overridePage?: number,
+            overrideSort?: { key: CaseSortKey; order: SortOrder },
+            overrideItemsPerPage?: number
+        ) => {
             setIsLoading(true);
             setError(null);
             const f = overrideFilters ?? filters;
             const page = overridePage ?? currentPage;
-            const skip = (page - 1) * itemsPerPage;
+            const limit = overrideItemsPerPage ?? itemsPerPage;
+            const skip = (page - 1) * limit;
             const sort = overrideSort ?? { key: sortKey, order: sortOrder };
             try {
                 const apiFilters: CaseFilters = {
                     ...toCaseFilters(f),
                     skip,
-                    limit: itemsPerPage,
+                    limit,
                     sort_by: sort.key,
                     sort_order: sort.order
                 };
@@ -102,7 +108,7 @@ export function useCaseList(initialFilters?: Partial<CaseListFilters>) {
 
     useEffect(() => {
         loadCases();
-        // eslint-disable-next-line react-hooks/exhaustive-deps -- carga inicial
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const sortBy = useCallback(
@@ -149,7 +155,7 @@ export function useCaseList(initialFilters?: Partial<CaseListFilters>) {
         (n: number) => {
             setItemsPerPage(n);
             setCurrentPage(1);
-            loadCases(undefined, 1);
+            loadCases(undefined, 1, undefined, n);
         },
         [loadCases]
     );
@@ -170,8 +176,6 @@ export function useCaseList(initialFilters?: Partial<CaseListFilters>) {
         setCurrentPage: goToPage,
         itemsPerPage,
         setItemsPerPage: changeItemsPerPage,
-        filteredCases: cases,
-        paginatedCases: cases,
         totalPages,
         totalItems,
         loadCases,

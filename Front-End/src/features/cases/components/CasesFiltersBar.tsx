@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 
 import Link from 'next/link';
 import { BaseCard, BaseButton } from '@/shared/components/base';
-import { Input, Select } from '@/shared/components/ui/form';
-import { FormField } from '@/shared/components/ui/form';
+import { Input, Select, FormField } from '@/shared/components/ui/form';
 import { SearchButton } from '@/shared/components/ui/buttons';
 import { Search, FileSpreadsheet, Plus, Trash2, Lock, Printer, PackageCheck } from 'lucide-react';
 import type { CaseListFilters } from '../hooks/useCaseList';
@@ -16,11 +15,8 @@ import { EntitiesCombobox, PathologistsCombobox, TestsCombobox } from '@/shared/
 interface CasesFiltersBarProps {
     filters: CaseListFilters;
     onFiltersChange: (updates: Partial<CaseListFilters>) => void;
-    totalFiltered: number;
-    totalAll: number;
     isLoading?: boolean;
     canExport?: boolean;
-    onRefresh: () => void;
     onExport: () => void;
     onSearch: (filters: CaseListFilters) => void;
     onClear: () => void;
@@ -51,11 +47,8 @@ const STATUS_OPTIONS = [
 export function CasesFiltersBar({
     filters,
     onFiltersChange,
-    totalFiltered,
-    totalAll,
     isLoading = false,
     canExport = false,
-    onRefresh,
     onExport,
     onSearch,
     onClear,
@@ -67,10 +60,8 @@ export function CasesFiltersBar({
     onDeliverSelected,
 }: CasesFiltersBarProps) {
     const [localFilters, setLocalFilters] = useState<CaseListFilters>(filters);
-    // id del patólogo seleccionado — PathologistsCombobox usa el id como value, el filtro usa el nombre
     const [pathologistId, setPathologistId] = useState('');
 
-    // Sincronizar estado local cuando los filtros externos cambian (ej. al limpiar o refrescar)
     useEffect(() => {
         setLocalFilters(filters);
         if (!filters.pathologist) setPathologistId('');

@@ -12,7 +12,6 @@ interface CaseEditPatientSuccessModalProps {
     isOpen: boolean;
     onClose: () => void;
     patient: Patient;
-    /** Oculta "Create case" (ya estamos en crear caso) */
     hideCrearCasoLink?: boolean;
 }
 
@@ -21,6 +20,40 @@ const formatAuditDate = (dateStr?: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
 };
+
+const formatDate = (dateStr?: string) => {
+    if (!dateStr) return 'No especificado';
+    const normalizedDateStr = !dateStr.includes('T') ? `${dateStr}T00:00:00` : dateStr;
+    return new Date(normalizedDateStr).toLocaleDateString('es-CO', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+};
+
+const InfoItem = ({ label, value }: { label: string; value?: string }) => {
+    if (!value) return null;
+    return (
+        <div className="flex flex-col gap-1">
+            <p className="text-xs font-medium text-neutral-500">{label}</p>
+            <p className="text-sm text-neutral-900 break-all">{value}</p>
+        </div>
+    );
+};
+
+const Section = ({ icon: Icon, sectionTitle, children }: { icon: React.ElementType; sectionTitle: string; children: React.ReactNode }) => (
+    <BaseCard variant="muted" padding="md">
+        <div className="space-y-3">
+            <div className="flex items-center gap-2 pb-2">
+                <Icon className="w-5 h-5 text-lime-brand-600" />
+                <h4 className="text-sm font-semibold text-neutral-700">{sectionTitle}</h4>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {children}
+            </div>
+        </div>
+    </BaseCard>
+);
 
 function getAuditInfoText(patient: Patient): string | null {
     const audit = patient.audit_info;
@@ -35,41 +68,6 @@ function getAuditInfoText(patient: Patient): string | null {
 }
 
 export function CaseEditPatientSuccessModal({ isOpen, onClose, patient, hideCrearCasoLink = false }: CaseEditPatientSuccessModalProps) {
-    const formatDate = (dateStr?: string) => {
-        if (!dateStr) return 'No especificado';
-        const normalizedDateStr = !dateStr.includes('T') ? `${dateStr}T00:00:00` : dateStr;
-        const date = new Date(normalizedDateStr);
-        return date.toLocaleDateString('es-CO', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-    };
-
-    const InfoItem = ({ label, value }: { label: string; value?: string }) => {
-        if (!value) return null;
-        return (
-            <div className="flex flex-col gap-1">
-                <p className="text-xs font-medium text-neutral-500">{label}</p>
-                <p className="text-sm text-neutral-900 break-all">{value}</p>
-            </div>
-        );
-    };
-
-    const Section = ({ icon: Icon, sectionTitle, children }: { icon: React.ElementType; sectionTitle: string; children: React.ReactNode }) => (
-        <BaseCard variant="muted" padding="md">
-            <div className="space-y-3">
-                <div className="flex items-center gap-2 pb-2">
-                    <Icon className="w-5 h-5 text-lime-brand-600" />
-                    <h4 className="text-sm font-semibold text-neutral-700">{sectionTitle}</h4>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {children}
-                </div>
-            </div>
-        </BaseCard>
-    );
-
     return (
         <SuccessModal
             isOpen={isOpen}

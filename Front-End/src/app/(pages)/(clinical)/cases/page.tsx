@@ -23,7 +23,7 @@ const COLUMNS = [
     { key: 'tests' as const, label: 'Pruebas', class: 'w-[15%]' },
     { key: 'status' as const, label: 'Estado', class: 'w-[10%]' },
     { key: 'created_at' as const, label: 'Creación/Firma', class: 'w-[12%]' },
-    { key: 'priority' as const, label: 'Prioridad/Días', class: 'w-[10%]' },
+    { key: 'priority' as const, label: 'Oportunidad', class: 'w-[10%]' },
 ];
 
 const loadingSpinner = (
@@ -97,8 +97,7 @@ function CasesListInner({ isRestrictedView, lockedPathologist, lockedIdentificat
         setCurrentPage,
         itemsPerPage,
         setItemsPerPage,
-        filteredCases,
-        paginatedCases,
+        cases,
         totalPages,
         totalItems,
         loadCases,
@@ -162,16 +161,11 @@ function CasesListInner({ isRestrictedView, lockedPathologist, lockedIdentificat
             <CasesFiltersBar
                 filters={filters}
                 onFiltersChange={setFilters}
-                totalFiltered={totalItems}
-                totalAll={totalItems}
                 isLoading={isLoading || isExporting}
                 canExport={!isRestrictedView && totalItems > 0 && !isExporting}
-                onRefresh={loadCases}
                 onExport={handleExport}
                 onSearch={(f) => {
                     if (lockedPathologist && f.search.trim()) {
-                        // Patólogo buscando por código exacto: desactiva el filtro de patólogo asignado
-                        // y restringe a casos Completados para que pueda ver cualquier resultado
                         applySearch({ ...f, pathologistName: '', status: 'Completado' });
                     } else {
                         applySearch(f);
@@ -207,7 +201,7 @@ function CasesListInner({ isRestrictedView, lockedPathologist, lockedIdentificat
 
             {!isLoading && !error && (
                 <CasesTable
-                    cases={paginatedCases}
+                    cases={cases}
                     columns={COLUMNS}
                     sortKey={sortKey}
                     sortOrder={sortOrder}

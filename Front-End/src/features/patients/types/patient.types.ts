@@ -1,17 +1,15 @@
-/** Siglas de tipos de identificación (valor almacenado en BD) */
 export type IdentificationType =
-    | 'CC'   // Cédula de Ciudadanía
-    | 'TI'   // Tarjeta de Identidad
-    | 'RC'   // Registro Civil
-    | 'PA'   // Pasaporte
-    | 'CE'   // Cédula de Extranjería
-    | 'DE'   // Documento Extranjero
-    | 'SC'   // Salvoconducto
-    | 'NIT'  // NIT
-    | 'CD'   // Carnet Diplomático
-    | 'NN';  // NN
+    | 'CC'
+    | 'TI'
+    | 'RC'
+    | 'PA'
+    | 'CE'
+    | 'DE'
+    | 'SC'
+    | 'NIT'
+    | 'CD'
+    | 'NN';
 
-/** Orden de visualización de tipos de identificación en selects */
 export const IDENTIFICATION_TYPE_OPTIONS: { value: IdentificationType; label: string }[] = [
     { value: 'CC', label: 'Cédula de Ciudadanía' },
     { value: 'TI', label: 'Tarjeta de Identidad' },
@@ -32,9 +30,7 @@ export interface PatientLocation {
     country?: string;
     department?: string;
     municipality?: string;
-    /** Municipio donde nació el paciente (nombre legible) */
     birth_municipality_name?: string;
-    /** Municipio de residencia del paciente (nombre legible) */
     residence_municipality_name?: string;
     subregion?: string;
     address?: string;
@@ -54,16 +50,16 @@ export interface AuditEntry {
 }
 
 export interface Patient {
-    id?: string; // UUID or database ID
-    patient_code: string; // Unique system code
+    id?: string;
+    patient_code: string;
     identification_type: IdentificationType;
     identification_number: string;
     first_name: string;
     second_name?: string;
     first_lastname: string;
     second_lastname?: string;
-    full_name?: string; // Computed
-    birth_date?: string; // ISO Date YYYY-MM-DD
+    full_name?: string;
+    birth_date?: string;
     age?: number;
     gender: Gender;
     phone?: string;
@@ -89,8 +85,6 @@ export interface PatientFilters {
     limit?: number;
 }
 
-export interface CreatePatientRequest extends Omit<Patient, 'id' | 'patient_code' | 'created_at' | 'updated_at' | 'full_name'> {
-    // Age can be entered manually or calculated from birth_date
-}
+export interface CreatePatientRequest extends Omit<Patient, 'id' | 'patient_code' | 'created_at' | 'updated_at' | 'full_name'> {}
 
-export interface UpdatePatientRequest extends Partial<CreatePatientRequest> { }
+export interface UpdatePatientRequest extends Partial<CreatePatientRequest> {}

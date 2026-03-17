@@ -20,18 +20,17 @@ interface PatientDetailsModalProps {
     onClose: () => void;
 }
 
-const formatDate = (dateStr?: string) => {
+const formatDate = (dateStr?: string): string | undefined => {
     if (!dateStr) return undefined;
-    const normalized = !dateStr.includes('T') ? `${dateStr}T00:00:00` : dateStr;
-    const date = new Date(normalized);
-    return date.toLocaleDateString('es-CO', {
+    const normalized = dateStr.includes('T') ? dateStr : `${dateStr}T00:00:00`;
+    return new Date(normalized).toLocaleDateString('es-CO', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
     });
 };
 
-const formatDateTime = (dateStr?: string) => {
+const formatDateTime = (dateStr?: string): string | undefined => {
     if (!dateStr) return undefined;
     return new Date(dateStr).toLocaleString('es-CO', {
         year: 'numeric',
@@ -64,6 +63,38 @@ function getAuditInfoText(patient: Patient): string | null {
     return parts.length > 0 ? parts.join(' | ') : null;
 }
 
+const InfoItem = ({ label, value }: { label: string; value?: string }) => {
+    if (!value) return null;
+    return (
+        <div className="flex flex-col gap-1">
+            <p className="text-xs font-medium text-neutral-500">{label}</p>
+            <p className="text-sm text-neutral-900 break-all">{value}</p>
+        </div>
+    );
+};
+
+const Section = ({
+    icon: Icon,
+    sectionTitle,
+    children
+}: {
+    icon: React.ElementType;
+    sectionTitle: string;
+    children: React.ReactNode;
+}) => (
+    <BaseCard variant="muted" padding="md">
+        <div className="space-y-3">
+            <div className="flex items-center gap-2 pb-2">
+                <Icon className="w-5 h-5 text-lime-brand-600" />
+                <h4 className="text-sm font-semibold text-neutral-700">{sectionTitle}</h4>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {children}
+            </div>
+        </div>
+    </BaseCard>
+);
+
 export function PatientDetailsModal({ visible, patient, onClose }: PatientDetailsModalProps) {
     const { isPatologo } = usePermissions();
     const [fullPatient, setFullPatient] = useState<Patient | null>(null);
@@ -93,38 +124,6 @@ export function PatientDetailsModal({ visible, patient, onClose }: PatientDetail
 
     const displayPatient = patient ? (fullPatient ?? patient) : null;
     if (!displayPatient) return null;
-
-    const InfoItem = ({ label, value }: { label: string; value?: string }) => {
-        if (!value) return null;
-        return (
-            <div className="flex flex-col gap-1">
-                <p className="text-xs font-medium text-neutral-500">{label}</p>
-                <p className="text-sm text-neutral-900 break-all">{value}</p>
-            </div>
-        );
-    };
-
-    const Section = ({
-        icon: Icon,
-        sectionTitle,
-        children
-    }: {
-        icon: React.ElementType;
-        sectionTitle: string;
-        children: React.ReactNode;
-    }) => (
-        <BaseCard variant="muted" padding="md">
-            <div className="space-y-3">
-                <div className="flex items-center gap-2 pb-2">
-                    <Icon className="w-5 h-5 text-lime-brand-600" />
-                    <h4 className="text-sm font-semibold text-neutral-700">{sectionTitle}</h4>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {children}
-                </div>
-            </div>
-        </BaseCard>
-    );
 
     const modalTitle = (
         <div className="space-y-1">
@@ -193,7 +192,6 @@ export function PatientDetailsModal({ visible, patient, onClose }: PatientDetail
                     </div>
                     <div className="space-y-6">
                         <Section icon={MapPin} sectionTitle="Ubicación">
-                            
                             <InfoItem label="Departamento" value={displayPatient.location?.department} />
                             <InfoItem label="Municipio" value={displayPatient.location?.municipality} />
                             <InfoItem label="Dirección" value={displayPatient.location?.address} />

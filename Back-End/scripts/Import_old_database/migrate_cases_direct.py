@@ -38,7 +38,7 @@ from bson import ObjectId
 ATLAS_URL  = os.environ.get("LEGACY_ATLAS_URI", "")
 ATLAS_DB   = "lime_pathsys"
 
-LOCAL_URL  = "mongodb://localhost:27017"
+LOCAL_URL  = os.environ.get("DEST_ATLAS_URI") or os.environ.get("MONGODB_URI") or "mongodb://localhost:27017"
 LOCAL_DB   = "pathsys"
 
 DEFAULT_BATCH_SIZE = 200

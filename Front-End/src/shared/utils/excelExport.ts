@@ -1,6 +1,7 @@
 import ExcelJS from 'exceljs';
 import { Patient } from '@/features/patients/types/patient.types';
 import { Case, getDateFromDateInfo } from '@/features/cases/types/case.types';
+import { BODY_REGION_OPTIONS } from '@/features/cases/data/case-options';
 import { getElapsedDays, getWasTimely, getMaxOpportunityTime } from './dateUtils';
 import { formatAge } from './formatAge';
 
@@ -111,69 +112,60 @@ export async function exportCasesToExcel(cases: Case[]) {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Casos');
 
-    // Preparar tests: una lista plana de {name, quantity} por caso
-    const casesWithTests = cases.map(c => {
-        const tests = c.samples?.flatMap(s => s.tests?.map(t => ({
-            name: t.name,
-            quantity: t.quantity
-        })) || []) || [];
-        return { ...c, flatTests: tests };
-    });
-
-    // Encontrar el máximo número de tests en un solo caso para definir columnas
-    const maxTests = Math.max(...casesWithTests.map(c => c.flatTests.length), 0);
+    // Encontrar el máximo número de muestras en un caso para definir columnas por muestra
+    const maxSamples = Math.max(...cases.map(c => c.samples?.length ?? 0), 0);
 
     // 1. Columnas de Información General del Caso
     const generalColumns = [
-        { header: 'Código Caso', key: 'case_code', width: 20 },
-        { header: 'Estado', key: 'status', width: 15 },
-        { header: 'Prioridad', key: 'priority', width: 12 },
-        { header: 'Fecha Creación', key: 'created_at', width: 20 },
-        { header: 'Días Transcurridos', key: 'days', width: 15 },
-        { header: 'Oportunidad Máxima', key: 'max_opportunity', width: 20 },
-        { header: 'Oportunidad', key: 'opportunity', width: 15 },
-        { header: 'Médico Solicitante', key: 'doctor', width: 25 },
-        { header: 'Servicio', key: 'service', width: 20 },
-        { header: 'Entidad', key: 'entity', width: 25 },
-        { header: 'Patólogo Asignado', key: 'pathologist_name', width: 25 },
-        { header: 'Fecha Creación', key: 'reception_date', width: 18 },
-        { header: 'Fecha Firma', key: 'signed_at', width: 20 },
-        { header: 'Fecha Entrega', key: 'delivered_at', width: 20 },
+        { header: 'Código Caso', key: 'case_code', width: 22 },
+        { header: 'Estado', key: 'status', width: 16 },
+        { header: 'Prioridad', key: 'priority', width: 14 },
+        { header: 'Fecha Creación', key: 'created_at', width: 22 },
+        { header: 'Días Transcurridos', key: 'days', width: 16 },
+        { header: 'Oportunidad Máxima', key: 'max_opportunity', width: 22 },
+        { header: 'Oportunidad', key: 'opportunity', width: 16 },
+        { header: 'Médico Solicitante', key: 'doctor', width: 28 },
+        { header: 'Servicio', key: 'service', width: 22 },
+        { header: 'Entidad', key: 'entity', width: 28 },
+        { header: 'Patólogo Asignado', key: 'pathologist_name', width: 28 },
+        { header: 'Fecha Creación', key: 'reception_date', width: 20 },
+        { header: 'Fecha Firma', key: 'signed_at', width: 22 },
+        { header: 'Fecha Entrega', key: 'delivered_at', width: 22 },
     ];
 
     // 2. Datos del Paciente
     const patientColumns = [
-        { header: 'Paciente Apellido 1', key: 'p_last1', width: 15 },
-        { header: 'Paciente Apellido 2', key: 'p_last2', width: 15 },
-        { header: 'Paciente Nombre 1', key: 'p_name1', width: 15 },
-        { header: 'Paciente Nombre 2', key: 'p_name2', width: 15 },
-        { header: 'Paciente Tipo Doc', key: 'p_id_type', width: 10 },
-        { header: 'Paciente Documento', key: 'p_id_num', width: 18 },
+        { header: 'Paciente Apellido 1', key: 'p_last1', width: 18 },
+        { header: 'Paciente Apellido 2', key: 'p_last2', width: 18 },
+        { header: 'Paciente Nombre 1', key: 'p_name1', width: 18 },
+        { header: 'Paciente Nombre 2', key: 'p_name2', width: 18 },
+        { header: 'Paciente Tipo Doc', key: 'p_id_type', width: 12 },
+        { header: 'Paciente Documento', key: 'p_id_num', width: 20 },
         { header: 'Paciente Sexo', key: 'p_gender', width: 12 },
-        { header: 'Paciente Edad', key: 'p_age', width: 8 },
-        { header: 'Paciente Teléfono', key: 'p_phone', width: 15 },
-        { header: 'Paciente Email', key: 'p_email', width: 25 },
+        { header: 'Paciente Edad', key: 'p_age', width: 10 },
+        { header: 'Paciente Teléfono', key: 'p_phone', width: 18 },
+        { header: 'Paciente Email', key: 'p_email', width: 28 },
     ];
 
-    // 3. Columnas dinámicas de pruebas
-    const testColumns = [];
-    for (let i = 1; i <= maxTests; i++) {
-        testColumns.push({ header: `Prueba ${i}`, key: `test_name_${i}`, width: 30 });
-        testColumns.push({ header: `Cant ${i}`, key: `test_qty_${i}`, width: 10 });
+    // 3. Columnas dinámicas por muestra (región del cuerpo y pruebas de esa muestra)
+    const sampleColumns = [];
+    for (let i = 1; i <= maxSamples; i++) {
+        sampleColumns.push({ header: `Muestra ${i} - Región`, key: `sample_region_${i}`, width: 28 });
+        sampleColumns.push({ header: `Muestra ${i} - Pruebas`, key: `sample_tests_${i}`, width: 45 });
     }
 
     // 4. Resultados (Descriptive tags stripped in row mapping)
     const resultColumns = [
-        { header: 'Macroscopía', key: 'macro', width: 40 },
-        { header: 'Microscopía', key: 'micro', width: 40 },
-        { header: 'Diagnóstico', key: 'diagnosis', width: 40 },
-        { header: 'CIE-10 Código', key: 'cie10_code', width: 15 },
-        { header: 'CIE-10 Nombre', key: 'cie10_name', width: 25 },
-        { header: 'CIE-O Código', key: 'cieo_code', width: 15 },
-        { header: 'CIE-O Nombre', key: 'cieo_name', width: 25 },
+        { header: 'Macroscopía', key: 'macro', width: 60 },
+        { header: 'Microscopía', key: 'micro', width: 60 },
+        { header: 'Diagnóstico', key: 'diagnosis', width: 60 },
+        { header: 'CIE-10 Código', key: 'cie10_code', width: 18 },
+        { header: 'CIE-10 Nombre', key: 'cie10_name', width: 30 },
+        { header: 'CIE-O Código', key: 'cieo_code', width: 18 },
+        { header: 'CIE-O Nombre', key: 'cieo_name', width: 30 },
     ];
 
-    worksheet.columns = [...generalColumns, ...patientColumns, ...testColumns, ...resultColumns];
+    worksheet.columns = [...generalColumns, ...patientColumns, ...sampleColumns, ...resultColumns];
 
     // Estilo de encabezado
     worksheet.getRow(1).font = { bold: true };
@@ -184,7 +176,7 @@ export async function exportCasesToExcel(cases: Case[]) {
     };
 
     // Agregar datos
-    casesWithTests.forEach(c => {
+    cases.forEach(c => {
         const createdTimestamp = getDateFromDateInfo(c.date_info, 'created_at');
         const diffDays = getElapsedDays(c);
         const wasTimely = getWasTimely(c);
@@ -228,11 +220,26 @@ export async function exportCasesToExcel(cases: Case[]) {
             p_email: c.patient?.email || ''
         };
 
-        // Rellenar pruebas dinámicas
-        c.flatTests.forEach((t, idx) => {
+        // Rellenar información por muestra: región del cuerpo y pruebas de cada muestra
+        (c.samples ?? []).forEach((sample, idx) => {
             const i = idx + 1;
-            rowData[`test_name_${i}`] = t.name;
-            rowData[`test_qty_${i}`] = t.quantity;
+            const regionLabel =
+                BODY_REGION_OPTIONS.find(o => o.value === sample.body_region)?.label ||
+                sample.body_region ||
+                '';
+
+            const testsSummary = (sample.tests ?? [])
+                .map(t => {
+                    const base = t.code || t.name || '';
+                    if (!base) return '';
+                    const qty = t.quantity && t.quantity > 1 ? ` (x${t.quantity})` : '';
+                    return `${base}${qty}`;
+                })
+                .filter(Boolean)
+                .join('; ');
+
+            rowData[`sample_region_${i}`] = regionLabel;
+            rowData[`sample_tests_${i}`] = testsSummary;
         });
 
         worksheet.addRow(rowData);

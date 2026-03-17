@@ -21,7 +21,6 @@ function getUserHeaders(): Record<string, string> {
     return headers;
 }
 
-// Mapea respuesta API a Case del frontend
 function apiToCase(raw: Record<string, unknown>): Case {
     const patientInfo = raw.patient_info as Record<string, unknown> | undefined;
     const samples = (raw.samples as SampleInfo[] | undefined)?.map(s => ({
@@ -71,14 +70,13 @@ function apiToCase(raw: Record<string, unknown>): Case {
         result: raw.result as Case['result'],
         audit_info: raw.audit_info as Case['audit_info'],
         date_info: raw.date_info as Case['date_info'],
-        complementary_tests: (raw.complementary_tests as Case['complementary_tests']) ?? undefined,
+        complementary_tests: raw.complementary_tests as Case['complementary_tests'],
         complementary_tests_reason: raw.complementary_tests_reason as string | undefined,
         delivered_to: raw.delivered_to as string | undefined,
-        additional_notes: (raw.additional_notes as CaseNote[] | undefined) ?? undefined,
+        additional_notes: raw.additional_notes as CaseNote[] | undefined,
     };
 }
 
-// Mapea CreateCaseRequest a body API (patient_id, requesting_physician, tests con id)
 function toCreateBody(data: CreateCaseRequest): Record<string, unknown> {
     const priority = data.priority === 'normal' ? 'Normal' : 'Prioritario';
     const body: Record<string, unknown> = {
@@ -115,8 +113,6 @@ function toCreateBody(data: CreateCaseRequest): Record<string, unknown> {
 
 function toUpdateBody(data: UpdateCaseRequest): Record<string, unknown> {
     const priority = data.priority === 'normal' ? 'Normal' : 'Prioritario';
-    // null = campo borrado explícitamente → se envía null para que MongoDB lo limpie
-    // undefined / "" = no enviar (se omite del JSON)
     const clearable = (v: string | null | undefined) => v === null ? null : (v || undefined);
     const body: Record<string, unknown> = {
         priority,
@@ -149,35 +145,60 @@ function toUpdateBody(data: UpdateCaseRequest): Record<string, unknown> {
     return body;
 }
 
+function buildCaseParams(filters?: CaseFilters): Record<string, string | number | undefined> {
+    return {
+        search: filters?.search,
+        created_at_from: filters?.created_at_from,
+        created_at_to: filters?.created_at_to,
+        entity: filters?.entity,
+        assigned_pathologist: filters?.assigned_pathologist,
+        pathologist_name: filters?.pathologist_name,
+        priority: filters?.priority,
+        test: filters?.test,
+        state: filters?.status,
+        doctor: filters?.doctor,
+        patient_id: filters?.patient_id,
+        identification_number: filters?.identification_number,
+        sort_by: filters?.sort_by,
+        sort_order: filters?.sort_order,
+    };
+}
+
+type TranscriptionData = {
+    method?: string[];
+    macro_result?: string;
+    micro_result?: string;
+    diagnosis?: string;
+    cie10_diagnosis?: { code: string; name: string } | null;
+    cieo_diagnosis?: { code: string; name: string } | null;
+    diagnosis_images?: string[];
+    complementary_tests?: { code: string; name: string; quantity: number }[];
+    complementary_tests_reason?: string;
+};
+
+function toTranscriptionBody(data: TranscriptionData): Record<string, unknown> {
+    const body: Record<string, unknown> = {};
+    if (data.method !== undefined) body.method = data.method;
+    if (data.macro_result !== undefined) body.macro_result = data.macro_result;
+    if (data.micro_result !== undefined) body.micro_result = data.micro_result;
+    if (data.diagnosis !== undefined) body.diagnosis = data.diagnosis;
+    if (data.cie10_diagnosis !== undefined) body.cie10_diagnosis = data.cie10_diagnosis;
+    if (data.cieo_diagnosis !== undefined) body.cieo_diagnosis = data.cieo_diagnosis;
+    if (data.diagnosis_images !== undefined) body.diagnosis_images = data.diagnosis_images;
+    if (data.complementary_tests !== undefined) body.complementary_tests = data.complementary_tests;
+    if (data.complementary_tests_reason !== undefined) body.complementary_tests_reason = data.complementary_tests_reason;
+    return body;
+}
+
 export const caseService = {
     async getCases(filters?: CaseFilters): Promise<{ data: Case[]; total: number }> {
-        const params: Record<string, string | number | undefined> = {
+        const params = {
+            ...buildCaseParams(filters),
             skip: filters?.skip ?? 0,
-            limit: filters?.limit ?? 50
+            limit: filters?.limit ?? 50,
         };
-        if (filters?.search) params.search = filters.search;
-        if (filters?.created_at_from) params.created_at_from = filters.created_at_from;
-        if (filters?.created_at_to) params.created_at_to = filters.created_at_to;
-        if (filters?.entity) params.entity = filters.entity;
-        if (filters?.assigned_pathologist) params.assigned_pathologist = filters.assigned_pathologist;
-        if (filters?.pathologist_name) params.pathologist_name = filters.pathologist_name;
-        if (filters?.priority) params.priority = filters.priority;
-        if (filters?.test) params.test = filters.test;
-        if (filters?.status) params.state = filters.status;
-        if (filters?.doctor) params.doctor = filters.doctor;
-        if (filters?.patient_id) params.patient_id = filters.patient_id;
-        if (filters?.identification_number) params.identification_number = filters.identification_number;
-        if (filters?.sort_by) params.sort_by = filters.sort_by;
-        if (filters?.sort_order) params.sort_order = filters.sort_order;
-
-        const res = await apiClient.get<{ data: Record<string, unknown>[]; total: number }>(
-            `${API_BASE}`,
-            params
-        );
-        return {
-            data: (res.data || []).map(apiToCase),
-            total: res.total ?? 0
-        };
+        const res = await apiClient.get<{ data: Record<string, unknown>[]; total: number }>(API_BASE, params);
+        return { data: (res.data || []).map(apiToCase), total: res.total ?? 0 };
     },
 
     async createCase(data: CreateCaseRequest, _patient: Patient): Promise<Case> {
@@ -217,66 +238,22 @@ export const caseService = {
 
     async updateCaseTranscription(
         caseId: string,
-        data: {
-            method?: string[];
-            macro_result?: string;
-            micro_result?: string;
-            diagnosis?: string;
-            cie10_diagnosis?: { code: string; name: string } | null;
-            cieo_diagnosis?: { code: string; name: string } | null;
-            diagnosis_images?: string[];
-            complementary_tests?: { code: string; name: string; quantity: number }[];
-            complementary_tests_reason?: string;
-        },
+        data: TranscriptionData,
         skipStateUpdate: boolean = false
     ): Promise<Case> {
-        const body: Record<string, unknown> = {};
-        if (data.method !== undefined) body.method = data.method;
-        if (data.macro_result !== undefined) body.macro_result = data.macro_result;
-        if (data.micro_result !== undefined) body.micro_result = data.micro_result;
-        if (data.diagnosis !== undefined) body.diagnosis = data.diagnosis;
-        if (data.cie10_diagnosis !== undefined) body.cie10_diagnosis = data.cie10_diagnosis;
-        if (data.cieo_diagnosis !== undefined) body.cieo_diagnosis = data.cieo_diagnosis;
-        if (data.diagnosis_images !== undefined) body.diagnosis_images = data.diagnosis_images;
-        if (data.complementary_tests !== undefined) body.complementary_tests = data.complementary_tests;
-        if (data.complementary_tests_reason !== undefined) body.complementary_tests_reason = data.complementary_tests_reason;
-
         const query = skipStateUpdate ? '?skip_state_update=true' : '';
         const raw = await apiClient.put<Record<string, unknown>>(
             `${API_BASE}/${caseId}/transcription${query}`,
-            body,
+            toTranscriptionBody(data),
             getUserHeaders()
         );
         return apiToCase(raw);
     },
 
-    async signCase(
-        caseId: string,
-        data: {
-            method?: string[];
-            macro_result?: string;
-            micro_result?: string;
-            diagnosis?: string;
-            cie10_diagnosis?: { code: string; name: string } | null;
-            cieo_diagnosis?: { code: string; name: string } | null;
-            diagnosis_images?: string[];
-            complementary_tests?: { code: string; name: string; quantity: number }[];
-            complementary_tests_reason?: string;
-        }
-    ): Promise<Case> {
-        const body: Record<string, unknown> = {};
-        if (data.method !== undefined) body.method = data.method;
-        if (data.macro_result !== undefined) body.macro_result = data.macro_result;
-        if (data.micro_result !== undefined) body.micro_result = data.micro_result;
-        if (data.diagnosis !== undefined) body.diagnosis = data.diagnosis;
-        if (data.cie10_diagnosis !== undefined) body.cie10_diagnosis = data.cie10_diagnosis;
-        if (data.cieo_diagnosis !== undefined) body.cieo_diagnosis = data.cieo_diagnosis;
-        if (data.diagnosis_images !== undefined) body.diagnosis_images = data.diagnosis_images;
-        if (data.complementary_tests !== undefined) body.complementary_tests = data.complementary_tests;
-        if (data.complementary_tests_reason !== undefined) body.complementary_tests_reason = data.complementary_tests_reason;
+    async signCase(caseId: string, data: TranscriptionData): Promise<Case> {
         const raw = await apiClient.put<Record<string, unknown>>(
             `${API_BASE}/${caseId}/sign`,
-            body,
+            toTranscriptionBody(data),
             getUserHeaders()
         );
         return apiToCase(raw);
@@ -331,28 +308,8 @@ export const caseService = {
     },
 
     async getAllCasesForExport(filters?: CaseFilters): Promise<Case[]> {
-        const params: Record<string, string | number | undefined> = {
-            search: filters?.search,
-            created_at_from: filters?.created_at_from,
-            created_at_to: filters?.created_at_to,
-            entity: filters?.entity,
-            assigned_pathologist: filters?.assigned_pathologist,
-            pathologist_name: filters?.pathologist_name,
-            priority: filters?.priority,
-            test: filters?.test,
-            state: filters?.status,
-            doctor: filters?.doctor,
-            patient_id: filters?.patient_id,
-            identification_number: filters?.identification_number,
-            sort_by: filters?.sort_by,
-            sort_order: filters?.sort_order,
-            skip: 0,
-            limit: 100000,
-        };
-        const res = await apiClient.get<{ data: Record<string, unknown>[]; total: number }>(
-            `${API_BASE}`,
-            params
-        );
+        const params = { ...buildCaseParams(filters), skip: 0, limit: 100000 };
+        const res = await apiClient.get<{ data: Record<string, unknown>[]; total: number }>(API_BASE, params);
         return (res.data || []).map(apiToCase);
     }
 };

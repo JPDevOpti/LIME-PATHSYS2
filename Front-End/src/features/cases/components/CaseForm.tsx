@@ -54,6 +54,18 @@ interface CaseFormEditProps {
     onDelete?: () => void | Promise<void>;
 }
 
+function getStatusStyles(status?: CaseStatus): string {
+    switch (status) {
+        case 'Completado': return 'bg-green-100 text-green-800 border-green-200';
+        case 'Por entregar': return 'bg-red-100 text-red-800 border-red-200';
+        case 'Por firmar': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        case 'Descrip micro': return 'bg-indigo-100 text-indigo-800 border-indigo-200';
+        case 'Corte macro': return 'bg-cyan-100 text-cyan-800 border-cyan-200';
+        case 'En recepción': return 'bg-blue-100 text-blue-800 border-blue-200';
+        default: return 'bg-neutral-100 text-neutral-800 border-neutral-200';
+    }
+}
+
 function caseToFormData(c: Case): CreateCaseRequest & { assigned_pathologist?: { id: string; name: string }; status?: CaseStatus } {
     return {
         patientId: c.patient?.id || '',
@@ -315,18 +327,6 @@ export function CaseForm(props: CaseFormCreateProps | CaseFormEditProps) {
         props.onClear?.();
     };
 
-    const getStatusStyles = (status?: CaseStatus) => {
-        switch (status) {
-            case 'Completado': return 'bg-green-100 text-green-800 border-green-200';
-            case 'Por entregar': return 'bg-red-100 text-red-800 border-red-200';
-            case 'Por firmar': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-            case 'Descrip micro': return 'bg-indigo-100 text-indigo-800 border-indigo-200';
-            case 'Corte macro': return 'bg-cyan-100 text-cyan-800 border-cyan-200';
-            case 'En recepción': return 'bg-blue-100 text-blue-800 border-blue-200';
-            default: return 'bg-neutral-100 text-neutral-800 border-neutral-200';
-        }
-    };
-
     return (
         <BaseCard variant="default" padding="lg">
             <form onSubmit={handleSubmit} className="space-y-6" noValidate>
@@ -342,7 +342,6 @@ export function CaseForm(props: CaseFormCreateProps | CaseFormEditProps) {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                    {/* 1. Entidad */}
                     <FormField label="Entidad">
                         <EntitiesCombobox
                             value={formData.entity || ''}
@@ -356,7 +355,6 @@ export function CaseForm(props: CaseFormCreateProps | CaseFormEditProps) {
                         />
                     </FormField>
 
-                    {/* 2. Tipo de atención */}
                     <FormField label="Tipo de atención">
                         <Select
                             name="care_type"
@@ -370,7 +368,6 @@ export function CaseForm(props: CaseFormCreateProps | CaseFormEditProps) {
                         />
                     </FormField>
 
-                    {/* 3. Servicio */}
                     <FormField label="Servicio">
                         <Input
                             type="text"
@@ -381,7 +378,6 @@ export function CaseForm(props: CaseFormCreateProps | CaseFormEditProps) {
                         />
                     </FormField>
 
-                    {/* 4. Prioridad */}
                     <FormField label="Prioridad" required>
                         <Select
                             name="priority"
@@ -396,7 +392,6 @@ export function CaseForm(props: CaseFormCreateProps | CaseFormEditProps) {
                         />
                     </FormField>
 
-                    {/* 5. Médico remitente */}
                     <FormField label="Médico remitente" required>
                         <Input
                             type="text"
@@ -409,7 +404,6 @@ export function CaseForm(props: CaseFormCreateProps | CaseFormEditProps) {
                         />
                     </FormField>
 
-                    {/* 6. Patólogo asignado */}
                     <FormField label="Patólogo asignado">
                         <PathologistsCombobox
                             value={formData.assigned_pathologist?.id ?? ''}
@@ -435,7 +429,6 @@ export function CaseForm(props: CaseFormCreateProps | CaseFormEditProps) {
                         />
                     </FormField>
 
-                    {/* 7. Número de muestras */}
                     <FormField label="Número de muestras">
                         <Input
                             type="number"
@@ -448,7 +441,6 @@ export function CaseForm(props: CaseFormCreateProps | CaseFormEditProps) {
                         />
                     </FormField>
 
-                    {/* 8. Tiempo de oportunidad */}
                     <FormField label="Tiempo de oportunidad">
                         <Input
                             type="number"
