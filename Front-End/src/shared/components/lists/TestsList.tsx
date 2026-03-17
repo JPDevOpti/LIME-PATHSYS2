@@ -41,17 +41,19 @@ export function TestsCombobox({
     useEffect(() => {
         let cancelled = false;
         labTestsService
-            .getAll(true)
+            .getAll(false)
             .then((tests) => {
                 if (cancelled) return;
                 setApiOptions(
-                    tests.map((t) => ({
+                    tests
+                        .filter((t) => t.is_active !== false)
+                        .map((t) => ({
                         value: t.test_code,
                         label: t.name,
                         subtitle: t.test_code
                     }))
                 );
-                setAllTests(tests);
+                setAllTests(tests.filter((t) => t.is_active !== false));
             })
             .catch(() => {
                 if (cancelled) return;

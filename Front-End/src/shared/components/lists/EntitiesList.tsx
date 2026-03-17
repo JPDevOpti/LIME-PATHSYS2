@@ -34,11 +34,13 @@ export function EntitiesCombobox({
     useEffect(() => {
         let cancelled = false;
         entitiesService
-            .getAll(true)
+            .getAll(false)
             .then((entities) => {
                 if (cancelled) return;
                 setOptions(
-                    entities.map((e) => ({
+                    entities
+                        .filter((e) => e.is_active !== false)
+                        .map((e) => ({
                         value: e.code,
                         label: e.name,
                         subtitle: e.code

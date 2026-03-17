@@ -253,7 +253,7 @@ export function AssignPathologistModal({
                                         name="pathologist"
                                         value={selectedId}
                                         onChange={(v) => setSelectedId(v)}
-                                        placeholder={loadingPathologists ? 'Cargando pat?logos...' : 'Buscar pat?logo...'}
+                                        placeholder={loadingPathologists ? 'Cargando pat?logos...' : 'Buscar patólogo...'}
                                         options={pathologistOptions}
                                         disabled={loadingPathologists}
                                     />

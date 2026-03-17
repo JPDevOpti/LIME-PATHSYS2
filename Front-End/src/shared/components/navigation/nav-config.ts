@@ -158,7 +158,6 @@ const applicationNav: NavSection[] = [
         roles: ROLES_BILLING,
         children: [
           { title: 'Contabilidad por prueba', href: '/billing/tests', icon: FlaskConical as IconType, roles: ROLES_BILLING },
-          { title: 'Contabilidad por patólogo', href: '/billing/pathologist', icon: UserCircle as IconType, roles: ROLES_BILLING },
         ],
       },
     ],
