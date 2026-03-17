@@ -7,9 +7,11 @@ Unifica la ejecución de:
   - migrate_tests_direct.py
   - migrate_patients_direct.py
   - migrate_pathologists_direct.py
+  - migrate_residents_direct.py
   - migrate_auxiliaries_direct.py
   - migrate_cases_direct.py
   - migrate_unread_cases_direct.py
+  - update_entities_codes_and_names.py
 
 Uso:
   python3 migrate_all_direct.py
@@ -42,10 +44,12 @@ SCRIPTS: Dict[str, str] = {
     "tests": "migrate_tests_direct.py",
     "patients": "migrate_patients_direct.py",
     "pathologists": "migrate_pathologists_direct.py",
+    "residents": "migrate_residents_direct.py",
     "pathologist_signatures": "migrate_pathologist_signatures_direct.py",
     "auxiliaries": "migrate_auxiliaries_direct.py",
     "cases": "migrate_cases_direct.py",
     "unread_cases": "migrate_unread_cases_direct.py",
+    "update_entities": "../update_entities_codes_and_names.py",
 }
 
 DEFAULT_ORDER: List[str] = [
@@ -53,10 +57,12 @@ DEFAULT_ORDER: List[str] = [
     "tests",
     "patients",
     "pathologists",
+    "residents",
     "pathologist_signatures",
     "auxiliaries",
     "cases",
     "unread_cases",
+    "update_entities",
 ]
 
 DEST_ATLAS_URL = os.environ.get("DEST_ATLAS_URI", "")
@@ -77,7 +83,7 @@ def build_command(
     dest_db: str,
 ) -> List[str]:
     script_name = SCRIPTS[script_key]
-    script_path = BASE_DIR / script_name
+    script_path = (BASE_DIR / script_name).resolve()
 
     command = [sys.executable, str(script_path)]
 

@@ -29,7 +29,7 @@ const ROLE_TO_FRONTEND: Record<string, string> = {
 };
 
 function mapApiToProfile(api: Record<string, unknown>): Profile {
-    const role = String(api.role || '');
+    const role = String(api.role || '').trim().toLowerCase();
     return {
         id: String(api.id ?? ''),
         name: String(api.name ?? ''),
@@ -81,11 +81,50 @@ function buildUpdateBody(payload: UpdateProfilePayload): Record<string, unknown>
 }
 
 export const profilesService = {
-    async list(): Promise<Profile[]> {
-        const res = await apiClient.get<{ data: unknown[]; total: number }>('/api/v1/users', {
-            limit: 500,
+    async listProgressive(params?: {
+        pageSize?: number;
+        concurrency?: number;
+        onChunk?: (chunk: Profile[], meta: { loaded: number; total: number }) => void;
+    }): Promise<Profile[]> {
+        const pageSize = Math.max(1, Math.min(1000, params?.pageSize ?? 500));
+        const concurrency = Math.max(1, Math.min(6, params?.concurrency ?? 4));
+
+        const first = await apiClient.get<{ data: unknown[]; total: number }>('/api/v1/users', {
+            skip: 0,
+            limit: pageSize,
         });
-        return (res.data || []).map((d) => mapApiToProfile(d as Record<string, unknown>));
+        const total = typeof first.total === 'number' ? first.total : (first.data || []).length;
+        const all: Profile[] = (first.data || []).map((d) => mapApiToProfile(d as Record<string, unknown>));
+        params?.onChunk?.(all, { loaded: all.length, total });
+
+        const pages = Math.ceil(total / pageSize);
+        const skips: number[] = [];
+        for (let i = 1; i < pages; i++) skips.push(i * pageSize);
+
+        let cursor = 0;
+        const workers = Array.from({ length: Math.min(concurrency, skips.length) }, async () => {
+            while (cursor < skips.length) {
+                const myIndex = cursor;
+                cursor += 1;
+                const skip = skips[myIndex]!;
+                const res = await apiClient.get<{ data: unknown[]; total: number }>('/api/v1/users', {
+                    skip,
+                    limit: pageSize,
+                });
+                const chunk = (res.data || []).map((d) => mapApiToProfile(d as Record<string, unknown>));
+                if (chunk.length) {
+                    all.push(...chunk);
+                    params?.onChunk?.(chunk, { loaded: all.length, total });
+                }
+            }
+        });
+
+        await Promise.all(workers);
+        return all;
+    },
+
+    async list(): Promise<Profile[]> {
+        return this.listProgressive();
     },
 
     async get(id: string): Promise<Profile | null> {

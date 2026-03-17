@@ -33,9 +33,23 @@ def list_pathologists(
     limit: int = Query(100, ge=1, le=500),
     service: UsersService = Depends(get_users_service),
 ):
-    """Lista patólogos para asignación. Requiere autenticación (no admin)."""
+    """Lista patólogos para asignación. Requiere autenticación."""
     return UserListResponse(**service.list_users(
         search=search, role="pathologist", is_active=is_active, skip=skip, limit=limit
+    ))
+
+
+@pathologists_router.get("/residents", response_model=UserListResponse)
+def list_residents(
+    search: str | None = Query(None),
+    is_active: bool | None = Query(None),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=500),
+    service: UsersService = Depends(get_users_service),
+):
+    """Lista residentes para asignación. Requiere autenticación."""
+    return UserListResponse(**service.list_users(
+        search=search, role="resident", is_active=is_active, skip=skip, limit=limit
     ))
 
 

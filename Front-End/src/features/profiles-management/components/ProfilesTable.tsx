@@ -107,7 +107,10 @@ export function ProfilesTable({
                     </thead>
                     <tbody className="bg-white divide-y divide-neutral-200">
                         {profiles.map((p) => (
-                            <tr key={p.id} className="hover:bg-neutral-50 transition-colors">
+                            <tr
+                                key={p.id || `${p.role}-${p.email || ''}-${p.code || ''}-${p.name || ''}`}
+                                className="hover:bg-neutral-50 transition-colors"
+                            >
                                 <td className="w-[25%] px-6 py-4 whitespace-nowrap">
                                     <span className="text-sm font-medium text-neutral-900">{p.name}</span>
                                 </td>

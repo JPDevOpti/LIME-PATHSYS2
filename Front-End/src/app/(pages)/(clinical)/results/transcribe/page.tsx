@@ -12,6 +12,7 @@ import { BaseCard, BaseButton } from '@/shared/components/base';
 import { PrintPdfButton } from '@/shared/components/ui/buttons';
 import { openCasePdf as openCasePdfFile } from '@/shared/utils/pdf';
 import { Search, FilePen, SaveAll, FileCheck } from 'lucide-react';
+import { usePermissions } from '@/features/auth/hooks/usePermissions';
 import type { ResultEditorSection, ResultSections } from '@/features/results/types/results.types';
 
 const INITIAL_SECTIONS: ResultSections = {
@@ -25,6 +26,7 @@ const INITIAL_SECTIONS: ResultSections = {
 };
 
 export default function TranscribeResultsPage() {
+    const { isAdmin, isAuxiliar } = usePermissions();
     const searchParams = useSearchParams();
     const [caseCode, setCaseCode] = useState('');
     const [searching, setSearching] = useState(false);
@@ -149,9 +151,9 @@ export default function TranscribeResultsPage() {
         setSearchError('');
 
         try {
-            // Guardar progreso debe permitir que el backend avance el estado (En recepción → Corte macro, etc.),
-            // pero cuando todo está completo (botón "Completar para Firma") no debe cambiar el estado a "Por firmar".
-            const skipStateUpdate = complete;
+            // En Transcribir: máximo "Descrip micro" para patólogo/residente; auxiliar/admin sí puede dejar en "Por firmar".
+            const canGoToPorFirmar = isAdmin || isAuxiliar;
+            const skipStateUpdate = canComplete && !canGoToPorFirmar;
             const updated = await resultsService.updateCaseResult(caseData.id, {
                 method: sections.method?.filter((m) => m?.trim()),
                 macro_result: sections.macro || undefined,

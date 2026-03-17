@@ -3,6 +3,7 @@ export { CountryCombobox } from './CountryList';
 export { AntioquiaMunicipalityCombobox } from './AntioquiaMunicipalityList';
 export { TestsCombobox } from './TestsList';
 export { PathologistsCombobox } from './PathologistsList';
+export { ResidentsCombobox } from './ResidentsList';
 export { EntitiesCombobox } from './EntitiesList';
 
 export { BODY_REGION_OPTIONS } from './data/mock-body-regions';

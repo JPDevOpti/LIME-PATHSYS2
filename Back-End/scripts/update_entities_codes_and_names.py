@@ -260,6 +260,113 @@ def update_entity_and_references(
     if new_code:
         # Caso con nuevo código sugerido
         if existing:
+            # Si el new_code ya existe en otra entidad, evitamos chocar el índice único.
+            # En ese caso actualizamos la entidad "canónica" (la que ya tiene new_code),
+            # sincronizamos referencias por nombre, y luego intentamos inactivar la vieja
+            # si queda sin uso.
+            conflict = entities_coll.find_one({"code": new_code})
+            if conflict and conflict.get("_id") != existing.get("_id"):
+                if dry_run:
+                    print(
+                        f"[DRY-RUN] entities: conflicto de code {new_code!r}. "
+                        f"Se mantiene {_id_str(conflict)} como canónica y se evita "
+                        f"actualizar {_id_str(existing)} para no duplicar."
+                    )
+                else:
+                    if conflict.get("name") != new_name:
+                        entities_coll.update_one(
+                            {"_id": conflict["_id"]}, {"$set": {"name": new_name}}
+                        )
+                        stats["entities_updated"] += 1
+
+                # 2) Actualizar referencias por nombre en pacientes y casos
+                if current_name and new_name and current_name != new_name:
+                    # patients.entity_info.entity_name
+                    q_patients = {"entity_info.entity_name": current_name}
+                    update_patients = {"$set": {"entity_info.entity_name": new_name}}
+                    if dry_run:
+                        count_p = patients_coll.count_documents(q_patients)
+                        if count_p:
+                            print(
+                                f"[DRY-RUN] patients: {count_p} docs "
+                                f"{current_name!r}→{new_name!r}"
+                            )
+                    else:
+                        res_p = patients_coll.update_many(q_patients, update_patients)
+                        if res_p.modified_count:
+                            print(
+                                f"[OK] patients: {res_p.modified_count} docs "
+                                f"{current_name!r}→{new_name!r}"
+                            )
+
+                    # cases.entity
+                    q_cases_entity = {"entity": current_name}
+                    update_cases_entity = {"$set": {"entity": new_name}}
+                    if dry_run:
+                        count_ce = cases_coll.count_documents(q_cases_entity)
+                        if count_ce:
+                            print(
+                                f"[DRY-RUN] cases.entity: {count_ce} docs "
+                                f"{current_name!r}→{new_name!r}"
+                            )
+                    else:
+                        res_ce = cases_coll.update_many(q_cases_entity, update_cases_entity)
+                        if res_ce.modified_count:
+                            print(
+                                f"[OK] cases.entity: {res_ce.modified_count} docs "
+                                f"{current_name!r}→{new_name!r}"
+                            )
+
+                    # cases.patient_info.entity_info.entity_name
+                    q_cases_pi = {"patient_info.entity_info.entity_name": current_name}
+                    update_cases_pi = {
+                        "$set": {"patient_info.entity_info.entity_name": new_name}
+                    }
+                    if dry_run:
+                        count_pi = cases_coll.count_documents(q_cases_pi)
+                        if count_pi:
+                            print(
+                                f"[DRY-RUN] cases.patient_info.entity_info.entity_name: "
+                                f"{count_pi} docs {current_name!r}→{new_name!r}"
+                            )
+                    else:
+                        res_pi = cases_coll.update_many(q_cases_pi, update_cases_pi)
+                        if res_pi.modified_count:
+                            print(
+                                "[OK] cases.patient_info.entity_info.entity_name: "
+                                f"{res_pi.modified_count} docs {current_name!r}→{new_name!r}"
+                            )
+
+                # 3) Inactivar entidad vieja si quedó sin referencias
+                old_name = normalize_name(existing.get("name"))
+                if old_name:
+                    used_in_patients = patients_coll.count_documents(
+                        {"entity_info.entity_name": old_name}
+                    )
+                    used_in_cases_entity = cases_coll.count_documents({"entity": old_name})
+                    used_in_cases_pi = cases_coll.count_documents(
+                        {"patient_info.entity_info.entity_name": old_name}
+                    )
+                    if used_in_patients + used_in_cases_entity + used_in_cases_pi == 0:
+                        if existing.get("is_active", True):
+                            if dry_run:
+                                print(
+                                    "[DRY-RUN] entities: inactivar (post-merge) "
+                                    f"{_id_str(existing)} name={old_name!r}"
+                                )
+                                stats["entities_inactivated"] += 1
+                            else:
+                                entities_coll.update_one(
+                                    {"_id": existing["_id"]},
+                                    {"$set": {"is_active": False}},
+                                )
+                                print(
+                                    f"[OK] entities: inactivada (post-merge) {_id_str(existing)} "
+                                    f"name={old_name!r}"
+                                )
+                                stats["entities_inactivated"] += 1
+                return
+
             # Actualizar código y nombre
             query = {"_id": existing["_id"]}
             update: dict[str, Any] = {"name": new_name, "code": new_code}

@@ -43,8 +43,26 @@ export function ProfilesList() {
         setLoading(true);
         setLoadError(null);
         try {
-            const list = await profilesService.list();
-            setProfiles(list);
+            setProfiles([]);
+            await profilesService.listProgressive({
+                pageSize: 500,
+                concurrency: 4,
+                onChunk: (chunk) => {
+                    setProfiles((prev) => {
+                        const merged = prev.concat(chunk);
+                        const seen = new Set<string>();
+                        const out: Profile[] = [];
+                        for (const p of merged) {
+                            const id = (p.id || '').trim();
+                            if (!id) continue;
+                            if (seen.has(id)) continue;
+                            seen.add(id);
+                            out.push(p);
+                        }
+                        return out;
+                    });
+                },
+            });
         } catch (e) {
             const msg = e instanceof Error ? e.message : 'Error al cargar perfiles';
             setLoadError(msg);
