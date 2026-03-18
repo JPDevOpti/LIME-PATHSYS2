@@ -8,6 +8,7 @@ export interface UnreadCase {
     id: string;
     caseCode: string;
     isSpecialCase?: boolean;
+    externalCaseNumber?: string;
     documentType?: string;
     patientDocument?: string;
     patientName?: string;

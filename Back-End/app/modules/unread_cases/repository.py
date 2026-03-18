@@ -38,6 +38,7 @@ class UnreadCasesRepository:
             "id": str(doc.get("_id", "")),
             "case_code": doc.get("case_code", ""),
             "is_special_case": doc.get("is_special_case", False),
+            "external_case_number": doc.get("external_case_number"),
             "document_type": doc.get("document_type"),
             "patient_document": doc.get("patient_document"),
             "patient_name": doc.get("patient_name"),
@@ -73,6 +74,7 @@ class UnreadCasesRepository:
             s = re.escape(search.strip())
             q["$or"] = [
                 {"case_code": {"$regex": s, "$options": "i"}},
+                {"external_case_number": {"$regex": s, "$options": "i"}},
                 {"patient_name": {"$regex": s, "$options": "i"}},
                 {"patient_document": {"$regex": s, "$options": "i"}},
                 {"institution": {"$regex": s, "$options": "i"}},

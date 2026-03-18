@@ -71,6 +71,7 @@ export function NewUnreadCaseModal({ isOpen, onClose, caseData = null, onCreate,
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [form, setForm] = useState({
         isSpecialCase: false,
+        externalCaseNumber: '',
         documentType: '',
         patientDocument: '',
         firstName: '',
@@ -106,6 +107,7 @@ export function NewUnreadCaseModal({ isOpen, onClose, caseData = null, onCreate,
             if (testGroups.length === 0) testGroups.push(emptyTestGroup());
             setForm({
                 isSpecialCase: caseData.isSpecialCase ?? false,
+                externalCaseNumber: caseData.externalCaseNumber || '',
                 documentType: caseData.documentType || '',
                 patientDocument: caseData.patientDocument || '',
                 ...names,
@@ -119,6 +121,7 @@ export function NewUnreadCaseModal({ isOpen, onClose, caseData = null, onCreate,
         } else if (isOpen) {
             setForm({
                 isSpecialCase: false,
+                externalCaseNumber: '',
                 documentType: '',
                 patientDocument: '',
                 firstName: '',
@@ -227,6 +230,7 @@ export function NewUnreadCaseModal({ isOpen, onClose, caseData = null, onCreate,
         return {
             caseCode: undefined as unknown as string,
             isSpecialCase: form.isSpecialCase,
+            externalCaseNumber: form.externalCaseNumber.trim() || undefined,
             documentType: form.isSpecialCase ? undefined : form.documentType || undefined,
             patientDocument: form.isSpecialCase ? undefined : form.patientDocument.trim() || undefined,
             patientName: patientName || undefined,
@@ -256,6 +260,7 @@ export function NewUnreadCaseModal({ isOpen, onClose, caseData = null, onCreate,
 
         return {
             isSpecialCase: form.isSpecialCase,
+            externalCaseNumber: form.externalCaseNumber.trim() || undefined,
             documentType: form.isSpecialCase ? undefined : form.documentType || undefined,
             patientDocument: form.isSpecialCase ? undefined : form.patientDocument.trim() || undefined,
             patientName: patientName || undefined,
@@ -288,6 +293,7 @@ export function NewUnreadCaseModal({ isOpen, onClose, caseData = null, onCreate,
         if (isEditMode) return;
         setForm({
             isSpecialCase: false,
+            externalCaseNumber: '',
             documentType: '',
             patientDocument: '',
             firstName: '',
@@ -460,6 +466,14 @@ export function NewUnreadCaseModal({ isOpen, onClose, caseData = null, onCreate,
                                     onChange={(v) => setForm((p) => ({ ...p, entityCode: v }))}
                                     onEntitySelected={handleEntitySelected}
                                     placeholder="Buscar y seleccionar entidad..."
+                                />
+                            </FormField>
+                            <FormField label="N. caso externo">
+                                <Input
+                                    placeholder="Codigo del caso en la entidad externa"
+                                    value={form.externalCaseNumber}
+                                    onChange={(e) => setForm((p) => ({ ...p, externalCaseNumber: e.target.value }))}
+                                    maxLength={100}
                                 />
                             </FormField>
                             <FormField label="Numero de Placas">

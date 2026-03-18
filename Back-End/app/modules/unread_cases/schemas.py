@@ -20,6 +20,7 @@ class TestGroupSchema(BaseModel):
 class UnreadCaseCreate(BaseModel):
     case_code: Optional[str] = Field(None, max_length=50)
     is_special_case: Optional[bool] = False
+    external_case_number: Optional[str] = Field(None, max_length=100)
     document_type: Optional[str] = Field(None, max_length=10)
     patient_document: Optional[str] = Field(None, max_length=20)
     patient_name: Optional[str] = Field(None, max_length=200)
@@ -36,6 +37,7 @@ class UnreadCaseCreate(BaseModel):
 
 class UnreadCaseUpdate(BaseModel):
     is_special_case: Optional[bool] = None
+    external_case_number: Optional[str] = Field(None, max_length=100)
     document_type: Optional[str] = Field(None, max_length=10)
     patient_name: Optional[str] = Field(None, max_length=200)
     patient_document: Optional[str] = Field(None, max_length=20)
@@ -58,6 +60,7 @@ class UnreadCaseResponse(BaseModel):
     id: str
     case_code: str
     is_special_case: Optional[bool] = None
+    external_case_number: Optional[str] = None
     document_type: Optional[str] = None
     patient_document: Optional[str] = None
     patient_name: Optional[str] = None

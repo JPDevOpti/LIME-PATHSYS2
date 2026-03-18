@@ -65,6 +65,7 @@ function mapApiToUnreadCase(api: Record<string, unknown>): UnreadCase {
         id: parsedId,
         caseCode: String(api.case_code ?? ''),
         isSpecialCase: api.is_special_case as boolean | undefined,
+        externalCaseNumber: api.external_case_number as string | undefined,
         documentType: api.document_type as string | undefined,
         patientDocument: api.patient_document as string | undefined,
         patientName: api.patient_name as string | undefined,
@@ -97,6 +98,7 @@ function buildCreateBody(data: UnreadCaseCreatePayload): Record<string, unknown>
         received_by: data.receivedBy,
         status: data.status ?? 'En proceso'
     };
+    if (data.externalCaseNumber !== undefined) body.external_case_number = data.externalCaseNumber || null;
     if (data.documentType) body.document_type = data.documentType;
     if (data.patientDocument) body.patient_document = data.patientDocument;
     if (data.patientName) body.patient_name = data.patientName;
@@ -113,6 +115,7 @@ function buildCreateBody(data: UnreadCaseCreatePayload): Record<string, unknown>
 function buildUpdateBody(data: UnreadCaseUpdatePayload): Record<string, unknown> {
     const body: Record<string, unknown> = {};
     if (data.isSpecialCase !== undefined) body.is_special_case = data.isSpecialCase;
+    if (data.externalCaseNumber !== undefined) body.external_case_number = data.externalCaseNumber || null;
     if (data.documentType !== undefined) body.document_type = data.documentType;
     if (data.patientName !== undefined) body.patient_name = data.patientName;
     if (data.patientDocument !== undefined) body.patient_document = data.patientDocument;

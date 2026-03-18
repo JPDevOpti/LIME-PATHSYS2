@@ -122,6 +122,7 @@ export function UnreadCasesList() {
 
                 const row: Record<string, any> = {
                     'Código de Caso': c.caseCode,
+                    'N. Caso Externo': c.externalCaseNumber || '',
                     'Caso Especial': c.isSpecialCase ? 'Sí' : 'No',
                     'Institución': c.institution || '',
                     'Entidad (Nombre)': c.entityName || '',

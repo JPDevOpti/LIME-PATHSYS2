@@ -102,6 +102,10 @@ export function UnreadCaseDetailsModal({ caseData, onClose, onEdit, onDelete }: 
                         <p className="font-medium text-neutral-900">{caseData.institution || '-'}</p>
                     </div>
                     <div>
+                        <p className="text-xs text-neutral-500 uppercase">N. caso externo</p>
+                        <p className="font-medium text-neutral-900">{caseData.externalCaseNumber || '-'}</p>
+                    </div>
+                    <div>
                         <p className="text-xs text-neutral-500 uppercase">N° Placas</p>
                         <p className="font-medium text-neutral-900">{caseData.numberOfPlates ?? 0}</p>
                     </div>

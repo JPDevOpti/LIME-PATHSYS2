@@ -145,6 +145,9 @@ export function UnreadCasesTable({
                             Código
                         </th>
                         <th className="px-4 py-3 text-center text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                            N. externo
+                        </th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-neutral-500 uppercase tracking-wider">
                             Paciente / Documento
                         </th>
                         <th className="px-4 py-3 text-center text-xs font-medium text-neutral-500 uppercase tracking-wider">
@@ -184,6 +187,9 @@ export function UnreadCasesTable({
                             </td>
                             <td className="px-4 py-3 text-center">
                                 <span className="text-sm font-medium text-neutral-900">{c.caseCode}</span>
+                            </td>
+                            <td className="px-4 py-3 text-center text-sm text-neutral-700">
+                                {c.externalCaseNumber || '-'}
                             </td>
                             <td className="px-4 py-3 text-center">
                                 <p className="text-sm font-medium text-neutral-900">

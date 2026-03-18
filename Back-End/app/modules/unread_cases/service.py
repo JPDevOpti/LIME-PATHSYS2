@@ -63,6 +63,7 @@ class UnreadCasesService:
         payload = {
             "case_code": case_code,
             "is_special_case": data.is_special_case if data.is_special_case is not None else False,
+            "external_case_number": data.external_case_number,
             "document_type": data.document_type,
             "patient_document": data.patient_document,
             "patient_name": data.patient_name,
