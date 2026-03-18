@@ -145,7 +145,7 @@ export function AssignPathologistModal({
             setError('Este pat?logo es el titular del caso');
             return;
         }
-        setAssistants([...assistants, { id: person.id, name: person.name }]);
+        setAssistants([...assistants, { id: person.id, name: person.name, role: mode === 'resident' ? 'resident' : 'assistant' }]);
         setSelectedId('');
         setError('');
     };
@@ -274,7 +274,7 @@ export function AssignPathologistModal({
 
                     {(mode === 'assistant' || mode === 'resident') && assistants.length > 0 && (
                         <div className="space-y-2">
-                            <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Asistentes asignados</p>
+                            <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Asignados</p>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                 {assistants.map((assistant) => (
                                     <div key={assistant.id} className="flex items-center justify-between p-2 pl-3 bg-white border border-neutral-200 rounded-lg group">
@@ -283,6 +283,9 @@ export function AssignPathologistModal({
                                                 {getInitials(assistant.name)}
                                             </div>
                                             <span className="text-sm font-medium text-neutral-700 truncate">{assistant.name}</span>
+                                            <span className={clsx("text-[10px] px-1.5 py-0.5 rounded-full font-medium", assistant.role === 'resident' ? "bg-blue-100 text-blue-700" : "bg-lime-brand-100 text-lime-brand-700")}>
+                                                {assistant.role === 'resident' ? 'Residente' : 'Asistente'}
+                                            </span>
                                         </div>
                                         <button
                                             type="button"

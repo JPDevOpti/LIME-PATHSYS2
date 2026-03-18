@@ -76,6 +76,7 @@ export interface CaseFilters {
 export interface AssignedPathologist {
     id: string;
     name: string;
+    role?: 'assistant' | 'resident';
 }
 
 export interface AuditEntry {

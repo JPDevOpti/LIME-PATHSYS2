@@ -135,7 +135,16 @@ class CasePdfService:
         pathologist_name = pathologist_info.get("name") or ""
 
         assistants = case.get("assistant_pathologists") or []
-        assistant_names = [a.get("name") for a in assistants if a.get("name")]
+
+        # Separar residentes de patólogos asistentes por el campo role
+        resident_names = [
+            a.get("name") for a in assistants
+            if a.get("role") == "resident" and a.get("name")
+        ]
+        assistant_names = [
+            a.get("name") for a in assistants
+            if a.get("role") != "resident" and a.get("name")
+        ]
 
         all_pathologists = []
         if pathologist_name:
@@ -145,6 +154,8 @@ class CasePdfService:
         participating_pathologists = (
             ", ".join(all_pathologists) if all_pathologists else "Sin asignar"
         )
+
+        resident_name = ", ".join(resident_names) if resident_names else ""
 
         methods = result.get("method") or []
         if not isinstance(methods, list):
@@ -259,6 +270,8 @@ class CasePdfService:
             "pathologist_name": pathologist_name,
             "participating_pathologists": participating_pathologists,
             "validated_by": pathologist_name or participating_pathologists,
+            "resident_name": resident_name,
+            "assistant_names": assistant_names,
             "pathologist_license": pathologist_meta.get("medical_license") or "",
             "pathologist_signature": pathologist_meta.get("signature") if is_signed else "",
             "samples_summary": self._build_samples_summary(case.get("samples") or []),

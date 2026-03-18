@@ -235,6 +235,10 @@ class CaseRepository:
         if incoming_license:
             ref["medical_license"] = incoming_license
 
+        incoming_role = str(value.get("role") or "").strip()
+        if incoming_role:
+            ref["role"] = incoming_role
+
         user = self._find_user_for_pathologist_ref(value)
         if user:
             if not ref.get("id"):

@@ -89,6 +89,7 @@ class AssignedPathologistSchema(BaseModel):
     name: str
     pathologist_code: Optional[str] = None
     medical_license: Optional[str] = None
+    role: Optional[str] = None
 
 
 class NoteSchema(BaseModel):

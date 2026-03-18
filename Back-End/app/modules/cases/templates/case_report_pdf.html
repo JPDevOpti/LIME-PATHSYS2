@@ -578,6 +578,18 @@
                     <span class="patient-label">Firmado por:</span>
                     <span class="patient-value">{{ case.validated_by }}</span>
                 </div>
+                {% if case.resident_name %}
+                <div class="signature-signer">
+                    <span class="patient-label">Residente:</span>
+                    <span class="patient-value">{{ case.resident_name }}</span>
+                </div>
+                {% endif %}
+                {% if case.assistant_names and case.assistant_names|length > 0 %}
+                <div class="signature-signer">
+                    <span class="patient-label">Revisado por:</span>
+                    <span class="patient-value">{{ case.assistant_names | join(", ") }}</span>
+                </div>
+                {% endif %}
             </div>
         </section>
         {% endfor %}

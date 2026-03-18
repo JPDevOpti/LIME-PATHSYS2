@@ -33,7 +33,7 @@ export function EntityDetailsModal({ entity, period, onClose }: EntityDetailsMod
             return;
         }
         setIsLoading(true);
-        statisticsService.getEntityDetails(entity.codigo, { month: period.month, year: period.year })
+        statisticsService.getEntityDetails(entity.nombre, { month: period.month, year: period.year })
             .then(setEntityDetails)
             .catch(() => setEntityDetails(null))
             .finally(() => setIsLoading(false));
@@ -81,7 +81,7 @@ export function EntityDetailsModal({ entity, period, onClose }: EntityDetailsMod
                             <div>
                                 <p className="text-sm text-green-600 font-medium">Ambulatorios</p>
                                 <p className="text-2xl font-bold text-green-700">{entity.ambulatorios}</p>
-                                <p className="text-xs text-green-600">cases</p>
+                                <p className="text-xs text-green-600">casos</p>
                             </div>
                             <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                                 <CheckCircleIcon className="w-6 h-6 text-green-600" />
@@ -93,7 +93,7 @@ export function EntityDetailsModal({ entity, period, onClose }: EntityDetailsMod
                             <div>
                                 <p className="text-sm text-blue-600 font-medium">Hospitalizados</p>
                                 <p className="text-2xl font-bold text-blue-700">{entity.hospitalizados}</p>
-                                <p className="text-xs text-blue-600">cases</p>
+                                <p className="text-xs text-blue-600">casos</p>
                             </div>
                             <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                                 <BuildingOffice2Icon className="w-6 h-6 text-blue-600" />
@@ -105,7 +105,7 @@ export function EntityDetailsModal({ entity, period, onClose }: EntityDetailsMod
                             <div>
                                 <p className="text-sm text-neutral-600 font-medium">Total</p>
                                 <p className="text-2xl font-bold text-neutral-800">{entity.total}</p>
-                                <p className="text-xs text-neutral-500">cases</p>
+                                <p className="text-xs text-neutral-500">casos</p>
                             </div>
                             <div className="w-12 h-12 bg-neutral-200 rounded-full flex items-center justify-center">
                                 <UserGroupIcon className="w-6 h-6 text-neutral-600" />
