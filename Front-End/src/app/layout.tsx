@@ -9,9 +9,9 @@ export const metadata: Metadata = {
   title: 'PathSys',
   description: 'Sistema de gestión de patología',
   icons: {
-    icon: '/favico_derma.png',
-    shortcut: '/favico_derma.png',
-    apple: '/favico_derma.png',
+    icon: '/favico.png',
+    shortcut: '/favico.png',
+    apple: '/favico.png',
   },
 };
 
