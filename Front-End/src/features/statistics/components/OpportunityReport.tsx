@@ -157,13 +157,10 @@ export function OpportunityReport() {
 
                                 {/* Gráficos de línea — columna derecha */}
                                 <div className="lg:col-span-3 space-y-4">
-                                    <BaseCard className="p-6">
-                                        <h3 className="text-lg font-semibold text-neutral-900 mb-1">
+                                    <BaseCard className="p-4">
+                                        <h3 className="text-lg font-semibold text-neutral-900 mb-2">
                                             Tendencia de cumplimiento
                                         </h3>
-                                        <p className="text-sm text-neutral-500 mb-4">
-                                            % de casos dentro de oportunidad por mes — {selectedYear}
-                                        </p>
                                         <BaseLineChart
                                             data={lineData}
                                             xKey="name"
@@ -174,19 +171,16 @@ export function OpportunityReport() {
                                                 strokeWidth: 3,
                                                 dot: false,
                                             }]}
-                                            height={240}
+                                            height={200}
                                             showLegend={false}
                                             yAxisFormatter={(v) => `${v}%`}
                                             tooltipFormatter={(v) => `${v}%`}
                                         />
                                     </BaseCard>
-                                    <BaseCard className="p-6">
-                                        <h3 className="text-lg font-semibold text-neutral-900 mb-1">
+                                    <BaseCard className="p-4">
+                                        <h3 className="text-lg font-semibold text-neutral-900 mb-2">
                                             Flujo mensual
                                         </h3>
-                                        <p className="text-sm text-neutral-500 mb-4">
-                                            Casos y pacientes por mes — {selectedYear}
-                                        </p>
                                         <BaseLineChart
                                             data={flowData}
                                             xKey="name"

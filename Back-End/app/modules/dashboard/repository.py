@@ -125,7 +125,7 @@ class DashboardRepository:
                     "codigo": doc["case_code"],
                     "paciente": {
                         "nombre": patient_info.get("full_name", "Desconocido"),
-                        "cedula": patient_info.get("identification_number", ""),
+                        "cedula": f"{patient_info.get('identification_type', '')}-{patient_info.get('identification_number', '')}" if patient_info.get("identification_type") else patient_info.get("identification_number", ""),
                         "entidad": entidad or None,
                     },
                     "pruebas": [
