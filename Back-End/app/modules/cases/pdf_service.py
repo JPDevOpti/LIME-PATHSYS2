@@ -260,7 +260,7 @@ class CasePdfService:
             "participating_pathologists": participating_pathologists,
             "validated_by": pathologist_name or participating_pathologists,
             "pathologist_license": pathologist_meta.get("medical_license") or "",
-            "pathologist_signature": pathologist_meta.get("signature") or "",
+            "pathologist_signature": pathologist_meta.get("signature") if is_signed else "",
             "samples_summary": self._build_samples_summary(case.get("samples") or []),
             "methods_display": self._methods_to_display(methods),
             "has_additional_report": has_additional_report,

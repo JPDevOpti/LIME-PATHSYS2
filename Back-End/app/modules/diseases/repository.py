@@ -104,6 +104,15 @@ class DiseasesRepository:
             return {"$regex": r"^\s*CIE\s*-?\s*O\s*$", "$options": "i"}
         return table.strip() if table and table.strip() else {"$exists": True}
 
+    def _cie_collection_candidates(self, table: str | None = None) -> list[tuple[str, str]]:
+        normalized = (table or "").strip().upper().replace("-", "").replace(" ", "")
+        candidates = []
+        if normalized in {"", "CIE10"}:
+            candidates.append(("cie10", "CIE10"))
+        if normalized in {"", "CIEO"}:
+            candidates.append(("cieo", "CIEO"))
+        return candidates
+
     def _search_in_collections(
         self,
         query_filter: dict[str, Any],

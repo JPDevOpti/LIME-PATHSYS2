@@ -179,16 +179,30 @@ start_services() {
 
 wait_port_free() {
     local port="$1"
+    log "Liberando puerto $port..."
+    
+    # Fuerza matar cualquier proceso en el puerto inmediatamente
+    fuser -k -9 "$port/tcp" 2>/dev/null || true
+    lsof -ti:"$port" | xargs kill -9 2>/dev/null || true
+    
     local attempts=20
     local i=0
-    while lsof -ti:"$port" >/dev/null 2>&1; do
+    while lsof -ti:"$port" >/dev/null 2>&1 || ss -lptn "sport = :$port" 2>/dev/null | grep -q ":$port "; do
         i=$((i + 1))
+        
+        if [ "$i" -eq 10 ]; then
+            log "Advertencia: el puerto $port sigue ocupado. Intentando con sudo (puede pedir contraseña)..."
+            sudo fuser -k -9 "$port/tcp" 2>/dev/null || true
+            sudo lsof -ti:"$port" | xargs sudo kill -9 2>/dev/null || true
+        fi
+
         if [ "$i" -ge "$attempts" ]; then
-            log "Advertencia: el puerto $port sigue ocupado después de ${attempts} intentos, forzando..."
-            lsof -ti:"$port" | xargs kill -9 2>/dev/null || true
-            sleep 1
+            log "Advertencia: no se pudo confirmar la liberación del puerto $port."
             return
         fi
+        
+        fuser -k -9 "$port/tcp" 2>/dev/null || true
+        lsof -ti:"$port" | xargs kill -9 2>/dev/null || true
         sleep 0.5
     done
 }
@@ -202,10 +216,12 @@ stop_services() {
     pkill -f "uvicorn.*8000" 2>/dev/null || true
     pkill -f "$FRONT_DIR/node_modules/.bin/next dev" 2>/dev/null || true
     pkill -f "next dev" 2>/dev/null || true
+    pkill -f "node.*3001" 2>/dev/null || true
 
-    # Esperar a que los puertos queden libres antes de continuar
+    # Asegurar que los puertos queden completamente libres
     wait_port_free 8000
     wait_port_free 3001
+    wait_port_free 3000
 
     log "Servicios detenidos"
 }
