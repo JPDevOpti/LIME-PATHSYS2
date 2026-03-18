@@ -94,9 +94,11 @@ class CasePdfService:
         return pdf_bytes
 
     def _remove_pdf_title_metadata(self, _document: Any, pdf: Any) -> None:
-        if hasattr(pdf, "info") and isinstance(pdf.info, dict):
-            pdf.info.pop("Title", None)
-            pdf.info.pop("title", None)
+        info = getattr(pdf, "info", None)
+        if info is None:
+            return
+        info.pop("Title", None)
+        info.pop("title", None)
 
     def _build_pdf_filename_base(
         self, prepared_case: dict[str, Any], fallback_case_code: str

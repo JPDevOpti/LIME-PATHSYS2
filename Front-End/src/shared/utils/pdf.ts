@@ -6,6 +6,7 @@ export function openCasePdf(caseId: string): void {
 
   const url = buildApiUrl(`/api/v1/cases/${encodeURIComponent(caseId)}/pdf`, {
     token,
+    ts: Date.now(),
   });
 
   window.open(url, "_blank", "noopener,noreferrer");
