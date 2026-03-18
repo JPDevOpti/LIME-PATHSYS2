@@ -55,10 +55,10 @@ export default function CasesListPage() {
     const initialListFilters: Partial<CaseListFilters> | undefined = lockedPathologist
         ? { pathologistName: lockedPathologist }
         : isVisitante
-        ? { identificationNumber: restrictedDocument ?? '' }
-        : isPaciente
-        ? { identificationNumber: restrictedDocument ?? '', status: 'Completado' as const }
-        : undefined;
+            ? { identificationNumber: restrictedDocument ?? '' }
+            : isPaciente
+                ? { identificationNumber: restrictedDocument ?? '', status: 'Completado' as const }
+                : undefined;
 
     return (
         <CasesListInner
@@ -166,7 +166,7 @@ function CasesListInner({ isRestrictedView, lockedPathologist, lockedIdentificat
                 onExport={handleExport}
                 onSearch={(f) => {
                     if (lockedPathologist && f.search.trim()) {
-                        applySearch({ ...f, pathologistName: '', status: 'Completado' });
+                        applySearch({ ...f, pathologistName: '' });
                     } else {
                         applySearch(f);
                     }

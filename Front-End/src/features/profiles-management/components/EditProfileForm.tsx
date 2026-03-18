@@ -22,6 +22,8 @@ export interface EditProfileFormState {
     medicalLicense: string;
     observations: string;
     signature: string;
+    password: string;
+    passwordConfirm: string;
     role: ProfileRole;
     isActive: boolean;
 }
@@ -44,6 +46,8 @@ function fromProfile(p: Profile): EditProfileFormState {
         medicalLicense: p.medicalLicense ?? '',
         observations: p.observations ?? '',
         signature: p.signature ?? '',
+        password: '',
+        passwordConfirm: '',
         role: p.role,
         isActive: p.isActive !== false,
     };
@@ -145,6 +149,30 @@ export function EditProfileForm({ state, onChange }: EditProfileFormProps) {
                     rows={3}
                 />
             </FormField>
+
+            <div className="rounded-lg border border-neutral-200 bg-neutral-50/50 p-4">
+                <p className="text-sm font-medium text-neutral-700 mb-3">Cambiar contrasena (dejar en blanco para mantener la actual)</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField label="Nueva contrasena" htmlFor="edit-password">
+                        <Input
+                            id="edit-password"
+                            type="password"
+                            placeholder="Minimo 8 caracteres"
+                            value={state.password}
+                            onChange={(e) => onChange({ password: e.target.value })}
+                        />
+                    </FormField>
+                    <FormField label="Confirmar contrasena" htmlFor="edit-password-confirm">
+                        <Input
+                            id="edit-password-confirm"
+                            type="password"
+                            placeholder="Repetir contrasena"
+                            value={state.passwordConfirm}
+                            onChange={(e) => onChange({ passwordConfirm: e.target.value })}
+                        />
+                    </FormField>
+                </div>
+            </div>
 
             {(role === 'patologo' || role === 'residente') && (
                 <SignatureManager

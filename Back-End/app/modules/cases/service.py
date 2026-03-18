@@ -32,6 +32,7 @@ class CaseService:
         sort_order: str = "desc",
         skip: int = 0,
         limit: int = 50,
+        current_user: Optional[dict] = None,
     ) -> dict[str, Any]:
         data, total = self._repo.find_many(
             search=search,
@@ -50,6 +51,7 @@ class CaseService:
             sort_order=sort_order,
             skip=skip,
             limit=limit,
+            current_user=current_user,
         )
         return {"data": data, "total": total}
 

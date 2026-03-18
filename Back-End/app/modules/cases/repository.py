@@ -327,6 +327,7 @@ class CaseRepository:
         sort_order: str = "desc",
         skip: int = 0,
         limit: int = 50,
+        current_user: Optional[dict] = None,
     ) -> tuple[list[dict], int]:
         query: dict[str, Any] = {}
         and_conditions: list[dict] = []
@@ -387,6 +388,18 @@ class CaseRepository:
 
         if identification_number and identification_number.strip():
             query["patient_info.identification_number"] = identification_number.strip()
+
+        if current_user:
+            role = str(current_user.get("role", "")).lower()
+            if role in ("pathologist", "patologo", "patólogo", "patóloga"):
+                user_id = str(current_user.get("id", ""))
+                and_conditions.append({
+                    "$or": [
+                        {"assigned_pathologist.id": user_id},
+                        {"assistant_pathologists.id": user_id},
+                        {"state": "Completado"}
+                    ]
+                })
 
         if and_conditions:
             query["$and"] = and_conditions

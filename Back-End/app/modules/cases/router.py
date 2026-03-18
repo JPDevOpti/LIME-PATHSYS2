@@ -53,7 +53,7 @@ def list_cases(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100000),
     service: CaseService = Depends(get_case_service),
-    _: str = Depends(get_current_user_id),
+    current_user: dict = Depends(get_current_user),
 ):
     result = service.list_cases(
         search=search,
@@ -72,6 +72,7 @@ def list_cases(
         sort_order=sort_order or "desc",
         skip=skip,
         limit=limit,
+        current_user=current_user,
     )
     return CaseListResponse(**result)
 

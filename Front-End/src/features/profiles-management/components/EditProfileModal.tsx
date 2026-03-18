@@ -25,6 +25,7 @@ function buildPayload(state: EditProfileFormState): UpdateProfilePayload {
     if (state.observations.trim()) payload.observations = state.observations.trim();
     else payload.observations = undefined;
     payload.signature = state.signature ?? '';
+    if (state.password?.trim()) payload.password = state.password.trim();
     return payload;
 }
 
@@ -55,6 +56,16 @@ export function EditProfileModal({ profile, onClose, onSave }: EditProfileModalP
 
     const handleSubmit = async () => {
         if (!state || !state.name.trim()) return;
+        if (state.password.trim()) {
+            if (state.password.length < 8) {
+                setError('La contrasena debe tener al menos 8 caracteres');
+                return;
+            }
+            if (state.password !== state.passwordConfirm) {
+                setError('Las contrasenas no coinciden');
+                return;
+            }
+        }
         setSaving(true);
         setError(null);
         try {
