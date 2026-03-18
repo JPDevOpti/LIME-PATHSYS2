@@ -34,6 +34,8 @@ class OpportunityReportResponse(BaseModel):
     tests: list[OpportunityTestStat]
     pathologists: list[PathologistPerformance]
     monthlyPct: list[float] | None = None
+    monthlyCases: list[int] | None = None
+    monthlyPatients: list[int] | None = None
     summary: OpportunitySummaryStats | None = None
 
 

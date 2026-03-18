@@ -148,6 +148,8 @@ class StatisticsRepository:
 
         # ── % mensual: solo meses completados del año (hasta el mes solicitado) ─
         monthly_pct: list[float] = []
+        monthly_cases: list[int] = []
+        monthly_patients: list[int] = []
         for m in range(1, 13):
             m_match = self._base_match(
                 year,
@@ -160,6 +162,9 @@ class StatisticsRepository:
             m_within = self.cases.count_documents({**m_match, "opportunity_info.0.was_timely": True})
             pct = round((m_within / m_total) * 100, 1) if m_total > 0 else 0.0
             monthly_pct.append(pct)
+            monthly_cases.append(m_total)
+            m_patients = len(self.cases.distinct("patient_info.patient_id", m_match))
+            monthly_patients.append(m_patients)
 
         # ── Por prueba ─────────────────────────────────────────────────────────
         test_pipeline = [
@@ -237,6 +242,8 @@ class StatisticsRepository:
             "tests": tests_out,
             "pathologists": pathologists_out,
             "monthlyPct": monthly_pct,
+            "monthlyCases": monthly_cases,
+            "monthlyPatients": monthly_patients,
             "summary": summary,
         }
 

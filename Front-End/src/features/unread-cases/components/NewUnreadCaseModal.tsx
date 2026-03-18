@@ -480,9 +480,9 @@ export function NewUnreadCaseModal({ isOpen, onClose, caseData = null, onCreate,
                                 <Input
                                     type="number"
                                     min={1}
-                                    value={form.numberOfPlates}
+                                    value={form.numberOfPlates || ''}
                                     onChange={(e) =>
-                                        setForm((p) => ({ ...p, numberOfPlates: parseInt(e.target.value) || 1 }))
+                                        setForm((p) => ({ ...p, numberOfPlates: parseInt(e.target.value) || 0 }))
                                     }
                                 />
                             </FormField>
@@ -573,13 +573,13 @@ export function NewUnreadCaseModal({ isOpen, onClose, caseData = null, onCreate,
                                                         <Input
                                                             type="number"
                                                             min={1}
-                                                            value={test.quantity}
+                                                            value={test.quantity || ''}
                                                             onChange={(e) =>
                                                                 updateTestInGroup(
                                                                     groupIdx,
                                                                     testIdx,
                                                                     'quantity',
-                                                                    parseInt(e.target.value) || 1
+                                                                    parseInt(e.target.value) || 0
                                                                 )
                                                             }
                                                         />

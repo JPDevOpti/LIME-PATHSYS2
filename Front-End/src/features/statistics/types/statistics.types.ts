@@ -51,5 +51,7 @@ export interface OpportunityReportData {
     tests: OpportunityTest[];
     pathologists: PathologistPerformance[];
     monthlyPct?: number[];
+    monthlyCases?: number[];
+    monthlyPatients?: number[];
     summary?: OpportunitySummaryStats;
 }

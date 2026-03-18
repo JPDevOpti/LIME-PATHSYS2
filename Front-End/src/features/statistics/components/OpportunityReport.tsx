@@ -55,8 +55,19 @@ export function OpportunityReport() {
     const lineData = useMemo(() => {
         const yearNum = Number(selectedYear) || new Date().getFullYear();
         return (reportData?.monthlyPct ?? []).map((v, i) => ({
-            name: `${MONTHS[i]?.slice(0, 3)} ${yearNum}`,
+            name: MONTHS[i]?.slice(0, 3) ?? '',
             value: Number(Number(v).toFixed(1)),
+        }));
+    }, [reportData, selectedYear]);
+
+    // Datos de flujo mensual (casos y pacientes)
+    const flowData = useMemo(() => {
+        const cases = reportData?.monthlyCases ?? [];
+        const patients = reportData?.monthlyPatients ?? [];
+        return MONTHS.map((m, i) => ({
+            name: m.slice(0, 3),
+            casos: cases[i] ?? 0,
+            pacientes: patients[i] ?? 0,
         }));
     }, [reportData, selectedYear]);
 
@@ -133,7 +144,7 @@ export function OpportunityReport() {
                     {reportData && (
                         <>
                             <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-                                {/* Card de oportunidad — misma visual que el dashboard */}
+                                {/* Card de oportunidad */}
                                 <div className="lg:col-span-2">
                                     <OpportunityStatsCard
                                         data={opportunityStats}
@@ -144,32 +155,60 @@ export function OpportunityReport() {
                                     />
                                 </div>
 
-                                {/* Gráfico de tendencia mensual */}
-                                <div className="lg:col-span-3">
-                                    <BaseCard className="flex flex-col h-full p-6">
+                                {/* Gráficos de línea — columna derecha */}
+                                <div className="lg:col-span-3 space-y-4">
+                                    <BaseCard className="p-6">
                                         <h3 className="text-lg font-semibold text-neutral-900 mb-1">
                                             Tendencia de cumplimiento
                                         </h3>
                                         <p className="text-sm text-neutral-500 mb-4">
                                             % de casos dentro de oportunidad por mes — {selectedYear}
                                         </p>
-                                        <div className="flex-1">
-                                            <BaseLineChart
-                                                data={lineData}
-                                                xKey="name"
-                                                series={[{
-                                                    dataKey: 'value',
-                                                    name: 'Cumplimiento',
+                                        <BaseLineChart
+                                            data={lineData}
+                                            xKey="name"
+                                            series={[{
+                                                dataKey: 'value',
+                                                name: 'Cumplimiento',
+                                                color: '#0ba5ec',
+                                                strokeWidth: 3,
+                                                dot: false,
+                                            }]}
+                                            height={240}
+                                            showLegend={false}
+                                            yAxisFormatter={(v) => `${v}%`}
+                                            tooltipFormatter={(v) => `${v}%`}
+                                        />
+                                    </BaseCard>
+                                    <BaseCard className="p-6">
+                                        <h3 className="text-lg font-semibold text-neutral-900 mb-1">
+                                            Flujo mensual
+                                        </h3>
+                                        <p className="text-sm text-neutral-500 mb-4">
+                                            Casos y pacientes por mes — {selectedYear}
+                                        </p>
+                                        <BaseLineChart
+                                            data={flowData}
+                                            xKey="name"
+                                            series={[
+                                                {
+                                                    dataKey: 'casos',
+                                                    name: 'Casos',
                                                     color: '#0ba5ec',
-                                                    strokeWidth: 3,
+                                                    strokeWidth: 2,
                                                     dot: false,
-                                                }]}
-                                                height={280}
-                                                showLegend={false}
-                                                yAxisFormatter={(v) => `${v}%`}
-                                                tooltipFormatter={(v) => `${v}%`}
-                                            />
-                                        </div>
+                                                },
+                                                {
+                                                    dataKey: 'pacientes',
+                                                    name: 'Pacientes',
+                                                    color: '#22c55e',
+                                                    strokeWidth: 2,
+                                                    dot: false,
+                                                },
+                                            ]}
+                                            height={240}
+                                            showLegend
+                                        />
                                     </BaseCard>
                                 </div>
                             </div>

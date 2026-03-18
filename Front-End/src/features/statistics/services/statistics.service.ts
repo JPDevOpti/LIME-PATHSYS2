@@ -21,6 +21,8 @@ interface BackendOpportunityReport {
     tests: OpportunityTest[];
     pathologists: PathologistPerformance[];
     monthlyPct: number[] | null;
+    monthlyCases: number[] | null;
+    monthlyPatients: number[] | null;
     summary: OpportunitySummaryStats | null;
 }
 
@@ -62,6 +64,8 @@ export const statisticsService = {
             tests: data.tests,
             pathologists: data.pathologists,
             monthlyPct: data.monthlyPct ?? undefined,
+            monthlyCases: data.monthlyCases ?? undefined,
+            monthlyPatients: data.monthlyPatients ?? undefined,
             summary: data.summary ?? undefined,
         };
     },
