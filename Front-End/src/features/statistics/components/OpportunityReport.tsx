@@ -138,6 +138,9 @@ export function OpportunityReport() {
                                     <OpportunityStatsCard
                                         data={opportunityStats}
                                         loading={isLoading}
+                                        selectedMonth={Number(selectedMonth)}
+                                        selectedYear={Number(selectedYear)}
+                                        selectedEntity={selectedEntity}
                                     />
                                 </div>
 

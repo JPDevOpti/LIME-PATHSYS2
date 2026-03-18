@@ -82,21 +82,21 @@ class CasePdfService:
 
     def _render_pdf(self, prepared_cases: list[dict[str, Any]]) -> bytes:
         template = self.jinja_env.get_template("case_report_pdf.html")
-        pdf_title = self._compute_pdf_title(prepared_cases)
         html = template.render(
             cases=prepared_cases,
             header=self._header_context,
-            pdf_title=pdf_title,
         )
-        pdf_bytes = HTML(string=html).write_pdf()
+        document = HTML(string=html).render()
+        document.metadata.title = None
+        pdf_bytes = document.write_pdf(finisher=self._remove_pdf_title_metadata)
         if pdf_bytes is None:
             raise ValueError("WeasyPrint no pudo generar el PDF")
         return pdf_bytes
 
-    def _compute_pdf_title(self, prepared_cases: list[dict[str, Any]]) -> str:
-        if not prepared_cases:
-            return "Informe"
-        return str(prepared_cases[0].get("case_code") or "Informe")
+    def _remove_pdf_title_metadata(self, _document: Any, pdf: Any) -> None:
+        if hasattr(pdf, "info") and isinstance(pdf.info, dict):
+            pdf.info.pop("Title", None)
+            pdf.info.pop("title", None)
 
     def _build_pdf_filename_base(
         self, prepared_case: dict[str, Any], fallback_case_code: str
@@ -129,7 +129,7 @@ class CasePdfService:
         return {
             "document_code": "F-025-LIME",
             "document_version": "06",
-            "title": "INFORME DE RESULTADOS",
+            "title": "INFORME DE RESULTADOS ANATOMOPATOLÓGICOS",
             "unified_banner": unified_banner,
         }
 
