@@ -121,7 +121,6 @@ export function UnreadCasesList() {
                 const testObservations = c.testGroups?.map(g => g.observations).filter(Boolean).join(' | ') || '';
 
                 const row: Record<string, any> = {
-                    'ID Interno': c.id,
                     'Código de Caso': c.caseCode,
                     'Caso Especial': c.isSpecialCase ? 'Sí' : 'No',
                     'Institución': c.institution || '',
@@ -130,22 +129,15 @@ export function UnreadCasesList() {
                     'Paciente (Nombre)': c.patientName || '',
                     'Tipo Documento': c.documentType || '',
                     'Documento Paciente': c.patientDocument || '',
-                    'Observaciones Pruebas': testObservations,
-                    'Láminas IHQ Baja': c.lowComplexityPlates || 0,
-                    'Láminas IHQ Alta': c.highComplexityPlates || 0,
-                    'Láminas IHQ Especial': c.specialPlates || 0,
-                    'Láminas Histoquímica': c.histochemistryPlates || 0,
                     'Total Láminas': c.numberOfPlates || 0,
                     'Fecha de Entrada': formatExcelDate(c.entryDate),
                     'Recibido por': c.receivedBy || '',
                     'Estado': c.status || '',
                     'Entregado a': c.deliveredTo || '',
                     'Fecha de Entrega': formatExcelDate(c.deliveryDate),
-                    'Recibo': c.receipt || '',
                     'Notas/Observaciones': c.notes || '',
                     'Fecha de Creación': formatExcelDate(c.createdAt),
                     'Última Actualización': formatExcelDate(c.updatedAt),
-                    'Actualizado por': c.updatedBy || ''
                 };
 
                 // Add test columns dynamically
