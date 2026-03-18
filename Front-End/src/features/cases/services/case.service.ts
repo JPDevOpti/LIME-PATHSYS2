@@ -155,6 +155,9 @@ function toUpdateBody(data: UpdateCaseRequest): Record<string, unknown> {
     if (data.care_type) {
         body.care_type = data.care_type;
     }
+    if (data.status) {
+        body.state = data.status;
+    }
     return body;
 }
 

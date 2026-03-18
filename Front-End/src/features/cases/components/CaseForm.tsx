@@ -349,11 +349,26 @@ export function CaseForm(props: CaseFormCreateProps | CaseFormEditProps) {
                     <h3 className="text-lg font-bold text-neutral-900">
                         Información del Caso
                     </h3>
-                    {isEdit && formData.status && (
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${getStatusStyles(formData.status)}`}>
-                            {formData.status}
-                        </span>
-                    )}
+                    {isEdit && formData.status && (() => {
+                        const currentIdx = CASE_STATUS_OPTIONS.findIndex(o => o.value === (props as CaseFormEditProps).initialData.status);
+                        const availableOptions = CASE_STATUS_OPTIONS.filter((_, i) => i <= currentIdx);
+                        return (
+                            <div className="relative">
+                                <select
+                                    value={formData.status}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as CaseStatus }))}
+                                    className={`appearance-none cursor-pointer pl-3 pr-7 py-1 rounded-full text-xs font-semibold border focus:outline-none focus:ring-2 focus:ring-lime-brand-500 ${getStatusStyles(formData.status)}`}
+                                >
+                                    {availableOptions.map(opt => (
+                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    ))}
+                                </select>
+                                <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                        );
+                    })()}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">

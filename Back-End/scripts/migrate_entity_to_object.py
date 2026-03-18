@@ -20,10 +20,22 @@ Opciones:
 import argparse
 import os
 import re
+import sys
 from typing import Any
 
 from pymongo import MongoClient
 from pymongo.database import Database
+
+
+def print_progress(current: int, total: int, suffix: str = "") -> None:
+    width = 40
+    filled = int(width * current / total) if total else width
+    bar = "█" * filled + "░" * (width - filled)
+    pct = (current / total * 100) if total else 100
+    sys.stdout.write(f"\r  [{bar}] {pct:5.1f}% ({current}/{total}) {suffix}")
+    sys.stdout.flush()
+    if current >= total:
+        sys.stdout.write("\n")
 
 
 DEFAULT_URL = os.environ.get("MONGODB_URI", "mongodb://localhost:27017")
@@ -97,6 +109,7 @@ def migrate(db: Database, dry_run: bool = False) -> None:
         "patient_info.entity_info.entity_name": 1,
     })
 
+    processed = 0
     for doc in cursor:
         case_id = doc["_id"]
         case_code = doc.get("case_code", "???")
@@ -106,14 +119,12 @@ def migrate(db: Database, dry_run: bool = False) -> None:
         if isinstance(raw_entity, str) and raw_entity.strip():
             entity_name = raw_entity.strip()
         else:
-            # Intentar poblar desde patient_info
             pi = doc.get("patient_info") or {}
             ei = pi.get("entity_info") or {}
             entity_name = (ei.get("entity_name") or "").strip()
 
         if not entity_name:
             no_entity_name += 1
-            # Aún así actualizar a objeto vacío para consistencia
             new_entity = {"id": None, "name": ""}
         else:
             entity_id = find_entity_id(entity_name, lookup)
@@ -131,7 +142,12 @@ def migrate(db: Database, dry_run: bool = False) -> None:
             )
 
         migrated += 1
+        processed += 1
+        if not dry_run:
+            print_progress(processed, total, f"| migrados: {migrated} | sin_id: {no_entity_id}")
 
+    if dry_run:
+        print()
     print("-" * 60)
     print(f"Total procesados: {migrated}")
     print(f"Sin nombre de entidad: {no_entity_name}")

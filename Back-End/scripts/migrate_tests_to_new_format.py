@@ -20,10 +20,22 @@ Uso:
 import argparse
 import os
 import re
+import sys
 from typing import Any
 
 from pymongo import MongoClient
 from pymongo.database import Database
+
+
+def print_progress(current: int, total: int, suffix: str = "") -> None:
+    width = 40
+    filled = int(width * current / total) if total else width
+    bar = "█" * filled + "░" * (width - filled)
+    pct = (current / total * 100) if total else 100
+    sys.stdout.write(f"\r  [{bar}] {pct:5.1f}% ({current}/{total}) {suffix}")
+    sys.stdout.flush()
+    if current >= total:
+        sys.stdout.write("\n")
 
 
 DEFAULT_URL = os.environ.get("MONGODB_URI", "mongodb://localhost:27017")
@@ -78,6 +90,7 @@ def migrate(db: Database, dry_run: bool = False) -> None:
 
     cursor = cases_col.find(query, {"_id": 1, "case_code": 1, "samples": 1})
 
+    processed = 0
     for doc in cursor:
         case_id = doc["_id"]
         case_code = doc.get("case_code", "???")
@@ -92,20 +105,16 @@ def migrate(db: Database, dry_run: bool = False) -> None:
                 if not isinstance(test, dict):
                     continue
 
-                # Si ya tiene test_code y id es un ObjectId-like, skip
                 if "test_code" in test and test.get("id") and len(str(test["id"])) == 24:
                     continue
 
-                # Determinar el test_code
                 if "test_code" not in test:
-                    # Legacy: "id" contiene el test_code
                     old_id = test.get("id", "")
                     test["test_code"] = str(old_id).strip()
                     modified = True
 
                 test_code = str(test.get("test_code", "")).strip()
 
-                # Buscar el ObjectId real de la prueba
                 test_obj_id = lookup.get(test_code)
                 if test_obj_id:
                     test["id"] = test_obj_id
@@ -130,6 +139,12 @@ def migrate(db: Database, dry_run: bool = False) -> None:
                 )
             migrated_cases += 1
 
+        processed += 1
+        if not dry_run:
+            print_progress(processed, total, f"| casos: {migrated_cases} | tests: {migrated_tests} | sin_id: {no_test_id}")
+
+    if dry_run:
+        print()
     print("-" * 60)
     print(f"Casos procesados: {migrated_cases}")
     print(f"Tests actualizados: {migrated_tests}")
