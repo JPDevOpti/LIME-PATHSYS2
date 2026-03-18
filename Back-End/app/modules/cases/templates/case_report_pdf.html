@@ -7,7 +7,7 @@
         <style>
             @page {
                 size: Letter;
-                margin: 32mm 12mm 12mm 12mm;
+                margin: 43mm 12mm 12mm 12mm;
                 @top-left-corner { content: none; }
                 @top-left { content: none; }
                 @top-right { content: none; }
@@ -15,6 +15,7 @@
                 @top-center {
                     content: element(running-header);
                     width: 100%;
+                    vertical-align: bottom;
                 }
                 @bottom-right {
                     content: "Página " counter(page) " de " counter(pages);
