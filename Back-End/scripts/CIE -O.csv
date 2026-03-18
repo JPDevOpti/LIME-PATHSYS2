@@ -1,0 +1,2954 @@
+800,"Neoplasias, NOS"
+8000/0,"Neoplasia, benigna"
+8000/0,"Tumor, benigno"
+8000/0,"Tumor no clasificado, benigno"
+8000/1,"Neoplasia, incierto si es benigna o maligna"
+8000/1,"Neoplasia, NOS"
+8000/1,"Tumor, NOS"
+8000/1,"Tumor no clasificado, malignidad limítrofe"
+8000/1,"Tumor no clasificado, incierto si es benigno o maligno"
+8000/3,"Neoplasia, maligna"
+8000/3,"Blastoma, NOS"
+8000/3,"Tumor, maligno, NOS"
+8000/3,Cáncer
+8000/3,Malignidad
+8000/3,"Tumor no clasificado, maligno"
+8000/6,"Neoplasia, metastásica"
+8000/6,"Neoplasia, secundaria"
+8000/6,Émbolo tumoral
+8000/6,"Tumor, metastásico"
+8000/6,"Tumor, secundario"
+8000/9,"Neoplasia, maligna, incierto si es primaria o metastásica"
+8000/9,"Tumor no clasificado, maligno, incierto si es primaria o metastásica"
+8001/0,"Células tumorales, benignas"
+8001/1,"Células tumorales, incierto si son benignas o malignas"
+8001/1,"Células tumorales, NOS"
+8001/3,"Células tumorales, malignas"
+8002/3,Tumor maligno de células pequeñas
+8003/3,Tumor maligno de células gigantes
+8004/3,Tumor maligno de células fusiformes
+8004/3,Tumor maligno de células fusiformes
+8005/0,"Tumor maligno de células claras, NOS"
+8005/3,Tumor maligno de células claras
+801-804,"Neoplasias epiteliales, NOS"
+8010/0,Tumor epitelial benigno
+8010/2,"Carcinoma in situ, NOS"
+8010/2,"Carcinoma intraepitelial, NOS"
+8010/3,"Carcinoma, NOS"
+8010/3,Tumor epitelial maligno
+8010/3,Carcinoma asociado a heterotopía
+8010/6,"Carcinoma metastásico, NOS"
+8010/6,Carcinoma secundario
+8010/9,Carcinomatosis
+8011/0,Epitelioma benigno
+8011/3,Epitelioma maligno
+8011/3,"Epitelioma, NOS"
+8012/3,"Carcinoma de células grandes, NOS"
+8013/3,Carcinoma neuroendocrino de células grandes
+8013/3,Carcinoma neuroendocrino de células grandes combinado
+8014/3,Carcinoma de células grandes con fenotipo rabdoide
+8015/3,Carcinoma de células vítreas
+8020/3,"Carcinoma indiferenciado, NOS"
+8020/3,"Carcinoma poco diferenciado, NOS"
+8020/3,Carcinoma indiferenciado anaplásico
+8020/3,Carcinoma desdiferenciado
+8021/3,"Carcinoma anaplásico, NOS"
+8022/3,Carcinoma pleomórfico
+8023/3,Carcinoma asociado a proteína nuclear en testículo (NUT)
+8023/3,Carcinoma NUT
+8023/3,Carcinoma de línea media NUT
+8030/3,Carcinoma de células gigantes y fusiformes
+8031/3,Carcinoma de células gigantes
+8032/3,"Carcinoma fusiforme, NOS"
+8033/3,Carcinoma pseudosarcomatoso
+8033/3,Carcinoma sarcomatoide
+8034/3,Carcinoma de células poligonales
+8035/3,Carcinoma con células gigantes similares a osteoclastos
+8035/3,Carcinoma escamoso con células gigantes similares a osteoclastos
+8035/3,Carcinoma indiferenciado con células gigantes similares a osteoclastos
+8040/0,"Tumorlet, benigno"
+8040/0,Hiperplasia difusa idiopática de células neuroendocrinas
+8040/1,"Tumorlet, NOS"
+8041/3,"Carcinoma de células pequeñas, NOS"
+8041/3,Reserva carcinoma de células pequeñas
+8041/3,Carcinoma de células redondas
+8041/3,Carcinoma neuroendocrino de células pequeñas
+8041/3,"Carcinoma de células pequeñas, tipo pulmonar"
+8042/3,Carcinoma de células de avena
+8043/3,"Carcinoma de células pequeñas, células fusiformes"
+8044/3,"Carcinoma de células pequeñas, células intermedias"
+8044/3,"Carcinoma de células pequeñas, tipo hipercalcémico"
+8045/3,Carcinoma combinado de células pequeñas
+8045/3,Carcinoma mixto de células pequeñas
+8045/3,Carcinoma combinado de células pequeñas y adenocarcinoma
+8045/3,Carcinoma combinado de células pequeñas y células grandes
+8045/3,Carcinoma combinado de células pequeñas y células escamosas
+8046/3,Carcinoma de células no pequeñas
+805-808,Neoplasias de células escamosas
+8050/0,"Papiloma, NOS"
+8050/2,"Carcinoma papilar in situ, NOS"
+8050/3,"Carcinoma papilar, NOS"
+8051/0,Papiloma verrugoso
+8051/3,"Carcinoma verrugoso, NOS"
+8051/3,Carcinoma epidermoide verrugoso
+8051/3,Carcinoma de células escamosas verrugoso
+8052/0,"Papiloma de células escamosas, NOS"
+8052/0,Papiloma queratósico
+8052/0,Papiloma escamoso
+8052/0,"Queratosis benigna, NOS"
+8052/0,Queratosis seborreica
+8052/0,Lentigo solar
+8052/0,Queratosis similar al liquen plano
+8052/2,"Carcinoma papilar de células escamosas, no invasivo"
+8052/2,Carcinoma papilar de células escamosas in situ
+8052/3,Carcinoma papilar de células escamosas
+8052/3,Carcinoma epidermoide papilar
+8053/0,"Papiloma de células escamosas, invertido"
+8054/0,Disqueratoma verrugoso
+8054/3,Carcinoma verrugoso
+8054/3,Carcinoma condilomatoso
+8054/3,Carcinoma verrugoso-basaloide
+8060/0,Papilomatosis escamosa
+8060/0,"Papilomatosis, NOS"
+8070/0,Queratosis actínica
+8070/0,Queratosis arsenical
+8070/0,Queratosis PUVA
+8070/2,"Carcinoma escamoso carcinoma de células escamosas in situ, NOS"
+8070/2,"Carcinoma epidermoide in situ, NOS"
+8070/2,"Carcinoma intraepidérmico, NOS"
+8070/2,Carcinoma de células escamosas intraepitelial
+8070/3,"Carcinoma de células escamosas, NOS"
+8070/3,"Carcinoma de células escamosas, tipo habitual"
+8070/3,"Carcinoma epidermoide, NOS"
+8070/3,Carcinoma escamoso
+8070/3,Epitelioma de células escamosas
+8070/6,"Carcinoma de células escamosas, metastásico, NOS"
+8071/2,Neoplasia intraepitelial diferenciada
+8071/2,Neoplasia intraepitelial de pene diferenciada (PeIN)
+8071/2,Neoplasia intraepitelial vulvar diferenciada (VIN)
+8071/3,"Carcinoma de células escamosas, queratinizante, NOS"
+8071/3,"Carcinoma epidermoide, queratinizante"
+8071/3,"Carcinoma de células escamosas, de células grandes, queratinizante"
+8071/3,Queratoacantoma
+8072/0,Acantoma de células grandes
+8072/3,"Carcinoma de células escamosas, de células grandes, no queratinizante, NOS"
+8072/3,"Carcinoma epidermoide, de células grandes, no queratinizante"
+8072/3,"Carcinoma de células escamosas, no queratinizante, NOS"
+8073/3,"Carcinoma de células escamosas, de células pequeñas, no queratinizante"
+8073/3,"Carcinoma epidermoide, de células pequeñas, no queratinizante"
+8074/3,"Carcinoma de células escamosas, de células fusiformes"
+8074/3,"Carcinoma epidermoide, de células fusiformes"
+8074/3,"Carcinoma de células escamosas, sarcomatoide"
+8074/3,Carcinoma de células escamosas pseudovascular
+8075/3,"Carcinoma de células escamosas, adenoide"
+8075/3,"Carcinoma de células escamosas, acantolítico"
+8075/3,"Carcinoma de células escamosas, pseudoglandular"
+8076/2,Carcinoma de células escamosas in situ con invasión estromal cuestionable
+8076/2,Carcinoma epidermoide in situ con invasión estromal cuestionable
+8076/3,"Carcinoma de células escamosas, microinvasivo"
+8077/0,"Neoplasia intraepitelial escamosa, grado bajo"
+8077/0,"Neoplasia intraepitelial escamosa, grado I"
+8077/0,Lesión intraepitelial escamosa de grado bajo
+8077/0,"Neoplasia intraepitelial anal, grado bajo"
+8077/0,"Neoplasia intraepitelial cervical, grado bajo"
+8077/0,"Neoplasia intraepitelial escamosa esofágica (displasia), grado bajo"
+8077/2,"Neoplasia intraepitelial escamosa, grado alto"
+8077/2,"Neoplasia intraepitelial escamosa, grado II"
+8077/2,"Neoplasia intraepitelial escamosa, grado III"
+8077/2,"Displasia escamosa, grado alto"
+8077/2,Lesión intraepitelial escamosa de alto grado
+8077/2,"Neoplasia intraepitelial anal, grado III"
+8077/2,AIN III
+8077/2,"Neoplasia intraepitelial cervical, grado III"
+8077/2,"CIN III, NOS"
+8077/2,CIN III con displasia grave
+8077/2,"Neoplasia intraepitelial escamosa esofágica (displasia), grado alto"
+8077/2,"Neoplasia intraepitelial vaginal Neoplasia, grado III"
+8077/2,VAIN III
+8077/2,"Neoplasia intraepitelial vulvar, grado III"
+8077/2,VIN III
+8078/3,Carcinoma de células escamosas con formación de cuernos
+8080/2,Eritroplasia de Queyrat
+8081/2,Enfermedad de Bowen
+8081/2,"Carcinoma de células escamosas intraepidérmico, tipo Bowen"
+8082/3,Carcinoma linfoepitelial
+8082/3,Linfoepitelioma
+8082/3,Carcinoma similar al linfoepitelioma
+8082/3,Tumor de Schmincke
+8083/3,Carcinoma de células escamosas basaloides
+8083/3,Carcinoma papilar-basaloideo
+8084/0,Acantoma de células claras
+8084/3,"Carcinoma de células escamosas, tipo de células claras"
+8085/3,"Carcinoma de células escamosas, HPV positivo"
+8086/3,"Carcinoma de células escamosas, HPV negativo"
+809-811,Neoplasias de células basales
+8090/1,Tumor de células basales
+8090/3,"Carcinoma de células basales, NOS"
+8090/3,Epiteloma de células basales
+8090/3,Úlcera de roedor
+8090/3,Carcinoma de células basales pigmentado
+8090/3,Carcinoma de células basales con diferenciación anexial
+8091/3,Carcinoma de células basales superficial
+8091/3,Carcinoma de células basales superficial multifocal
+8091/3,Carcinoma de células basales multicéntrico
+8092/3,"Carcinoma de células basales infiltrante, NOS"
+8092/3,"Carcinoma basocelular infiltrante, no esclerosante"
+8092/3,"Carcinoma basocelular infiltrante, esclerosante"
+8092/3,"Carcinoma basocelular, tipo desmoplásico"
+8092/3,"Carcinoma basocelular, morfeico"
+8092/3,"Carcinoma basocelular, sarcomatoide"
+8093/3,"Carcinoma basocelular, fibroepitelial"
+8093/3,"Fibroepitelioma, NOS"
+8093/3,Fibroepitelioma de tipo Pinkus
+8093/3,"Carcinoma basocelular fibroepitelial, tipo Pinkus"
+8093/3,Tumor de Pinkus
+8094/3,Carcinoma basoescamoso
+8094/3,Carcinoma basoescamoso mixto
+8095/3,Carcinoma metatípico
+8096/0,Epitelioma intraepidérmico de Jadassohn
+8097/3,"Carcinoma basocelular, nodular"
+8097/3,"Carcinoma basocelular, micronodular"
+8098/3,Carcinoma basal adenoide
+8100/0,Tricoepitelioma
+8100/0,Tumor de Brooke
+8100/0,Epitelioma adenoide quístico
+8100/0,Tricoblastoma
+8100/0,Trichogerminoma
+8100/3,Carcinoma tricoblástico
+8100/3,Carcinoma tricoblástico carcinosarcoma
+8101/0,Trichofoliculoma
+8102/0,Trichilemoma
+8102/3,Trichilemocarcinoma
+8102/3,Carcinoma triquilemal
+8103/0,Tumor pilar
+8103/1,Quiste triquilemal proliferante
+8103/1,Tumor triquilemal proliferante
+8104/0,Acantoma de la vaina pilar
+8104/0,Tumor del infundíbulo folicular
+8110/0,"Pilomatricoma, NOS"
+8110/0,"Pilomatrixoma, NOS"
+8110/0,Epitelioma calcificante de Malherbe
+8110/0,Matricoma melanocítico
+8110/3,"Carcinoma de células escamosas, microinvasivo"
+8110/3,"Neoplasia intraepitelial escamosa, grado bajo"
+8110/3,"Neoplasia intraepitelial escamosa, grado I"
+8110/3,Lesión intraepitelial escamosa de grado bajo
+8110/3,"Neoplasia intraepitelial anal, grado bajo"
+812-813,"Neoplasia intraepitelial cervical, grado bajo"
+8120/0,"Neoplasia intraepitelial escamosa esofágica (displasia), grado bajo"
+8120/0,"Neoplasia intraepitelial escamosa, grado alto"
+8120/0,"Neoplasia intraepitelial escamosa, grado II"
+8120/0,"Neoplasia intraepitelial escamosa, grado III"
+8120/0,"Displasia escamosa, grado alto"
+8120/2,Lesión intraepitelial escamosa de alto grado
+8120/2,"Neoplasia intraepitelial anal, grado III"
+8120/3,AIN III
+8120/3,"Neoplasia intraepitelial cervical, grado III"
+8120/3,"CIN III, NOS"
+8120/3,CIN III con displasia grave
+8121/0,"Neoplasia intraepitelial escamosa esofágica (displasia), grado alto"
+8121/0,"Neoplasia intraepitelial vaginal Neoplasia, grado III"
+8121/0,VAIN III
+8121/0,"Neoplasia intraepitelial vulvar, grado III"
+8121/0,VIN III
+8121/0,Carcinoma de células escamosas con formación de cuernos
+8121/0,Eritroplasia de Queyrat
+8121/1,Enfermedad de Bowen
+8121/1,"Carcinoma de células escamosas intraepidérmico, tipo Bowen"
+8121/1,Carcinoma linfoepitelial
+8121/1,Linfoepitelioma
+8121/1,Carcinoma similar al linfoepitelioma
+8121/1,Tumor de Schmincke
+8121/3,Carcinoma de células escamosas basaloides
+8121/3,Carcinoma papilar-basaloideo
+8122/3,Acantoma de células claras
+8122/3,"Carcinoma de células escamosas, tipo de células claras"
+8122/3,"Carcinoma de células escamosas, HPV positivo"
+8122/3,"Carcinoma de células escamosas, HPV negativo"
+8123/3,Neoplasias de células basales
+8124/3,Tumor de células basales
+8130/1,"Carcinoma de células basales, NOS"
+8130/1,Epiteloma de células basales
+8130/2,Úlcera de roedor
+8130/2,Carcinoma de células basales pigmentado
+8130/3,Carcinoma de células basales con diferenciación anexial
+8130/3,Carcinoma de células basales superficial
+8131/3,Carcinoma de células basales superficial multifocal
+8131/3,Carcinoma de células basales multicéntrico
+814-838,"Carcinoma de células basales infiltrante, NOS"
+8140/0,"Carcinoma basocelular infiltrante, no esclerosante"
+8140/1,"Carcinoma basocelular infiltrante, esclerosante"
+8140/1,"Carcinoma basocelular, tipo desmoplásico"
+8140/2,"Carcinoma basocelular, morfeico"
+8140/3,"Carcinoma basocelular, sarcomatoide"
+8140/3,"Carcinoma basocelular, fibroepitelial"
+8140/3,"Fibroepitelioma, NOS"
+8140/3,Fibroepitelioma de tipo Pinkus
+8140/3,"Carcinoma basocelular fibroepitelial, tipo Pinkus"
+8140/3,Tumor de Pinkus
+8140/6,Carcinoma basoescamoso
+8141/3,Carcinoma basoescamoso mixto
+8141/3,Carcinoma metatípico
+8141/3,Epitelioma intraepidérmico de Jadassohn
+8142/3,"Carcinoma basocelular, nodular"
+8143/3,"Carcinoma basocelular, micronodular"
+8144/0,Carcinoma basal adenoide
+8144/3,Tricoepitelioma
+8144/3,Tumor de Brooke
+8144/3,Epitelioma adenoide quístico
+8144/3,Tricoblastoma
+8145/3,Trichogerminoma
+8145/3,Carcinoma tricoblástico
+8146/0,Carcinoma tricoblástico carcinosarcoma
+8147/0,Trichofoliculoma
+8147/3,Trichilemoma
+8147/3,Trichilemocarcinoma
+8148/0,Carcinoma triquilemal
+8148/0,Tumor pilar
+8148/0,Quiste triquilemal proliferante
+8148/0,Tumor triquilemal proliferante
+8148/0,Acantoma de la vaina pilar
+8148/2,Tumor del infundíbulo folicular
+8148/2,"Pilomatricoma, NOS"
+8148/2,"Pilomatrixoma, NOS"
+8148/2,Epitelioma calcificante de Malherbe
+8148/2,Matricoma melanocítico
+8148/2,"Displasia glandular esofágica (neoplasia intraepitelial), alto grado"
+8148/2,"Neoplasia intraepitelial esofágica, alto grado"
+8148/2,"Neoplasia intraepitelial prostática, grado III"
+8148/2,PIN III
+8148/2,"Neoplasia intraepitelial prostática, alto grado"
+8149/0,Adenoma canalicular
+8150/0,Microadenoma neuroendocrino pancreático
+8150/0,"Tumor endocrino pancreático, benigno"
+8150/0,"Tumor de células de los islotes, benigno"
+8150/0,Microadenoma pancreático
+8150/3,"Tumor neuroendocrino pancreático, no funcional"
+8150/3,"Tumor endocrino pancreático, no funcional"
+8150/3,"Tumor endocrino pancreático, NOS"
+8150/3,Adenoma de células de los islotes
+8150/3,Adenomatosis de células de los islotes
+8150/3,Nesidioblastoma
+8150/3,"Tumor de células de los islotes, NOS"
+8150/3,Adenocarcinoma de células de los islotes
+8150/3,Carcinoma de células de los islotes
+8151/3,"Insulinoma, NOS"
+8151/3,Adenoma de células beta
+8151/3,Tumor de células beta
+8152/3,Glucagonoma
+8152/3,Tumor de células alfa
+8152/3,Enteroglucagonoma
+8152/3,Tumor productor de péptido similar al glucagón
+8152/3,Tumor de células L Tumor
+8152/3,Péptido pancreático y péptido similar al péptido pancreático dentro del tumor productor de amida de tirosina terminal
+8152/3,Tumor productor de PP/PYY
+8153/3,Gastrinoma
+8153/3,Tumor de células G
+8153/3,Tumor de células de gastrina
+8154/3,Neoplasia neuroendocrina mixta no neuroendocrina (MiNEN)
+8154/3,"Tumor pancreático mixto endocrino y exocrino, maligno"
+8154/3,Adenocarcinoma mixto de células de los islotes y exocrino
+8154/3,Carcinoma mixto acinar-endocrino
+8154/3,Carcinoma mixto acinar-neuroendocrino
+8154/3,Carcinoma mixto acinar-endocrino-ductal
+8154/3,Carcinoma mixto ductal-endocrino
+8154/3,Carcinoma mixto ductal-neuroendocrino
+8154/3,Adenocarcinoma mixto endocrino y exocrino
+8155/3,Vipoma
+8156/3,Somatostatinoma
+8156/3,Tumor de células de somatostatina
+8158/3,Tumor productor de ACTH
+8158/3,"Tumor endocrino, funcional, NOS"
+8160/0,Adenoma de las vías biliares
+8160/0,Colangioma
+8160/3,Colangiocarcinoma
+8160/3,Vías biliares adenocarcinoma
+8160/3,Carcinoma de los conductos biliares
+8161/0,Cistoadenoma de los conductos biliares
+8161/3,Cistoadenocarcinoma de los conductos biliares
+8162/3,Colangiocarcinoma perihiliar
+8162/3,Tumor de Klatskin
+8163/0,Neoplasia pancreatobiliar no invasiva
+8163/0,Neoplasia papilar pancreatobiliar no invasiva con displasia de bajo grado
+8163/0,Neoplasia papilar pancreatobiliar no invasiva con neoplasia intraepitelial de bajo grado
+8163/2,"Neoplasia papilar, tipo pancreatobiliar, con neoplasia intraepitelial de alto grado"
+8163/2,Neoplasia papilar pancreatobiliar no invasiva con displasia de alto grado
+8163/2,Neoplasia papilar pancreatobiliar no invasiva con neoplasia intraepitelial de alto grado
+8163/3,Carcinoma de tipo pancreatobiliar
+8163/3,"Adenocarcinoma, tipo pancreatobiliar"
+8170/0,Adenoma de células hepáticas
+8170/0,Adenoma hepatocelular
+8170/0,"Hepatoma, benigno"
+8170/3,"Carcinoma hepatocelular, NOS"
+8170/3,"Hepatoma, NOS"
+8170/3,Hepatocarcinoma
+8170/3,"Hepatoma, maligno"
+8170/3,Carcinoma de células hepáticas
+8171/3,"Carcinoma hepatocelular, fibrolamelar"
+8172/3,"Carcinoma hepatocelular, escirro"
+8172/3,Carcinoma hepático esclerosante
+8173/3,"Carcinoma hepatocelular carcinoma, variante de células fusiformes"
+8173/3,Carcinoma hepatocelular sarcomatoide
+8174/3,"Carcinoma hepatocelular, tipo de células claras"
+8175/3,"Carcinoma hepatocelular, tipo pleomórfico"
+8180/3,Carcinoma hepatocelular combinado y colangiocarcinoma
+8180/3,Hepatocolangiocarcinoma
+8180/3,Carcinoma hepatocelular mixto y de conducto biliar
+8190/0,Adenoma trabecular
+8190/3,Adenocarcinoma trabecular
+8190/3,Carcinoma trabecular
+8191/0,Adenoma embrionario
+8200/0,Cilindroma dérmico ecrino
+8200/0,Cilindroma de piel
+8200/0,Cilindroma de mama
+8200/0,Tumor en turbante
+8200/3,Carcinoma adenoide quístico
+8200/3,"Cilindroma, NOS"
+8200/3,"Adenocarcinoma, cilindroide"
+8200/3,Carcinoma adenoquístico
+8200/3,"Adenoma bronquial, cilindroide"
+8200/3,Carcinoma tímico con características similares al carcinoma adenoide quístico
+8201/2,Carcinoma cribiforme in situ
+8201/2,"Carcinoma ductal in situ, tipo cribiforme"
+8201/3,"Carcinoma cribiforme, NOS"
+8201/3,"Carcinoma ductal, tipo cribiforme"
+8201/3,Tipo comedón cribiforme carcinoma
+8201/3,"Adenocarcinoma, tipo comedón cribiforme"
+8202/0,Adenoma microquístico
+8204/0,Adenoma lactante
+8210/0,"Pólipo adenomatoso, NOS"
+8210/0,Adenoma polipoide
+8210/2,Adenocarcinoma in situ en pólipo adenomatoso
+8210/2,"Adenocarcinoma in situ en pólipo, NOS"
+8210/2,"Carcinoma in situ en pólipo, NOS"
+8210/2,Adenocarcinoma in situ en adenoma polipoide
+8210/2,Adenocarcinoma in situ en adenoma tubular
+8210/2,Carcinoma in situ en pólipo adenomatoso
+8210/3,"Adenocarcinoma en pólipo, NOS"
+8210/3,"Carcinoma en pólipo, NOS"
+8210/3,Adenocarcinoma en adenoma polipoide
+8210/3,Adenocarcinoma en ade
+8210/3,Adenocarcinoma en adenoma tubular
+8210/3,Carcinoma en pólipo adenomatoso
+8211/0,"Adenoma tubular, NOS"
+8211/3,Adenocarcinoma tubular
+8211/3,Carcinoma tubular
+8212/0,Adenoma plano
+8213/0,"Adenoma serrado, NOS"
+8213/0,Adenoma serrado tradicional
+8213/0,Pólipo adenomatoso e hiperplásico mixto
+8213/0,"Adenoma serrado sésil, NOS"
+8213/0,Pólipo serrado sésil
+8213/0,Adenoma serrado sésil tradicional
+8213/3,Adenocarcinoma serrado
+8214/3,Carcinoma de células parietales
+8214/3,Adenocarcinoma de células parietales
+8215/3,Adenocarcinoma de glándulas anales
+8215/3,Adenocarcinoma de conductos anales
+8220/0,Poliposis adenomatosa del colon
+8220/0,"Adenomatosis, NOS"
+8220/0,Poliposis familiar del colon
+8220/3,Adenocarcinoma en poliposis adenomatosa del colon
+8221/0,Múltiples pólipos adenomatosos
+8221/3,Adenocarcinoma en múltiples pólipos adenomatosos
+8230/2,"Carcinoma ductal in situ, tipo sólido"
+8230/2,"Carcinoma intraductal, tipo sólido"
+8230/3,"Carcinoma sólido, NOS"
+8230/3,"Carcinoma sólido adenocarcinoma, NOS"
+8230/3,Carcinoma sólido con formación de mucina
+8230/3,Adenocarcinoma sólido con formación de mucina
+8231/3,Carcinoma simple
+8240/3,"Tumor neuroendocrino, NOS"
+8240/3,"Tumor carcinoide, NOS"
+8240/3,"Carcinoide, NOS"
+8240/3,"Adenoma bronquial, carcinoide"
+8240/3,"Carcinoma neuroendocrino, grado bajo"
+8240/3,"Carcinoma neuroendocrino, bien diferenciado"
+8240/3,"Tumor neuroendocrino, grado 1"
+8240/3,Carcinoide típico
+8241/3,Carcinoide de células enterocromafines
+8241/3,Argentafinoma
+8241/3,"Tumor carcinoide, argentafín"
+8241/3,Carcinoide de células EC
+8241/3,Carcinoide productor de serotonina
+8241/3,Tumor productor de serotonina
+8242/3,Tumor de células tipo enterocromafines
+8242/3,Carcinoide de células ECL
+8243/3,Carcinoide de células caliciformes
+8243/3,Carcinoide mucinoso
+8243/3,Tumor mucocarcinoide
+8244/3,Carcinoma adenoneuroendocrino mixto
+8244/3,Carcinoide y adenocarcinoma combinados
+8244/3,Carcinoide y adenocarcinoma mixtos
+8244/3,Carcinoide compuesto
+8244/3,MANEC
+8244/3,Carcinoide mixto-adenocarcinoma
+8245/1,Carcinoide tubular
+8245/3,Tumor adenocarcinoide
+8246/3,"Carcinoma neuroendocrino, NOS"
+8246/3,Neoplasia neuroendocrina pobremente diferenciada
+8247/3,Carcinoma de células de Merkel
+8247/3,Tumor de células de Merkel
+8247/3,Carcinoma neuroendocrino cutáneo primario
+8248/1,Apudoma
+8249/3,"Tumor neuroendocrino, grado 2"
+8249/3,Tumor carcinoide atípico
+8249/3,"Carcinoma neuroendocrino, moderadamente diferenciado"
+8249/3,"Tumor neuroendocrino, grado 3"
+8250/0,Hiperplasia adenomatosa atípica
+8250/1,Adenomatosis pulmonar
+8250/2,"Adenocarcinoma in situ de pulmón, no mucinoso"
+8250/3,Adenocarcinoma lepídico
+8250/3,"Adenocarcinoma bronquioloalveolar, NOS"
+8250/3,"Carcinoma bronquioloalveolar, NOS"
+8250/3,Carcinoma de células alveolares
+8250/3,Adenocarcinoma bronquiolar
+8250/3,Carcinoma bronquiolar carcinoma
+8251/0,Adenoma alveolar
+8251/3,Adenocarcinoma alveolar
+8251/3,Carcinoma alveolar
+8252/3,"Carcinoma bronquioloalveolar, no mucinoso"
+8252/3,"Carcinoma bronquioloalveolar, de células de Clara"
+8252/3,"Carcinoma bronquioloalveolar, de tipo neumocito II"
+8253/2,"Adenocarcinoma in situ de pulmón, mucinoso"
+8253/3,"Adenocarcinoma de pulmón, mucinoso"
+8253/3,"Carcinoma bronquioloalveolar, mucinoso"
+8253/3,"Carcinoma bronquioloalveolar, de tipo de células caliciformes"
+8254/3,"Adenocarcinoma de pulmón, mixto mucinoso y no mucinoso"
+8254/3,"Carcinoma bronquioloalveolar, mixto mucinoso y no mucinoso"
+8254/3,"Carcinoma bronquioloalveolar, de tipo de células de Clara y caliciformes"
+8254/3,"Carcinoma bronquioloalveolar, de tipo indeterminado"
+8254/3,"Carcinoma bronquioloalveolar, de tipo neumocito y de células caliciformes tipo II"
+8255/3,Adenocarcinoma con Subtipos
+8255/3,Adenocarcinoma combinado con otros tipos de carcinoma
+8256/3,"Adenocarcinoma mínimamente invasivo, no mucinoso"
+8257/3,"Adenocarcinoma mínimamente invasivo, mucinoso"
+8260/0,"Adenoma papilar, NOS"
+8260/0,Papiloma glandular
+8260/1,Tumor papilar agresivo
+8260/3,"Adenocarcinoma papilar, NOS"
+8260/3,Carcinoma papilar de tiroides
+8260/3,Carcinoma papilar de células renales
+8261/0,"Adenoma velloso, NOS"
+8261/0,Papiloma velloso
+8261/2,Adenocarcinoma in situ en adenoma velloso
+8261/3,Adenocarcinoma en adenoma velloso
+8262/3,Adenocarcinoma velloso
+8263/0,"Adenoma tubulovelloso, NOS"
+8263/0,Adenoma villoglandular
+8263/0,Adenoma papilotubular
+8263/0,Adenoma tubulopapilar
+8263/2,Adenocarcinoma in situ en adenoma tubulovelloso
+8263/3,Adenocarcinoma en adenoma tubulovelloso
+8263/3,Carcinoma villoglandular
+8263/3,Variante villoglandular del adenocarcinoma endometrioide
+8263/3,Adenoma papilotubular adenocarcinoma
+8263/3,Adenocarcinoma tubulopapilar
+8264/0,Papilomatosis glandular
+8264/0,Papilomatosis biliar
+8265/3,"Carcinoma micropapilar, NOS"
+8265/3,Adenocarcinoma micropapilar
+8270/0,Adenoma cromófobo
+8270/3,Carcinoma cromófobo
+8270/3,Adenocarcinoma cromófobo
+8271/0,Adenoma lactotropo
+8271/0,Prolactinoma
+8272/0,"Adenoma hipofisario, NOS"
+8272/0,Adenoma corticotropo
+8272/0,Adenoma de células nulas
+8272/0,Adenoma plurihormonal
+8272/0,Adenoma gonodotropo
+8272/0,Adenoma somatotropo
+8272/0,Adenoma tirotropo
+8272/0,"Adenoma hipofisario, ectópico"
+8272/3,"Carcinoma hipofisario, NOS"
+8273/3,Blastoma hipofisario
+8280/0,Adenoma acidófilo
+8280/0,Adenoma eosinófilo
+8280/3,Carcinoma acidófilo
+8280/3,Adenocarcinoma acidófilo
+8280/3,Adenocarcinoma eosinófilo
+8280/3,Carcinoma eosinófilo
+8281/0,Adenoma mixto acidófilo-basófilo
+8281/3,Carcinoma mixto acidófilo-basófilo
+8290/0,Adenoma oxifílico
+8290/0,Oncocítico adenoma
+8290/0,Oncocitoma
+8290/0,"Adenoma folicular, célula oxifílica"
+8290/0,Adenoma de células de Hürthle
+8290/0,Tumor de células de Hürthle
+8290/0,Oncocitoma de células fusiformes
+8290/0,Cistoadenoma papilar oncocítico
+8290/3,Adenocarcinoma oxifílico
+8290/3,Adenocarcinoma oncocítico
+8290/3,Carcinoma oncocítico
+8290/3,Carcinoma de células de Hürthle
+8290/3,Adenocarcinoma de células de Hürthle
+8290/3,"Carcinoma folicular, célula oxifílica"
+8300/0,Adenoma basófilo
+8300/0,Adenoma de células mucoides
+8300/3,Carcinoma basófilo
+8300/3,Adenocarcinoma basófilo
+8300/3,Adenocarcinoma de células mucoides
+8310/0,Adenoma de células claras
+8310/3,"Adenocarcinoma de células claras, NOS"
+8310/3,"Carcinoma de células claras, NOS"
+8310/3,"Adenocarcinoma de células claras, mesonefroide"
+8310/3,"Carcinoma de células renales de células claras, NOS"
+8311/1,Tumor hipernefroide
+8311/3,Carcinoma de células renales asociado al síndrome de leiomiomatosis hereditaria y carcinoma de células renales (HLRCC)
+8311/3,Carcinoma de translocación de la familia MiT
+8311/3,Carcinoma de células renales deficiente en succinato deshidrogenasa carcinoma
+8312/3,"Carcinoma de células renales, NOS"
+8312/3,Adenocarcinoma de células renales
+8312/3,"Carcinoma de células renales, no clasificado"
+8312/3,Tumor de Grawitz
+8312/3,Hipernefroma
+8313/0,Adenofibroma de células claras
+8313/0,Cistoadenofibroma de células claras
+8313/1,"Tumor de células claras, proliferativo atípico"
+8313/1,Tumor quístico de células claras de malignidad limítrofe
+8313/1,Adenofibroma de células claras de malignidad limítrofe
+8313/1,Cistoadenofibroma de células claras de malignidad limítrofe
+8313/1,Adenocarcinofibroma de células claras
+8313/3,Cistoadenocarcinofibroma de células claras
+8313/3,Cistoadenocarcinofibroma de células claras
+8314/3,Carcinoma rico en lípidos
+8315/3,Carcinoma rico en glucógeno
+8315/3,Carcinoma de células claras rico en glucógeno
+8316/1,Neoplasia renal quística multilocular de bajo potencial maligno
+8316/3,Carcinoma de células renales asociado a quistes
+8316/3,Carcinoma de células renales asociado a enfermedad quística adquirida
+8316/3,Carcinoma de células renales tubuloquístico
+8317/3,"Carcinoma de células renales, tipo cromófobo"
+8317/3,Carcinoma renal de células cromófobas
+8317/3,Tumor cromófobo oncocítico híbrido
+8318/3,"Carcinoma de células renales, sarcomatoide"
+8318/3,"Carcinoma de células renales, células fusiformes"
+8319/3,Carcinoma de conductos colectores
+8319/3,Carcinoma de conductos de Bellini
+8319/3,"Carcinoma renal, tipo conducto colector"
+8320/3,Carcinoma de células granulares
+8320/3,Adenocarcinoma de células granulares
+8321/0,Adenoma de células principales
+8322/0,Adenoma de células claras
+8322/3,Adenocarcinoma de células claras
+8322/3,Carcinoma de células claras
+8323/0,Adenoma de células mixtas
+8323/1,Carcinoma de células renales papilares de células claras
+8323/3,Adenocarcinoma de células mixtas
+8324/0,Lipoadenoma
+8324/0,Adenolipoma
+8325/0,Metanéfrico adenoma
+8330/0,"Adenoma folicular, NOS"
+8330/1,Adenoma folicular atípico
+8330/3,"Carcinoma folicular, NOS"
+8330/3,"Adenocarcinoma folicular, NOS"
+8331/3,"Adenocarcinoma folicular, bien diferenciado"
+8331/3,"Carcinoma folicular, bien diferenciado"
+8332/3,"Adenocarcinoma folicular, trabecular"
+8332/3,"Carcinoma folicular, trabecular"
+8332/3,"Adenocarcinoma folicular, moderadamente diferenciado"
+8332/3,"Carcinoma folicular, moderadamente diferenciado"
+8333/0,"Adenoma microfolicular, NOS"
+8333/0,Adenoma fetal
+8333/3,Adenocarcinoma fetal
+8334/0,Adenoma macrofolicular
+8334/0,Adenoma coloide
+8335/1,Tumor folicular de potencial maligno incierto
+8335/1,"Carcinoma folicular, encapsulado, NOS"
+8335/3,"Carcinoma folicular, mínimamente invasivo"
+8336/1,Tumor trabecular hialinizante
+8336/1,Adenoma trabecular hialinizante
+8337/3,Carcinoma tiroideo poco diferenciado
+8337/3,Carcinoma insular
+8339/3,"Carcinoma folicular, encapsulado, angioinvasivo"
+8340/3,"Carcinoma papilar, variante folicular"
+8340/3,"Carcinoma papilar adenocarcinoma, variante folicular"
+8340/3,Adenocarcinoma papilar y folicular
+8340/3,Carcinoma papilar y folicular
+8341/3,Microcarcinoma papilar
+8342/3,"Carcinoma papilar, variante oncocítica"
+8342/3,"Carcinoma papilar, de células oxifílicas"
+8343/3,"Carcinoma papilar, encapsulado, de tiroides"
+8344/3,"Carcinoma papilar, de células columnares"
+8344/3,"Carcinoma papilar, de células altas"
+8345/3,Carcinoma medular de tiroides
+8345/3,Carcinoma de células C
+8345/3,Carcinoma de células parafoliculares
+8345/3,Carcinoma medular con estroma amiloide
+8346/3,Carcinoma mixto medular-folicular
+8347/3,Carcinoma mixto medular-papilar
+8348/1,Tumor bien diferenciado de potencial maligno incierto
+8349/1,Neoplasia folicular tiroidea no invasiva con características nucleares papilares (NIFTP)
+8350/3,Carcinoma esclerosante no encapsulado
+8350/3,Adenocarcinoma esclerosante no encapsulado
+8350/3,Tumor esclerosante no encapsulado
+8350/3,"Carcinoma papilar, esclerosante difuso"
+8360/1,Adenomas endocrinos múltiples
+8360/1,Adenomatosis endocrina
+8361/0,Tumor yuxtaglomerular
+8361/0,Tumor de células yuxtaglomerulares Tumor
+8361/0,Reninoma
+8370/0,"Adenoma cortical suprarrenal, NOS"
+8370/0,"Tumor cortical suprarrenal, NOS"
+8370/0,"Tumor cortical suprarrenal, benigno"
+8370/3,Carcinoma cortical suprarrenal
+8370/3,Adenocarcinoma cortical suprarrenal
+8370/3,"Tumor cortical suprarrenal, maligno"
+8371/0,"Adenoma cortical suprarrenal, de células compactas"
+8372/0,"Adenoma cortical suprarrenal, pigmentado"
+8372/0,Adenoma negro
+8372/0,Adenoma pigmentado
+8373/0,"Adenoma cortical suprarrenal, de células claras"
+8374/0,"Adenoma cortical suprarrenal, de células glomerulares"
+8375/0,"Adenoma cortical suprarrenal, de células mixtas"
+8380/0,"Adenoma endometrioide, NOS"
+8380/0,"Cistoadenoma endometrioide, NOS"
+8380/1,"Adenoma endometrioide, malignidad limítrofe"
+8380/1,"Tumor endometrioide, limítrofe"
+8380/1,Tumor endometrioide proliferativo atípico
+8380/1,"Cistoadenoma endometrioide, malignidad limítrofe"
+8380/1,Tumor endometrioide de bajo potencial maligno
+8380/2,Neoplasia intraepitelial endometrioide
+8380/2,Hiperplasia atípica del endometrio
+8380/3,"Adenocarcinoma endometrioide, NOS"
+8380/3,"Carcinoma endometrioide, NOS"
+8380/3,Cistoadenocarcinoma endometrioide
+8381/0,"Adenofibroma endometrioide, NOS"
+8381/0,"Cistoadenofibroma endometrioide, NOS"
+8381/1,"Adenofibroma endometrioide, malignidad limítrofe"
+8381/1,"Cistoadenofibroma endometrioide, malignidad limítrofe"
+8381/3,"Adenofibroma endometrioide, maligno"
+8381/3,"Cistoadenofibroma endometrioide, maligno"
+8382/3,"Adenocarcinoma endometrioide, variante secretora"
+8383/3,"Adenocarcinoma endometrioide, variante de células ciliadas"
+8384/3,"Adenocarcinoma, tipo endocervical, NOS"
+839-842,Neoplasias anexiales y de apéndices cutáneos
+8390/0,Adenoma de apéndices cutáneos
+8390/0,"Tumor anexial, benigno"
+8390/0,"Tumor de apéndices cutáneos, benigno"
+8390/3,"Adenocarcinoma anexial, NOS"
+8390/3,Carcinoma de apéndices cutáneos
+8390/3,Carcinoma anexial
+8391/0,Fibroma folicular
+8391/0,Fibrofoliculoma
+8391/0,Fibroma perifolicular
+8391/0,Tricodescoma
+8391/0,Tricodescoma con predominio de células fusiformes
+8392/0,Siringofibroadenoma
+8400/0,Adenoma de glándulas sudoríparas
+8400/0,"Siringadenoma, NOS"
+8400/0,"Tumor de glándulas sudoríparas, benigno"
+8400/1,"Tumor de glándulas sudoríparas, NOS"
+8400/3,Adenocarcinoma de glándulas sudoríparas
+8400/3,Carcinoma de glándulas sudoríparas
+8400/3,"Tumor de glándulas sudoríparas, maligno"
+8401/0,Adenoma apocrino
+8401/0,Cistoadenoma apocrino
+8401/3,Adenocarcinoma apocrino
+8401/3,Carcinoma apocrino
+8402/0,"Hidradenoma, NOS"
+8402/0,Hidradenoma nodular
+8402/0,Hidradenoma de células claras
+8402/0,Acrospiroma ecrino
+8402/3,Hidradenocarcinoma
+8402/3,"Hidradenoma nodular, maligno"
+8403/0,"Espiradenoma, NOS"
+8403/0,Espiradenoma ecrino
+8403/3,Espiradenoma ecrino maligno
+8403/3,Neoplasia maligna que surge de un espiradenoma preexistente
+8403/3,Neoplasia maligna que surge de un cilindroma preexistente
+8403/3,Neoplasia maligna que surge de un espiradenocilindroma preexistente
+8404/0,Hidrocistoma
+8404/0,Hidrocistadenoma
+8404/0,Cistadenoma ecrino
+8405/0,Hidradenoma papilar
+8405/0,Hidradenoma papilífero
+8406/0,Siringocistadenoma papilífero
+8406/0,Siringadenoma papilar
+8406/0,Siringocistadenoma papilar
+8406/0,Sialadenoma papilífero
+8406/3,Siringocistadenocarcinoma papilífero
+8407/0,"Siringoma, NOS"
+8407/0,Tumor siringomatoso del pezón
+8407/0,Adenoma siringomatoso del pezón
+8407/0,Adenoma siringomatoso infiltrante del pezón
+8407/3,Carcinoma anexial microquístico
+8407/3,Carcinoma esclerosante de los conductos sudoríparos
+8407/3,Carcinoma siringomatoso
+8408/0,Adenoma papilar ecrino
+8408/3,Adenocarcinoma papilar digital
+8408/3,Adenoma digital agresivo adenoma papilar
+8408/3,Adenocarcinoma papilar ecrino
+8409/0,"Poroma, NOS"
+8409/0,"Poroma ecrino, NOS"
+8409/0,Poroma apocrino
+8409/2,Porocarcinoma in situ
+8409/3,"Porocarcinoma, NOS"
+8409/3,Poroma ecrino maligno
+8410/0,Sebaceoma
+8410/0,Adenoma sebáceo
+8410/0,Epitelioma sebáceo
+8410/3,Carcinoma sebáceo
+8410/3,Adenocarcinoma sebáceo
+8413/3,Adenocarcinoma ecrino
+8420/0,Adenoma ceruminoso
+8420/3,Adenocarcinoma ceruminoso
+8420/3,Carcinoma ceruminoso
+843,Neoplasias mucoepidermoides
+8430/1,Tumor mucoepidermoide
+8430/3,Carcinoma mucoepidermoide
+844-849,"Neoplasias quísticas, mucinosas y serosas"
+8440/0,"Cistoadenoma, NOS"
+8440/0,"Cistoma, NOS"
+8440/3,"Cistoadenoma seroso, NOS"
+8441/0,Cistoma seroso
+8441/0,Adenoma microquístico seroso
+8441/0,"Cistoadenoma seroso papilar, NOS"
+8441/0,Cistoadenoma seroso carcinoma intraepitelial seroso
+8441/2,Carcinoma intraepitelial tubárico seroso (STIC)
+8441/2,Carcinoma intraepitelial endometrial seroso
+8441/2,"Carcinoma seroso, NOS"
+8441/3,"Cistoadenocarcinoma seroso, NOS"
+8441/3,"Adenocarcinoma seroso, NOS"
+8441/3,"Adenocarcinoma papilar seroso, NOS"
+8441/3,Cistoadenocarcinoma seroso papilar
+8441/3,Adenocarcinoma seroso papilar
+8441/3,Carcinoma papilar superficial seroso
+8441/3,"Tumor seroso borderline, NOS"
+8442/1,"Tumor seroso, proliferativo atípico"
+8442/1,"Cistoadenoma seroso, malignidad borderline"
+8442/1,"Tumor seroso, NOS, de bajo potencial maligno"
+8442/1,Tumor quístico papilar seroso de malignidad borderline
+8442/1,Tumor seroso papilar proliferativo atípico
+8442/1,"Cistoadenoma seroso papilar, malignidad borderline"
+8442/1,Tumor seroso papilar de bajo potencial maligno
+8442/1,Tumor papilar superficial seroso de malignidad borderline
+8442/1,Cistoadenoma de células claras
+8443/0,"Cistoadenoma papilar, NOS"
+8450/0,Tumor papilar cistadenofibroma
+8450/0,"cistadenocarcinoma papilar, NOS"
+8450/3,adenocarcinoma papiloquístico
+8450/3,"cistadenoma papilar, malignidad limítrofe"
+8451/1,tumor pseudopapilar sólido de ovario
+8452/1,tumor quístico papilar
+8452/1,tumor sólido y quístico
+8452/1,neoplasia epitelial sólida y papilar
+8452/1,neoplasia pseudopapilar sólida de páncreas
+8452/3,carcinoma pseudopapilar sólido
+8452/3,adenoma papilar mucinoso intraductal
+8453/0,tumor papilar mucinoso intraductal con displasia intermedia
+8453/0,tumor papilar mucinoso intraductal con displasia de bajo grado
+8453/0,neoplasia papilar mucinoso intraductal con displasia de bajo grado
+8453/0,tumor papilar mucinoso intraductal con displasia moderada
+8453/0,neoplasia papilar mucinosa intraductal con displasia moderada
+8453/0,neoplasia papilar mucinosa intraductal con displasia de alto grado
+8453/2,"carcinoma papilar mucinoso intraductal, no invasivo"
+8453/2,carcinoma papilar mucinoso intraductal Neoplasia con carcinoma invasivo asociado
+8453/3,"Carcinoma mucinoso papilar intraductal, invasivo"
+8453/3,Tumor quístico del nódulo auriculoventricular
+8454/0,"Tumor seroso borderline, variante micropapilar"
+8460/2,"Carcinoma seroso, no invasivo, de bajo grado"
+8460/2,Carcinoma seroso de bajo grado
+8460/3,Carcinoma seroso de bajo grado
+8460/3,Carcinoma seroso micropapilar
+8461/0,Papiloma seroso de superficie
+8461/3,Carcinoma seroso de alto grado
+8470/0,"Cistoadenoma mucinoso, NOS"
+8470/0,"Cistoadenoma mucinoso papilar, NOS"
+8470/0,"Cistoadenoma pseudomucinoso papilar, NOS"
+8470/0,"Cistoadenoma pseudomucinoso, NOS"
+8470/0,Cistoma mucinoso
+8470/0,Neoplasia quística mucinosa con displasia de grado intermedio
+8470/0,Neoplasia quística mucinosa con neoplasia intraepitelial de grado intermedio
+8470/0,Neoplasia quística mucinosa con displasia de bajo grado
+8470/0,Neoplasia quística mucinosa con neoplasia intraepitelial de bajo grado
+8470/0,Tumor quístico mucinoso con displasia intermedia
+8470/0,Tumor quístico mucinoso con displasia de bajo grado
+8470/0,Tumor quístico mucinoso con displasia moderada
+8470/2,Neoplasia quística mucinosa con displasia de alto grado
+8470/2,"Cistoadenocarcinoma mucinoso, no invasivo"
+8470/2,Tumor quístico mucinoso con displasia de alto grado
+8470/2,Neoplasia quística mucinosa con displasia intraepitelial de alto grado Neoplasia
+8470/3,"Cistoadenocarcinoma mucinoso, NOS"
+8470/3,"Cistoadenocarcinoma pseudomucinoso, NOS"
+8470/3,Adenocarcinoma pseudomucinoso
+8470/3,Tumor quístico mucinoso con un carcinoma invasivo asociado
+8470/3,Neoplasia quística mucinosa con un carcinoma invasivo asociado
+8470/3,Cistoadenocarcinoma mucinoso papilar
+8470/3,Cistoadenocarcinoma pseudomucinoso papilar
+8472/1,Tumor quístico mucinoso de malignidad limítrofe
+8472/1,Tumor mucinoso limítrofe
+8472/1,"Tumor mucinoso, NOS, de bajo potencial maligno"
+8472/1,Tumor mucinoso proliferativo atípico
+8472/1,"Cistoadenoma mucinoso, malignidad limítrofe"
+8472/1,"Cistoadenoma pseudomucinoso, malignidad limítrofe"
+8472/1,"Cistoadenoma mucinoso papilar, malignidad limítrofe"
+8472/1,"Cistoadenoma papilar pseudomucinoso, malignidad limítrofe"
+8472/1,Tumor papilar mucinoso de bajo potencial maligno
+8474/0,Cistoadenoma seromucinoso
+8474/1,Tumor seromucinoso limítrofe
+8474/1,"Tumor seromucinoso, proliferativo atípico"
+8474/3,Carcinoma seromucinoso
+8480/0,Adenoma mucinoso
+8480/0,Adenoma de glándulas mucosas
+8480/1,Neoplasia mucinosa apendicular de bajo grado
+8480/3,Adenocarcinoma mucinoso
+8480/3,"Adenocarcinoma acinar, variante mucinosa"
+8480/3,Adenocarcinoma coloide
+8480/3,Carcinoma coloide
+8480/3,Adenocarcinoma gelatinoso
+8480/3,Carcinoma gelatinoso
+8480/3,Carcinoma mucinoso
+8480/3,Adenocarcinoma mucoide
+8480/3,Carcinoma mucoide
+8480/3,Adenocarcinoma mucoso
+8480/3,Carcinoma mucoso
+8480/3,Pseudomixoma peritoneal con sitio primario desconocido
+8480/3,Carcinoma mucinoso tubular y de células fusiformes
+8480/6,Pseudomixoma peritoneal
+8481/3,Adenocarcinoma productor de mucina
+8481/3,Carcinoma productor de mucina
+8481/3,Adenocarcinoma secretor de mucina
+8481/3,Carcinoma secretor de mucina
+8482/3,"Carcinoma mucinoso, tipo gástrico"
+8482/3,"Adenocarcinoma mucinoso, tipo endocervical"
+8490/3,Carcinoma de células en anillo de sello
+8490/3,Adenocarcinoma de células en anillo de sello
+8490/3,"Adenocarcinoma acinar, variante similar a anillo de sello"
+8490/3,"Carcinoma mucinoso, tipo de células en anillo de sello"
+8490/3,Carcinoma poco cohesivo
+8490/3,Carcinoma de células en anillo de sello/histiocitoide
+8490/6,Carcinoma metastásico de células en anillo de sello
+8490/6,Tumor de Krukenberg
+850-854,Neoplasias ductales y lobulillares
+8500/2,"Carcinoma intraductal, no infiltrante, NOS"
+8500/2,"Adenocarcinoma intraductal, no infiltrante, NOS"
+8500/2,"Carcinoma intraductal, NOS"
+8500/2,"Carcinoma ductal in situ, NOS"
+8500/2,"DCIS, NOS"
+8500/2,DIN 3
+8500/2,Neoplasia intraepitelial ductal 3
+8500/2,"Carcinoma hipersecretor quístico, intraductal"
+8500/3,"Carcinoma ductal infiltrante, NOS"
+8500/3,Carcinoma mamario invasivo sin tipo especial
+8500/3,"Adenocarcinoma ductal, NOS"
+8500/3,"Carcinoma ductal carcinoma, NOS"
+8500/3,"Carcinoma ductal, NOS"
+8500/3,Carcinoma de células ductales
+8500/3,Adenocarcinoma ductal infiltrante
+8500/3,Carcinoma de mama de tipo basal
+8500/3,Adenocarcinoma de glándula mamaria de tipo
+8500/3,Adenocarcinoma de glándulas mamarias anogenitales
+8500/3,Carcinoma de mama masculina
+8501/2,"Comedocarcinoma, no infiltrante"
+8501/2,"Carcinoma ductal in situ, tipo comedón"
+8501/2,"DCIS, tipo comedón"
+8501/3,"Comedocarcinoma, NOS"
+8502/3,Carcinoma secretor
+8502/3,Carcinoma de mama juvenil
+8503/0,Papiloma intraductal
+8503/0,"Adenoma ductal, NOS"
+8503/0,Papiloma ductal
+8503/0,"Neoplasia papilar intraductal, NOS"
+8503/0,Neoplasia papilar intraquística con neoplasia intraepitelial de bajo grado
+8503/0,Neoplasia papilar intraquística con neoplasia intraepitelial de grado intermedio
+8503/0,Neoplasia papilar intraglandular con neoplasia intraepitelial de bajo grado
+8503/0,Neoplasia papilar intraductal con neoplasia de grado intermedio
+8503/0,Neoplasia papilar intraductal con neoplasia intraepitelial de bajo grado
+8503/0,Neoplasia papilar tubular intraductal de bajo grado
+8503/0,Papiloma intraductal con hiperplasia ductal atípica
+8503/2,Adenocarcinoma papilar intraductal no infiltrante
+8503/2,"Adenocarcinoma papilar intraductal, NOS"
+8503/2,"Carcinoma papilar intraductal, NOS"
+8503/2,"DCIS, papilar"
+8503/2,"Carcinoma ductal in situ, papilar"
+8503/2,Carcinoma papilar intraductal no infiltrante
+8503/2,Papiloma intraductal con DCIS
+8503/2,Neoplasia papilar intraductal con neoplasia intraepitelial de alto grado
+8503/2,Intraquística Neoplasia papilar con neoplasia intraepitelial de alto grado
+8503/2,Tumor papilar intraquístico con displasia de alto grado
+8503/2,Tumor papilar intraquístico con neoplasia intraepitelial de alto grado
+8503/2,Neoplasia papilar intraductal con displasia de alto grado
+8503/2,Tumor papilar intraductal con displasia de alto grado
+8503/2,Tumor papilar intraductal con neoplasia intraepitelial de alto grado
+8503/2,Neoplasia tubular-papilar intraductal de alto grado
+8503/2,Neoplasia tubulopapilar intraductal
+8503/3,Adenocarcinoma papilar intraductal con invasión
+8503/3,Adenocarcinoma papilar infiltrante
+8503/3,Adenocarcinoma infiltrante y papilar
+8503/3,Carcinoma papilar de mama
+8503/3,Neoplasia papilar intraductal con carcinoma invasivo asociado
+8503/3,Neoplasia papilar intraquística con carcinoma invasivo asociado
+8504/0,Adenoma papilar intraquístico
+8504/0,Papiloma intraquístico
+8504/2,Carcinoma papilar encapsulado
+8504/2,Carcinoma papilar intraquístico no infiltrante carcinoma
+8504/2,Carcinoma papilar enquistado
+8504/2,Carcinoma papilar intraquístico
+8504/2,"Carcinoma intraquístico, NOS"
+8504/2,Adenocarcinoma papilar intraquístico
+8504/3,Carcinoma papilar encapsulado con invasión
+8504/3,Carcinoma papilar enquistado con invasión
+8504/3,Carcinoma papilar intraquístico con invasión
+8505/0,"Papilomatosis intraductal, NOS"
+8505/0,Papilomatosis intraductal difusa
+8506/0,Adenoma del pezón
+8506/0,Papilomatosis del conducto subareolar
+8507/2,Carcinoma micropapilar intraductal
+8507/2,"Carcinoma ductal in situ, micropapilar"
+8507/2,"Carcinoma intraductal, adherido, de alto grado"
+8507/3,Carcinoma micropapilar invasivo de mama
+8507/3,Carcinoma micropapilar de mama
+8508/3,Carcinoma hipersecretor quístico
+8509/2,Carcinoma papilar sólido in situ
+8509/2,Carcinoma de glándulas sudoríparas productor de mucina endocrina in situ
+8509/3,Carcinoma papilar sólido con invasión
+8509/3,Carcinoma de glándulas sudoríparas productor de mucina endocrina
+8510/3,"Carcinoma medular, NOS"
+8510/3,Adenocarcinoma medular
+8510/3,Carcinoma de tipo medular
+8512/3,Carcinoma medular con estroma linfoide
+8513/3,Carcinoma medular atípico
+8514/3,"Carcinoma ductal, tipo desmoplásico"
+8519/2,"Carcinoma lobulillar in situ, pleomórfico"
+8519/2,"LCIS, pleomórfico"
+8520/2,"Carcinoma lobulillar in situ, NOS"
+8520/2,"LCIS, NOS"
+8520/2,"Carcinoma lobulillar, no infiltrante"
+8520/2,"Carcinoma lobulillar in situ, clásico"
+8520/2,Papiloma intraductal con carcinoma lobulillar in situ
+8520/3,"Carcinoma lobulillar, NOS"
+8520/3,"Carcinoma lobulillar infiltrante, NOS"
+8520/3,Adenocarcinoma lobulillar
+8520/3,Carcinoma tubulolobulillar
+8520/3,"Carcinoma lobulillar, pleomórfico"
+8521/3,Carcinoma ductular infiltrante
+8522/2,Carcinoma intraductal y carcinoma lobulillar in situ
+8522/3,Carcinoma ductal y lobulillar infiltrante
+8522/3,Carcinoma lobulillar y ductal
+8522/3,Carcinoma intraductal y lobulillar
+8522/3,Carcinoma ductal y lobulillar infiltrante in situ
+8522/3,Carcinoma lobulillar infiltrante y carcinoma ductal in situ
+8523/3,Carcinoma ductal infiltrante mixto con otros tipos de carcinoma
+8523/3,Carcinoma ductal infiltrante y coloide
+8523/3,Carcinoma ductal infiltrante y cribiforme
+8523/3,Carcinoma ductal infiltrante y mucinoso
+8523/3,Carcinoma ductal infiltrante y tubular
+8524/3,Carcinoma lobulillar infiltrante mixto con otros tipos de carcinoma
+8525/3,Adenocarcinoma polimorfo
+8525/3,Carcinoma polimorfo
+8525/3,Adenocarcinoma del conducto terminal
+8530/3,Carcinoma inflamatorio
+8530/3,Adenocarcinoma inflamatorio
+8540/3,Enfermedad de Paget mamaria
+8540/3,Enfermedad de Paget de la mama
+8540/3,Enfermedad de Paget del pezón
+8541/3,Enfermedad de Paget y carcinoma ductal infiltrante de la mama
+8542/3,"Enfermedad de Paget, extramamaria"
+8543/3,Enfermedad de Paget y carcinoma intraductal de la mama
+855,Neoplasias de células acinares
+8550/0,Adenoma de células acinares
+8550/0,Adenoma acinar
+8550/0,Adenoma de células acínicas
+8550/1,Tumor de células acínicas
+8550/1,Tumor de células acínicas
+8550/3,Carcinoma de células acinares
+8550/3,"Adenocarcinoma acinar, NOS"
+8550/3,Acinoma carcinoma
+8550/3,Adenocarcinoma de células acínicas
+8551/3,Cistoadenocarcinoma de células acinares
+8551/3,Adenocarcinoma acinar de pulmón
+8552/3,Carcinoma acinar-ductal mixto
+856-857,Neoplasias epiteliales complejas
+8560/0,Papiloma mixto de células escamosas y glandular
+8560/0,Pólipo túbuloescamoso
+8560/3,Carcinoma adenoescamoso
+8560/3,Adenocarcinoma mixto y carcinoma epidermoide
+8560/3,Adenocarcinoma mixto y carcinoma de células escamosas
+8560/3,Carcinoma ductal ecrino escamoide
+8561/0,Adenolinfoma
+8561/0,Cistoadenoma papilar linfomatoso
+8561/0,Tumor de Warthin
+8562/3,Carcinoma epitelial-mioepitelial
+8563/0,Linfadenoma
+8570/3,Adenocarcinoma con metaplasia escamosa
+8570/3,Adenoacantoma
+8570/3,Carcinoma endometrioide con diferenciación escamosa
+8571/3,Adenocarcinoma con metaplasia cartilaginosa y ósea
+8571/3,Adenocarcinoma con metaplasia cartilaginosa
+8571/3,Adenocarcinoma con diferenciación condroide diferenciación
+8571/3,Adenocarcinoma con metaplasia ósea
+8572/3,Adenocarcinoma con metaplasia de células fusiformes
+8572/3,"Adenocarcinoma acinar, variante sarcomatoide"
+8572/3,Carcinoma metaplásico tipo fibromatosis
+8573/3,Adenocarcinoma con metaplasia apocrina
+8573/3,Carcinoma con metaplasia apocrina
+8574/3,Adenocarcinoma con diferenciación neuroendocrina
+8574/3,Carcinoma con diferenciación neuroendocrina
+8574/3,Adenocarcinoma mezclado con carcinoma neuroendocrino
+8575/3,"Carcinoma metaplásico, NOS"
+8576/3,Adenocarcinoma hepatoide
+8576/3,Carcinoma hepatoide
+858,Neoplasias epiteliales tímicas
+8580/0,Timoma microscópico
+8580/0,Timoma benigno
+8580/1,Timoma micronodular con estroma linfoide
+8580/3,"Timoma, NOS"
+8580/3,Timoma intrapulmonar
+8580/3,Timoma esclerosante
+8580/3,Timoma metaplásico
+8581/3,"Timoma, tipo A"
+8581/3,"Timoma, medular"
+8581/3,"Timoma, de células fusiformes"
+8582/3,"Timoma, tipo AB"
+8582/3,"Timoma, tipo mixto"
+8583/3,"Timoma, tipo B1"
+8583/3,"Timoma, rico en linfocitos"
+8583/3,"Timoma, linfocítico"
+8583/3,"Timoma, organoide"
+8583/3,"Timoma, predominantemente cortical"
+8584/3,"Timoma, tipo B2"
+8584/3,"Timoma, cortical"
+8585/3,"Timoma, tipo B3"
+8585/3,"Timoma, atípico"
+8585/3,"Timoma, epitelial"
+8585/3,Carcinoma tímico bien diferenciado
+8586/3,"Carcinoma tímico, NOS"
+8586/3,"Timoma, tipo C"
+8587/0,Timoma hamartomatoso ectópico
+8588/3,Tumor epitelial fusiforme con elemento similar al timo
+8588/3,SETTLE
+8588/3,Tumor epitelial fusiforme con diferenciación similar al timo
+8589/3,Carcinoma tímico intratiroideo
+8589/3,Carcinoma que muestra elemento similar al timo
+8589/3,Carcinoma que muestra diferenciación similar al timo
+8589/3,CASTLE
+859-867,Neoplasias gonadales especializadas
+8590/0,Tumor benigno del estroma de los cordones sexuales
+8590/0,En anillo de sello Tumor estromal
+8590/0,Tumor estromal microquístico
+8590/1,"Tumor estromal gonadal-cordón sexual, NOS"
+8590/1,"Tumor estromal gonadal, NOS"
+8590/1,"Tumor estromal gonadal, NOS"
+8590/1,Tumor estromal ovárico
+8590/1,Tumor estromal testicular
+8590/1,"Tumor uterino parecido al tumor estromal gonadal-cordón sexual, incompletamente diferenciado"
+8590/1,"Tumor estromal gonadal-cordón sexual, no clasificado"
+8591/1,"Tumor estromal gonadal-cordón sexual, formas mixtas"
+8591/1,"Tumor estromal gonadal-cordón sexual, mixto"
+8592/1,Tumor estromal con elementos menores del cordón sexual
+8592/1,"Tumor mixto de células germinales-cordón sexual-cordón sexual, NOS"
+8593/1,"Tumor mixto de células germinales-cordón sexual-cordón sexual-estroma, no clasificado"
+8594/1,"Tecoma, NOS"
+8594/1,Tumor de células de la teca
+8600/0,"Tecoma, maligno"
+8600/0,"Tecoma, luteinizado"
+8600/3,Tecoma maligno
+8601/0,Tecoma luteinizado
+8602/0,Tumor estromal esclerosante
+8610/0,"Luteoma, NOS"
+8610/0,Luteinoma
+8620/1,Tumor de células de la granulosa del testículo en adultos
+8620/1,"Tumor de células de la granulosa del testículo, NOS"
+8620/3,Tumor de células de la granulosa del ovario en adultos
+8620/3,"Tumor de células de la granulosa, tipo adulto"
+8620/3,Carcinoma de células de la granulosa
+8620/3,"Tumor de células de la granulosa, sarcomatoide"
+8621/1,Tumor de células de la granulosa-células de la teca
+8621/1,Tumor de células de la teca-células de la granulosa
+8622/0,"Tumor de células de la granulosa del testículo, juvenil"
+8622/1,"Tumor de células de la granulosa, juvenil"
+8623/1,Tumor de los cordones sexuales con túbulos anulares
+8630/0,Androblastoma benigno
+8630/0,"Arrenoblastoma, benigno"
+8630/1,"Androblastoma, NOS"
+8630/1,"Arrenoblastoma, NOS"
+8630/3,Androblastoma maligno
+8630/3,Arrenoblastoma maligno
+8631/0,"Tumor de células de Sertoli-Leydig, bien diferenciado"
+8631/1,"Tumor de células de Sertoli-Leydig de diferenciación intermedia, NOS"
+8631/1,"Tumor de células de Sertoli-Leydig, moderadamente diferenciado diferenciado"
+8631/1,"Tumor de células de Sertoli-Leydig, NOS"
+8631/3,"Tumor de células de Sertoli-Leydig, poco diferenciado"
+8631/3,"Tumor de células de Sertoli-Leydig, sarcomatoide"
+8632/1,Ginandroblastoma
+8633/1,"Tumor de células de Sertoli-Leydig, retiforme"
+8634/1,"Tumor de células de Sertoli-Leydig, diferenciación intermedia, con elementos heterólogos"
+8634/1,"Tumor de células de Sertoli-Leydig, moderadamente diferenciado, con elementos heterólogos"
+8634/1,"Tumor de células de Sertoli-Leydig, retiforme, con elementos heterólogos"
+8634/3,"Tumor de células de Sertoli-Leydig, poco diferenciado, con elementos heterólogos"
+8640/1,"Tumor de células de Sertoli, NOS"
+8640/1,"Androblastoma tubular, NOS"
+8640/1,Adenoma tubular de Pick
+8640/1,Adenoma de células de Sertoli
+8640/1,Adenoma testicular
+8640/3,Carcinoma de células de Sertoli
+8641/0,Tumor de células de Sertoli con almacenamiento de lípidos
+8641/0,Folliculome lipidique
+8641/0,Tumor de células de Sertoli rico en lípidos
+8641/0,Androblastoma tubular con almacenamiento de lípidos
+8642/1,Tumor de células de Sertoli calcificante de células grandes
+8643/1,Neoplasia de células de Sertoli hialinizante de células grandes intratubulares
+8650/0,"Tumor de células de Leydig de ovario, NOS"
+8650/1,"Tumor de células de Leydig de testículo, NOS"
+8650/1,"Tumor de células intersticiales, NOS"
+8650/3,"Tumor de células de Leydig, maligno"
+8650/3,"Tumor de células intersticiales, maligno"
+8660/0,Tumor de células del hilio
+8660/0,Tumor de células hiliares
+8670/0,Tumor de células lipídicas de ovario
+8670/0,"Tumor de células esteroides, NOS"
+8670/0,Tumor de células lipoideas de ovario
+8670/0,Masculinovoblastoma
+8670/3,"Tumor de células esteroides, maligno"
+8671/0,Tumor del resto suprarrenal
+868-871,Paragangliomas y tumores glómicos
+8680/3,"Paraganglioma, NOS"
+8681/3,Paraganglioma simpático
+8682/3,Paraganglioma parasimpático
+8683/0,Paraganglioma gangliocítico
+8690/3,Paraganglioma del oído medio
+8690/3,"Glomus Tumor yugular, NOS"
+8690/3,Paraganglioma yugular
+8690/3,Paraganglioma yugulotimpánico
+8691/3,Tumor del cuerpo aórtico
+8691/3,Paraganglioma del cuerpo aórtico
+8691/3,Paraganglioma aorticopulmonar
+8692/3,Paraganglioma del cuerpo carotídeo
+8692/3,Tumor del cuerpo carotídeo
+8693/3,"Paraganglioma extrasuprarrenal, NOS"
+8693/3,"Paraganglioma no cromafín, NOS"
+8693/3,Paraganglioma laríngeo
+8693/3,Paraganglioma vagal
+8693/3,Quemodectoma
+8693/3,Paraganglioma compuesto
+8700/3,"Feocromocitoma, NOS"
+8700/3,Paraganglioma medular suprarrenal
+8700/3,Paraganglioma cromafín
+8700/3,Tumor cromafín
+8700/3,Cromafinoma
+8700/3,Feocromocitoma compuesto
+8700/3,Feocromoblastoma
+8710/3,Glomangiosarcoma
+8710/3,Sarcoma glomoide
+8711/0,"Tumor glómico, NOS"
+8711/1,Glomangiomatosis
+8711/1,Tumor glómico de potencial maligno incierto
+8711/3,"Tumor glómico, maligno"
+8712/0,Glomangioma
+8713/0,Glomangiomioma
+8714/0,"Tumor epitelioide perivascular, benigno"
+8714/0,"PEComa, benigno"
+8714/3,"Tumor epitelioide perivascular, maligno"
+8714/3,"PEComa, maligno"
+872-879,Nevis y melanomas
+8720/0,"Nevo pigmentado, NOS"
+8720/0,"Nevo, NOS"
+8720/0,"Nevo melanocítico, NOS"
+8720/0,Nevo piloso
+8720/0,Nevo spilus
+8720/0,Nevo de Meyerson
+8720/0,Nevo penetrante profundo
+8720/0,Nevo combinado
+8720/0,Genital Nevo
+8720/0,Nevo conjuntival
+8720/2,Melanoma in situ
+8720/3,"Melanoma maligno, NOS"
+8720/3,"Melanoma, NOS"
+8720/3,Melanoma nevoide
+8720/3,"Melanoma, meníngeo"
+8721/3,Melanoma nodular
+8722/0,Nevo de células en globo
+8722/3,Melanoma de células en globo
+8723/0,Nevo en halo
+8723/0,Nevo en regresión
+8723/3,"Melanoma maligno, en regresión"
+8725/0,Neuronevo
+8726/0,Nevo magnocelular
+8726/0,"Melanocitoma, globo ocular"
+8726/0,"Melanocitoma, NOS"
+8727/0,Nevo displásico
+8728/0,Melanocitosis meníngea
+8728/0,Melanocitosis difusa
+8728/1,Melanocitoma meníngeo
+8728/3,Melanomatosis meníngea
+8730/0,Nevo no pigmentado
+8730/0,Nevo acrómico
+8730/3,Melanoma amelanótico
+8740/0,"Nevo de la unión, NOS"
+8740/0,Nevo intraepidérmico
+8740/0,Nevo de la unión
+8740/3,Melanoma maligno en nevo de la unión
+8741/2,"Melanosis precancerosa, NOS"
+8741/3,Melanoma maligno en melanosis precancerosa
+8742/0,Nevo melanocítico lentiginoso
+8742/0,Lentigo simple
+8742/0,Lentigo simple
+8742/2,Lentigo maligno
+8742/2,"Peca melanótica de Hutchinson, NOS"
+8742/3,Melanoma lentigo maligno
+8742/3,Melanoma maligno en peca melanótica de Hutchinson
+8743/3,Melanoma con daño solar acumulativo bajo
+8743/3,Melanoma de propagación superficial
+8744/0,Nevo acral
+8744/3,Melanoma acral
+8744/3,"Melanoma lentiginoso acral, maligno"
+8745/3,"Melanoma desmoplásico, NOS"
+8745/3,"Melanoma desmoplásico, amelanótico"
+8745/3,"Melanoma neurotrópico, maligno"
+8746/3,Melanoma lentiginoso mucoso
+8750/0,Nevo dérmico
+8750/0,Nevo intradérmico
+8750/0,Nevo estromal
+8760/0,Nevo compuesto
+8760/0,Nevo dérmico y epidérmico
+8761/0,"Nevo melanocítico congénito, NOS"
+8761/1,"Nevo gigante Nevo pigmentado, NOS"
+8761/1,Nevo congénito intermedio y gigante
+8761/3,Melanoma maligno que surge en un nevo congénito gigante
+8761/3,Melanoma maligno en un nevo pigmentado gigante
+8761/3,Melanoma maligno en un nevo melanocítico congénito
+8762/1,Lesión dérmica proliferativa en un nevo congénito
+8762/1,Nódulo proliferativo en un nevo melanocítico congénito
+8770/0,Nevo de células fusiformes y epitelioide
+8770/0,Melanoma juvenil
+8770/0,Nevo juvenil
+8770/0,"Nevo de Spitz, NOS"
+8770/0,"Nevo de Spitz, atípico"
+8770/0,Nevo de células fusiformes pigmentado de Reed
+8770/0,Nevo de Spitz de células fusiformes pigmentado
+8770/3,Tumor maligno de Spitz
+8770/3,Melanoma mixto de células fusiformes y epitelioide
+8770/3,Melanoma de Spitz
+8770/3,Melanoma spitzoide
+8771/0,Nevo de células epitelioides
+8771/3,Melanoma de células epitelioides
+8772/0,"Nevo de células fusiformes, NOS"
+8772/3,"Nevo de células fusiformes melanoma, NOS"
+8773/3,"Melanoma de células fusiformes, tipo A"
+8774/3,"Melanoma de células fusiformes, tipo B"
+8780/0,"Nevo azul, NOS"
+8780/0,Nevo azul de Jadassohn
+8780/1,Melanocitoma epitelioide pigmentado
+8780/1,"Nevo azul, epitelioide"
+8780/3,"Nevo azul, maligno"
+8780/3,Melanoma que surge en un nevo azul
+8790/0,Nevo azul celular
+880,"Tumores y sarcomas de tejidos blandos, NOS"
+8800/0,"Tumor de tejidos blandos, benigno"
+8800/3,"Sarcoma, NOS"
+8800/3,"Tumor mesenquimal, maligno"
+8800/3,Sarcoma de tejidos blandos
+8800/3,"Tumor de tejidos blandos, maligno"
+8800/9,"Sarcomatosis, NOS"
+8801/3,Sarcoma de células fusiformes
+8801/3,"Sarcoma de células fusiformes, indiferenciado"
+8802/1,Tumor angiectásico hialinizante pleomórfico
+8802/3,Sarcoma de células gigantes
+8802/3,"Sarcoma de células pleomórficas, NOS"
+8802/3,"Sarcoma de células pleomórficas, indiferenciado"
+8802/3,Sarcoma pleomórfico
+8802/3,Sarcoma dérmico pleomórfico
+8803/3,Sarcoma de células pequeñas
+8803/3,"Sarcoma de células redondas, NOS"
+8803/3,"Sarcoma de células redondas, indiferenciado"
+8804/3,"Epitelioide Sarcoma, NOS"
+8804/3,Sarcoma de células epitelioides
+8804/3,"Sarcoma epitelioides, indiferenciado"
+8805/3,Sarcoma indiferenciado
+8806/3,Tumor desmoplásico de células pequeñas y redondas
+881-883,Neoplasias fibromatosas
+8810/0,"Fibroma, NOS"
+8810/0,Fibroblastoma desmoplásico
+8810/0,Fibroma de Gardner
+8810/0,Fibroma nucal
+8810/0,Fibroma colagenoso
+8810/0,Fibroma dérmico en forma de placa CD34 positivo
+8810/1,Fibroma celular
+8810/3,"Fibrosarcoma, NOS"
+8811/0,"Fibromixoma, NOS"
+8811/0,"Mixofibroma, NOS"
+8811/0,Fibroma mixoide
+8811/0,Fibromixoma plexiforme
+8811/0,Fibromixoma acral
+8811/1,Sarcoma fibroblástico mixoinflamatorio
+8811/1,Tumor fibroblástico mixoinflamatorio atípico
+8811/1,Tumor fibrolipomatoso hemosiderótico
+8811/3,Mixofibrosarcoma
+8811/3,Fibromixosarcoma
+8812/0,Fibroma perióstico
+8812/3,Fibrosarcoma perióstico
+8812/3,"Sarcoma perióstico, NOS"
+8813/0,Fibroma de la vaina tendinosa
+8813/0,Fibroma fascial
+8813/1,Firomatosis de tipo palmar/plantar
+8813/1,Fibromatosis superficial
+8813/3,Fibrosarcoma fascial
+8814/3,Fibrosarcoma infantil
+8814/3,Fibrosarcoma congénito
+8815/0,"Tumor fibroso solitario/Hemangiopericitoma, grado 1"
+8815/0,"Hemangiopericitoma, benigno"
+8815/1,"Tumor fibroso solitario, NOS"
+8815/1,"Hemangiopericitoma, NOS"
+8815/1,Tumor fibroso localizado
+8815/1,"Tumor fibroso solitario/Hemangiopericitoma, grado 2"
+8815/1,Meningioma hemangiopericítico
+8815/3,"Tumor fibroso solitario, maligno"
+8815/3,"Tumor fibroso solitario Tumor/Hemangiopericitoma, grado 3"
+8815/3,Hemangiopericitoma maligno
+8816/0,Fibroma aponeurótico calcificante
+8817/0,Tumor fibroso calcificante
+8818/0,Displasia fibrosa
+8820/0,Elastofibroma
+8821/1,Fibromatosis agresiva
+8821/1,Fibromatosis de tipo desmoide
+8821/1,"Desmoide, NOS"
+8821/1,"Tumor desmoide, NOS"
+8821/1,Desmoide extraabdominal
+8821/1,Fibroma invasivo
+8822/1,Fibromatosis abdominal
+8822/1,Desmoide abdominal
+8822/1,Fibromatosis mesentérica
+8822/1,Fibromatosis retroperitoneal
+8823/0,Fibroma esclerótico
+8823/1,Fibroma desmoplásico
+8824/0,Miofibroma
+8824/0,Dermatomiofibroma
+8824/0,Miopericitoma
+8824/1,Miofibromatosis
+8824/1,Fibromatosis generalizada congénita
+8824/1,Miofibromatosis infantil
+8825/0,Miofibroblastoma
+8825/1,"Tumor miofibroblástico, NOS"
+8825/1,Tumor miofibroblástico inflamatorio
+8825/3,Sarcoma miofibroblástico
+8826/0,Angiomiofibroblastoma
+8827/1,"Tumor miofibroblástico, peribronquial"
+8827/1,Tumor miofibroblástico peribronquial congénito
+8828/0,Fascitis nodular
+8828/0,Fascitis proliferativa
+8828/0,Miositis proliferativa
+8830/0,"Histiocitoma fibroso benigno, NOS"
+8830/0,"Histiocitoma fibroso, NOS"
+8830/0,"Fibroxantoma, NOS"
+8830/0,Xantofibroma
+8830/0,Histiocitoma fibroso epitelioide
+8830/1,Histiocitoma fibroso atípico
+8830/1,Fibroxantoma atípico
+8830/3,Histiocitoma fibroso maligno
+8830/3,Sarcoma pleomórfico de alto grado indiferenciado de hueso
+8830/3,Fibroxantoma maligno
+8831/0,"Histiocitoma, NOS"
+8831/0,Histiocitoma profundo
+8831/0,Histiocitoma fibroso benigno profundo
+8831/0,Juvenil histiocitoma
+8831/0,Reticulohistiocitoma
+8831/0,Reticulohistocitosis
+8832/0,"Dermatofibroma, NOS"
+8832/0,"Histiocitoma cutáneo, NOS"
+8832/0,Dermatofibroma lenticular
+8832/0,Hemangioma esclerosante
+8832/0,Fibrosis nodular subepidérmica
+8832/0,Neumocitoma esclerosante
+8832/0,Fibroma pleomórfico
+8832/1,"Dermatofibrosarcoma protuberans, NOS"
+8832/1,"Dermatofibrosarcoma, NOS"
+8832/3,"Dermatofibrosarcoma protuberans, fibrosarcomatoso"
+8832/3,"Dermatofibrosarcoma, sarcomatoso"
+8833/1,Dermatofibrosarcoma protuberans pigmentado
+8833/1,Tumor de Bednar
+8834/1,Fibroblastoma de células gigantes
+8835/1,Tumor fibrohistiocítico plexiforme
+8836/1,Histiocitoma fibroso angiomatoide
+884,Neoplasias mixomatosas
+8840/0,"Mixoma, NOS"
+8840/3,Mixosarcoma
+8840/3,Sarcoma fibromixoide de bajo grado
+8840/3,Epitelioide esclerosante fibrosarcoma
+8841/0,"Angiomixoma, NOS"
+8841/0,Angiomixoma agresivo
+8841/0,Angiomixoma superficial
+8842/0,"Tumor fibromixoide osificante, NOS"
+8842/3,"Tumor miofibroblástico, NOS"
+8842/3,Tumor miofibroblástico inflamatorio
+885-888,Sarcoma miofibroblástico
+8850/0,Angiomiofibroblastoma
+8850/0,"Tumor miofibroblástico, peribronquial"
+8850/1,Tumor miofibroblástico peribronquial congénito
+8850/1,Fascitis nodular
+8850/1,Fascitis proliferativa
+8850/3,Miositis proliferativa
+8850/3,"Histiocitoma fibroso benigno, NOS"
+8851/0,"Histiocitoma fibroso, NOS"
+8851/1,"Fibroxantoma, NOS"
+8851/3,Xantofibroma
+8851/3,Histiocitoma fibroso epitelioide
+8851/3,Histiocitoma fibroso atípico
+8851/3,Fibroxantoma atípico
+8851/3,Histiocitoma fibroso maligno
+8852/0,Sarcoma pleomórfico de alto grado indiferenciado de hueso
+8852/0,Fibroxantoma maligno
+8852/3,"Histiocitoma, NOS"
+8852/3,Histiocitoma profundo
+8853/3,Histiocitoma fibroso benigno profundo
+8854/0,Juvenil histiocitoma
+8854/3,Reticulohistiocitoma
+8855/3,Reticulohistocitosis
+8856/0,"Dermatofibroma, NOS"
+8856/0,"Histiocitoma cutáneo, NOS"
+8856/0,Dermatofibroma lenticular
+8857/0,Hemangioma esclerosante
+8857/3,Fibrosis nodular subepidérmica
+8858/3,Neumocitoma esclerosante
+8860/0,Fibroma pleomórfico
+8860/1,"Dermatofibrosarcoma protuberans, NOS"
+8861/0,"Dermatofibrosarcoma, NOS"
+8862/0,"Dermatofibrosarcoma protuberans, fibrosarcomatoso"
+8870/0,"Dermatofibrosarcoma, sarcomatoso"
+8880/0,Dermatofibrosarcoma protuberans pigmentado
+8880/0,Tumor de Bednar
+8880/0,Fibroblastoma de células gigantes
+8881/0,Tumor fibrohistiocítico plexiforme
+8881/0,Histiocitoma fibroso angiomatoide
+8881/0,Neoplasias mixomatosas
+8881/0,"Mixoma, NOS"
+889-892,Mixosarcoma
+8890/0,Sarcoma fibromixoide de bajo grado
+8890/0,Epitelioide esclerosante fibrosarcoma
+8890/0,"Angiomixoma, NOS"
+8890/0,Angiomixoma agresivo
+8890/0,Angiomixoma superficial
+8890/0,"Tumor fibromixoide osificante, NOS"
+8890/0,Leiomioma plexiforme
+8890/0,"Leiomioma, apopléjico"
+8890/0,"Leiomioma, hidrópico"
+8890/0,Miolipoma
+8890/0,Leiomioma cotiledoide
+8890/0,Leiomioma disecante
+8890/1,"Leiomiomatosis, NOS"
+8890/1,"Leiomiomatosis, peritoneal diseminada"
+8890/1,Leiomiomatosis intravascular
+8890/1,Leiomiomatosis intravenosa
+8890/3,"Leiomiosarcoma, NOS"
+8891/0,Leiomioma epitelioide
+8891/0,Leiomioblastoma
+8891/3,Leiomiosarcoma epitelioide
+8892/0,Leiomioma celular
+8893/0,Leiomioma extraño
+8893/0,Leiomioma atípico
+8893/0,Leiomioma pleomórfico
+8893/0,Leiomioma simplásico
+8894/0,Angioleiomioma
+8894/0,Angiomioma
+8894/0,Leiomioma vascular
+8894/3,Angiomiosarcoma
+8895/0,Mioma
+8895/3,Miosarcoma
+8896/0,Leiomioma mixoide
+8896/3,Leiomiosarcoma mixoide
+8897/1,Tumor de músculo liso de potencial maligno incierto
+8897/1,"Tumor de músculo liso, atípico"
+8897/1,"Tumor de músculo liso, NOS"
+8897/1,Leiomiosarcoma cutáneo
+8898/1,Leiomioma metastásico
+8900/0,"Rabdomioma, NOS"
+8900/3,"Rabdomiosarcoma, NOS"
+8900/3,Rabdosarcoma
+8901/3,"Rabdomiosarcoma pleomórfico, tipo adulto"
+8901/3,"Rabdomiosarcoma pleomórfico, NOS"
+8901/3,"Rabdomiosarcoma, tipo pleomórfico"
+8902/3,Rabdomiosarcoma de tipo mixto
+8902/3,Rabdomiosarcoma embrionario mixto y rabdomiosarcoma alveolar
+8903/0,Rabdomioma fetal
+8904/0,Rabdomioma celular del adulto
+8904/0,Rabdomioma del adulto
+8904/0,Rabdomioma glucogénico
+8905/0,Rabdomioma genital
+8910/3,"Rabdomiosarcoma embrionario, NOS"
+8910/3,"Rabdomiosarcoma, tipo embrionario"
+8910/3,"Rabdomiosarcoma embrionario, pleomórfico"
+8910/3,Sarcoma botrioides
+8910/3,Sarcoma botrioide
+8912/3,Rabdomiosarcoma de células fusiformes
+8912/3,Rabdomiosarcoma esclerosante
+8912/3,"Rabdomiosarcoma, tipo fusiforme/esclerosante"
+8920/3,Rabdomiosarcoma alveolar
+8921/3,Ectomesenquimoma
+8921/3,Rabdomiosarcoma con gangliosarcoma Diferenciación
+893-899,Neoplasias complejas mixtas y estromales
+8930/0,Nódulo estromal endometrial
+8930/3,"Sarcoma estromal endometrial, NOS"
+8930/3,"Sarcoma endometrial, NOS"
+8930/3,"Sarcoma estromal endometrial, alto grado"
+8930/3,"Sarcoma estromal endometrioide, alto grado"
+8931/3,"Sarcoma estromal endometrioide, bajo grado"
+8931/3,Miosis estromal endolinfática
+8931/3,"Sarcoma estromal endometrioide, bajo grado"
+8931/3,Estromatosis endometrial
+8931/3,Endometriosis estromal
+8931/3,"Miosis estromal, NOS"
+8932/0,"Adenomioma, NOS"
+8932/0,Adenomioma polipoide atípico
+8933/3,Adenosarcoma
+8934/3,Carcinofibroma
+8935/0,"Tumor estromal, benigno"
+8935/1,"Tumor estromal, NOS"
+8935/1,Tumor estromal metanéfrico
+8935/1,Tumor estromal de potencial maligno incierto
+8935/3,"Sarcoma estromal, NOS"
+8936/3,Gastrointestinal stromal tumor
+8936/3,GIST
+8936/3,Gastrointestinal stromal sarcoma
+8936/3,Gastrointestinal autonomic nerve tumor
+8936/3,GANT
+8936/3,Gastrointestinal pacemaker cell tumor
+8940/0,Pleomorphic adenoma
+8940/0,"Mixed tumor, NOS"
+8940/0,"Mixed tumor, salivary gland type, NOS"
+8940/0,"Chondroid syringoma, NOS"
+8940/3,"Mixed tumor, malignant, NOS"
+8940/3,"Mixed tumor, salivary gland type, malignant"
+8940/3,Malignant chondroid syringoma
+8941/3,Carcinoma ex pleomorphic adenoma
+8941/3,Carcinoma in pleomorphic adenoma
+8950/3,Mullerian mixed tumor
+8951/3,Mesodermal mixed tumor
+8959/0,Benign cystic nephroma
+8959/0,Mixed epithelial and stromal tumor
+8959/0,Pediatric cystic nephroma
+8959/0,Adult cystic nephroma
+8959/1,Cystic partially differentiated nephroblastoma
+8959/3,Malignant cystic nephroma
+8959/3,Malignant multilocular cystic nephroma
+8960/1,Mesoblastic nephroma
+8960/3,"Nephroblastoma, NOS"
+8960/3,"Nephroma, NOS"
+8960/3,Wilms tumor
+8963/3,"Rhabdoid tumor, NOS"
+8963/3,Malignant rhabdoid tumor
+8963/3,Rhabdoid sarcoma
+8964/3,Clear cell sarcoma of kidney
+8966/0,Renomedullary interstitial cell tumor
+8966/0,Renomedullary fibroma
+8966/0,Medullary fibroma
+8967/0,Ossifying renal tumor
+8970/3,"Hepatoblastoma, NOS"
+8970/3,Embryonal hepatoma
+8970/3,Hepatoblastoma epitelioide
+8970/3,Hepatoblastoma mixto epitelial-mesenquimal
+8971/3,Pancreatoblastoma
+8972/3,Blastoma pulmonar
+8972/3,Neumoblastoma
+8973/3,Blastoma pleuropulmonar
+8974/1,Sialoblastoma
+8975/1,Tumor estromal-epitelial anidado calcificado
+8980/3,"Carcinosarcoma, NOS"
+8981/3,Carcinosarcoma embrionario
+8982/0,"Mioepitelioma, NOS"
+8982/0,Adenoma mioepitelial
+8982/0,Tumor mioepitelial
+8982/0,Tumor condromixoide ectomesenquimal
+8982/3,Carcinoma mioepitelial
+8982/3,Mioepitelioma maligno
+8982/3,Mioepitelioma infiltrante
+8983/0,"Adenomioepitelioma, NOS"
+8983/0,Adenomioepitelioma benigno
+8983/3,Adenomioepitelioma con carcinoma
+8983/3,Adenomioepitelioma maligno
+8990/0,Mesenquimoma benigno
+8990/0,Tumor mesenquimal fosfatúrico benigno
+8990/0,"Tumor mesenquimal fosfatúrico, NOS"
+8990/1,"Mesenquimoma, NOS"
+8990/1,Tumor mesenquimal mixto
+8990/1,Tumor primitivo de células granulares no neuronales
+8990/3,Mesenquimoma maligno
+8990/3,Sarcoma mesenquimal mixto
+8990/3,Tumor mesenquimal fosfatúrico maligno
+8991/3,Sarcoma embrionario
+8992/0,Hamartoma pulmonar
+900-903,Neoplasias fibroepiteliales
+9000/0,"Tumor de Brenner, NOS"
+9000/1,"Tumor de Brenner, malignidad limítrofe"
+9000/1,Tumor de Brenner limítrofe
+9000/1,Tumor de Brenner proliferativo atípico
+9000/1,Tumor de Brenner proliferante
+9000/3,Tumor de Brenner maligno
+9010/0,"Fibroadenoma, NOS"
+9010/0,Lipofibroadenoma
+9011/0,Fibroadenoma intracanalicular
+9012/0,Fibroadenoma pericanular
+9013/0,"Adenofibroma, NOS"
+9013/0,Adenofibroma metanéfrico
+9013/0,Adenofibroma nefrogénico
+9013/0,"Cistadenofibroma, NOS"
+9013/0,Adenofibroma papilar
+9014/0,"Adenofibroma seroso, NOS"
+9014/0,"Cistadenofibroma seroso, NOS"
+9014/0,Adenofibroma seromucinoso
+9014/1,Adenofibroma seroso de malignidad limítrofe
+9014/1,Cistadenofibroma seroso de malignidad limítrofe
+9014/3,Adenocarcinofibroma seroso
+9014/3,Adenofibroma seroso maligno
+9014/3,Cistadenofibroma seroso
+9014/3,Cistadenofibroma seroso maligno
+9015/0,"Adenofibroma mucinoso, NOS"
+9015/0,"Cistadenofibroma mucinoso, NOS"
+9015/1,Adenofibroma mucinoso de malignidad limítrofe
+9015/1,Cistadenofibroma mucinoso de malignidad limítrofe
+9015/3,Adenocarcinofibroma mucinoso
+9015/3,Adenofibroma mucinoso maligno
+9015/3,Cistadenofibroma mucinoso maligno
+9015/3,Cistadenofibroma mucinoso maligno
+9016/0,Gigante Fibroadenoma
+9020/0,Tumor filodes benigno
+9020/0,Cistosarcoma filodes benigno
+9020/1,Tumor filodes limítrofe
+9020/1,"Cistosarcoma filodes, NOS"
+9020/1,"Tumor filodes, NOS"
+9020/3,Tumor filodes maligno
+9020/3,Cistosarcoma filodes maligno
+9020/3,"Tumor del estroma periductal, grado bajo"
+9030/0,Fibroadenoma juvenil
+904,Neoplasias de tipo sinovial
+9040/0,Sinovioma benigno
+9040/3,"Sarcoma sinovial, NOS"
+9040/3,"Sinovioma, NOS"
+9040/3,Sinovioma maligno
+9041/3,"Sarcoma sinovial, células fusiformes"
+9041/3,"Sarcoma sinovial, fibroso monofásico"
+9042/3,"Sarcoma sinovial, células epitelioides"
+9043/3,"Sarcoma sinovial, bifásico"
+9044/3,"Sarcoma de células claras, NOS"
+9044/3,Melanoma maligno de partes blandas
+9045/3,Sarcoma sinonasal bifenotípico
+905,Neoplasias mesoteliales
+9050/0,Mesotelioma benigno
+9050/3,Mesotelioma maligno
+9050/3,"Mesotelioma, NOS"
+9051/0,"Mesotelioma fibroso, benigno"
+9051/3,"Mesotelioma fibroso, maligno"
+9051/3,"Mesotelioma fibroso, NOS"
+9051/3,Mesotelioma desmoplásico
+9051/3,Mesotelioma sarcomatoide
+9051/3,Mesotelioma fusiforme
+9052/0,"Mesotelioma epitelioide, benigno"
+9052/0,Mesotelioma papilar bien diferenciado mesotelioma
+9052/0,Papiloma mesotelial
+9052/1,Mesotelioma papilar bien diferenciado de la pleura
+9052/3,Mesotelioma epitelioide maligno
+9052/3,"Mesotelioma epitelioide, NOS"
+9053/3,"Mesotelioma, bifásico, maligno"
+9053/3,"Mesotelioma, bifásico, NOS"
+9054/0,"Tumor adenomatoide, NOS"
+9055/0,Quistes de inclusión peritoneal
+9055/0,Mesotelioma quístico
+9055/0,Mesotelioma multiquístico
+906-909,Neoplasias de células germinales
+9060/3,Disgerminoma
+9061/3,"Seminoma, NOS"
+9062/3,"Seminoma, anaplásico"
+9062/3,Seminoma con alto índice mitótico
+9063/3,Seminoma espermatocítico
+9063/3,Espermatocitoma
+9063/3,Tumor espermatocítico
+9064/2,Células germinales malignas intratubulares
+9064/2,Neoplasia intratubular de células germinales
+9064/2,Neoplasia de células germinales in situ
+9064/3,Germinoma
+9064/3,"Tumor de células germinales, NOS"
+9065/3,"Tumor de células germinales, no seminomatoso"
+9070/3,"Carcinoma embrionario, NOS"
+9070/3,Adenocarcinoma embrionario
+9071/3,"Tumor del saco vitelino, NOS"
+9071/3,"Carcinoma embrionario, infantil"
+9071/3,"Tumor del saco vitelino, tipo prepuberal"
+9071/3,Tumor del seno endodérmico
+9071/3,Orquioblastoma
+9071/3,Tumor vitelino polivesicular
+9071/3,Tumor del saco vitelino hepatoide
+9071/3,"Tumor del saco vitelino, tipo pospuberal"
+9072/3,Poliembrioma
+9072/3,"Carcinoma embrionario, tipo poliembrionario"
+9073/1,Gonadoblastoma
+9073/1,Gonocitoma
+9080/0,"Teratoma, benigno"
+9080/0,"Teratoma del adulto, NOS"
+9080/0,"Teratoma quístico, NOS"
+9080/0,Teratoma quístico del adulto
+9080/0,"Teratoma maduro, NOS"
+9080/0,"Teratoma, diferenciado"
+9080/1,"Teratoma, NOS"
+9080/1,Teratoma sólido
+9080/1,"Tumor de células germinales, en regresión"
+9080/1,Teratoma inmaduro de Pulmón
+9080/1,Teratoma inmaduro del timo
+9080/1,Teratoma inmaduro de la tiroides
+9080/3,"Teratoma maligno, NOS"
+9080/3,Teratoma embrionario
+9080/3,Teratoblastoma maligno
+9080/3,"Teratoma inmaduro, maligno"
+9080/3,"Teratoma inmaduro, NOS"
+9081/3,Teratocarcinoma
+9081/3,Teratoma y carcinoma embrionario mixto
+9081/3,Teratocarcinosarcoma
+9082/3,"Teratoma maligno, indiferenciado"
+9082/3,"Teratoma maligno, anaplásico"
+9083/3,"Teratoma maligno, intermedio"
+9084/0,"Quiste dermoide, NOS"
+9084/0,"Dermoide, NOS"
+9084/0,"Teratoma, tipo prepuberal"
+9084/0,"Teratoma, tipo prepuberal maduro"
+9084/3,Teratoma con transformación maligna
+9084/3,Teratoma con neoplasias malignas de tipo somático
+9084/3,Quiste dermoide con transformación maligna
+9084/3,Quiste dermoide con tumor secundario
+9085/3,Tumor mixto de células germinales
+9085/3,Teratoma mixto y seminoma
+9086/3,Tumor de células germinales con neoplasia hematológica asociada
+9090/0,"Struma ovarii, NOS"
+9090/3,"Struma ovarii, maligno"
+9091/1,Carcinoide de estruma
+9091/1,Struma ovarii y carcinoide
+910,Neoplasias trofoblásticas
+9100/0,"Mola hidatiforme, NOS"
+9100/0,Mola hidatiforme completa
+9100/0,Mola hidatídica
+9100/1,Mola hidatiforme invasiva
+9100/1,"Mola invasiva, NOS"
+9100/1,"Corioadenoma, NOS"
+9100/1,Corioadenoma destruens
+9100/1,Mola hidatiforme maligna
+9100/3,"Coriocarcinoma, NOS"
+9100/3,Corioepitelioma
+9100/3,Corionepitelioma
+9101/3,Coriocarcinoma combinado con otras neoplasias de células germinales elementos
+9101/3,Coriocarcinoma combinado con carcinoma embrionario
+9101/3,Coriocarcinoma combinado con teratoma
+9102/3,Teratoma maligno trofoblástico
+9103/0,Mola hidatiforme parcial
+9104/1,Tumor trofoblástico del sitio placentario
+9105/3,Tumor trofoblástico epitelioide
+911,Mesonephromas
+9110/0,Adenoma de la red ovárica
+9110/0,Mesonephroma benigno
+9110/0,Adenoma mesonéfrico
+9110/0,Adenoma del conducto de Wolff
+9110/1,Tumor de Wolff
+9110/1,Tumor del conducto de Wolff
+9110/1,Tumor mesonéfrico
+9110/3,Mesonephroma maligno
+9110/3,"Mesonephroma, NOS"
+9110/3,Adenocarcinoma mesonéfrico
+9110/3,Carcinoma del conducto de Wolff
+9110/3,Adenocarcinoma de la red ovárica
+912-916,Tumores de los vasos sanguíneos
+9120/0,"Hemangioma, NOS"
+9120/0,"Angioma, NOS"
+9120/0,Corioangioma
+9120/0,Hemangioma en cereza
+9120/0,Hemangioma sinusoidal
+9120/0,Hemangioma microvenular
+9120/0,Hemangioma glomeruloide
+9120/0,Hemangioma de células fusiformes
+9120/0,Hemangioma en uña de caballo
+9120/3,Hemangiosarcoma
+9120/3,Angiosarcoma
+9121/0,Hemangioma cavernoso
+9122/0,Hemangioma venoso
+9123/0,Hemangioma racemoso
+9123/0,Hemangioma arteriovenoso
+9124/3,Sarcoma de células de Kupffer
+9125/0,Hemangioma epitelioide
+9125/0,Hemangioma histiocitoide
+9125/0,Nódulo angiomatoide epitelioide cutáneo
+9126/0,Lesión vascular atípica
+9130/0,Hemangioendotelioma benigno
+9130/1,Hemangioendotelioma NOS
+9130/1,Angioendotelioma
+9130/1,Hemangioendotelioma kaposiforme
+9130/3,Hemangioendotelioma maligno
+9130/3,Sarcoma hemangioendotelial
+9131/0,Hemangioma capilar
+9131/0,Hemangioma simple
+9131/0,Hemangioma infantil
+9131/0,Hemangioma juvenil Hemangioma
+9131/0,Hemangioma plexiforme
+9131/0,Hemangioma capilar lobulillar
+9131/0,"Hemangioma congénito, NOS"
+9131/0,"Hemangioma congénito, de involución rápida"
+9131/0,"Hemangioma congénito, no involutivo"
+9132/0,Hemangioma intramuscular
+9132/0,Angioma intramuscular
+9133/3,"Hemangioendotelioma epitelioide, NOS"
+9133/3,Hemangioendotelioma epitelioide maligno
+9133/3,Tumor bronquialveolar intravascular
+9135/1,Angioendotelioma papilar intralinfático
+9135/1,Angioendotelioma papilar endovascular
+9135/1,Tumor de Dabska
+9136/1,Hemangioendotelioma de células fusiformes
+9136/1,Angioendotelioma de células fusiformes
+9136/1,Hemangioendotelioma retiforme
+9136/1,Hemangioendotelioma compuesto
+9137/0,Miointimoma
+9137/3,Sarcoma de la íntima
+9138/1,Hemangioendotelioma pseudomiogénico (similar al sarcoma epitelioide)
+9140/3,Sarcoma de Kaposi
+9140/3,Múltiple Sarcoma hemorrágico
+9141/0,Angioqueratoma
+9142/0,Hemangioma queratósico verrugoso
+9142/0,Malformación venosa verrugosa
+9160/0,"Angiofibroma, NOS"
+9160/0,Pápula fibrosa de la nariz
+9160/0,Nevo involutivo
+9160/0,Angiofibroma juvenil
+9160/0,Angiofibroma celular
+9160/0,Angiofibroma de células gigantes
+9161/0,Hemangioma en penacho adquirido
+9161/0,Hemangioma en penacho
+9161/1,Hemangioblastoma
+9161/1,Angioblastoma
+917,Tumores de los vasos linfáticos
+9170/0,"Linfangioma, NOS"
+9170/0,"Linfangioendotelioma, NOS"
+9170/3,Linfangiosarcoma
+9170/3,Sarcoma linfangioendotelial
+9170/3,Linfangioendotelioma maligno
+9171/0,Linfangioma capilar
+9172/0,Linfangioma cavernoso
+9173/0,Linfangioma quístico
+9173/0,"Higroma, NOS"
+9173/0,Higroma quístico
+9174/0,Linfangiomioma
+9174/1,Linfangioleiomiomatosis
+9174/1,Linfangiomiomatosis
+9175/0,Hemolinfangioma
+918-924,Neoplasias óseas y condromatosas
+9180/0,"Osteoma, NOS"
+9180/3,"Osteosarcoma, NOS"
+9180/3,"Sarcoma osteogénico, NOS"
+9180/3,Sarcoma osteoblástico
+9180/3,Osteocondrosarcoma
+9180/3,Osteosarcoma extraesquelético
+9181/3,Osteosarcoma condroblástico
+9182/3,Osteosarcoma fibroblástico
+9182/3,Osteofibrosarcoma
+9183/3,Osteosarcoma telangiectásico
+9184/3,Osteosarcoma en la enfermedad ósea de Paget
+9184/3,Osteosarcoma secundario
+9185/3,Osteosarcoma de células pequeñas
+9185/3,Osteosarcoma de células redondas
+9186/3,"Osteosarcoma central, NOS"
+9186/3,Osteosarcoma central convencional
+9186/3,Osteosarcoma medular
+9187/3,Osteosarcoma central de bajo grado
+9187/3,Osteosarcoma intramedular de bajo grado
+9187/3,Osteosarcoma intraóseo bien diferenciado
+9187/3,Osteosarcoma intraóseo de bajo grado
+9191/0,"Osteoma osteoide, NOS"
+9192/3,Osteosarcoma parosteal
+9192/3,Osteosarcoma yuxtacortical
+9193/3,Osteosarcoma perióstico
+9194/3,Osteosarcoma de superficie de alto grado
+9195/3,Osteosarcoma intracortical
+9200/0,"Osteoblastoma, NOS"
+9200/0,Osteoma osteoide gigante
+9200/1,Osteoblastoma agresivo
+9210/0,Osteocondroma
+9210/0,Exostosis cartilaginosa
+9210/0,Econdroma
+9210/0,Exostosis osteocartilaginosa
+9210/1,"Osteocondromatosis, NOS"
+9210/1,Econdrosis
+9211/0,Osteocondromixoma
+9212/0,Proliferación osteocondromatosa parosteal extraña
+9213/0,Exostosis subungueal
+9220/0,"Condroma, NOS"
+9220/0,Encondroma
+9220/1,"Condromatosis, NOS"
+9220/3,"Condrosarcoma, NOS"
+9220/3,Fibrocondrosarcoma
+9220/3,"Condrosarcoma, grado 2"
+9220/3,"Condrosarcoma, Grado 3"
+9221/0,Condroma perióstico
+9221/0,Condroma yuxtacortical
+9221/3,Condrosarcoma perióstico
+9221/3,Condrosarcoma yuxtacortical
+9222/1,Tumor cartilaginoso atípico
+9222/1,"Condrosarcoma, grado 1"
+9230/1,"Condroblastoma, NOS"
+9230/1,Tumor condromatoso de células gigantes
+9230/1,Tumor de Codman
+9230/3,Condroblastoma maligno
+9231/3,Condrosarcoma mixoide
+9240/3,Condrosarcoma mesenquimal
+9241/0,Fibroma condromixoide
+9242/3,Condrosarcoma de células claras
+9243/3,Condrosarcoma desdiferenciado
+925,Tumores de células gigantes
+9250/1,"Tumor óseo de células gigantes, NOS"
+9250/1,"Osteoclastoma, NOS"
+9250/3,"Tumor óseo de células gigantes, maligno"
+9250/3,Sarcoma óseo de células gigantes
+9250/3,Osteoclastoma maligno
+9251/1,"Tumor de células gigantes de partes blandas, NOS"
+9251/3,Tumor maligno de células gigantes de partes blandas
+9252/0,"Tumor tenosinovial de células gigantes, NOS"
+9252/0,"Tumor tenosinovial de células gigantes, localizado"
+9252/0,Histiocitoma fibroso de la vaina tendinosa
+9252/0,"Tumor de células gigantes de la vaina tendinosa, NOS"
+9252/1,"Tumor tenosinovial de células gigantes, difuso"
+9252/1,Sinovitis villonodular pigmentada
+9252/3,Tumor tenosinovial de células gigantes maligno
+9252/3,"Tumor de células gigantes de la vaina tendinosa, maligno"
+926,Tumores óseos diversos
+9260/0,Quiste óseo aneurismático
+9261/3,Adamantinoma de huesos largos
+9262/0,Fibroma osificante
+9262/0,Fibroosteoma
+9262/0,Osteofibroma
+927-934,Tumores odontogénicos
+9270/0,"Tumor odontogénico, benigno"
+9270/1,"Tumor odontogénico, NOS"
+9270/3,"Tumor odontogénico, maligno"
+9270/3,Carcinoma ameloblástico
+9270/3,Carcinoma odontogénico
+9270/3,Sarcoma odontogénico
+9270/3,Carcinoma intraóseo primario
+9271/0,Carcinoma ameloblástico fibrodentinoma
+9271/0,Dentinoma
+9272/0,"Cementoma, NOS"
+9272/0,Displasia cemental periapical
+9272/0,Displasia cemento-ósea periapical
+9273/0,"Cementoblastoma, benigno"
+9274/0,Fibroma cemento-osificante
+9274/0,Fibroma cementante
+9275/0,Cementoma gigantiforme
+9275/0,Displasia ósea florida
+9280/0,"Odontoma, NOS"
+9281/0,Odontoma compuesto
+9282/0,Odontoma complejo
+9290/0,Fibroodontoma ameloblástico
+9290/0,Odontoma fibroameloblástico
+9290/3,Odontosarcoma ameloblástico
+9290/3,Fibroodontosarcoma ameloblástico
+9290/3,Fibrodentinosarcoma ameloblástico
+9300/0,Tumor odontogénico adenomatoide
+9300/0,Adenoameloblastoma
+9301/0,Quiste odontogénico calcificante
+9302/0,Tumor de células fantasma dentinogénico
+9302/0,Tumor de células fantasma odontogénico
+9302/3,Carcinoma odontogénico de células fantasma
+9310/0,"Ameloblastoma, NOS"
+9310/0,"Adamantinoma, NOS"
+9310/3,"Ameloblastoma, metastásico"
+9310/3,"Ameloblastoma, maligno"
+9310/3,"Adamantinoma, maligno"
+9311/0,Odontoameloblastoma
+9312/0,Tumor odontogénico escamoso
+9320/0,Mixoma odontogénico
+9320/0,Mixofibroma odontogénico
+9321/0,"Fibroma odontogénico, NOS"
+9321/0,Fibroma odontogénico central
+9322/0,Fibroma odontogénico periférico
+9330/0,Fibroma ameloblástico
+9330/3,Fibrosarcoma ameloblástico
+9330/3,Sarcoma ameloblástico
+9330/3,Fibrosarcoma odontogénico
+9340/0,Tumor odontogénico epitelial calcificante
+9340/0,Tumor de Pindborg
+9341/3,Carcinoma odontogénico de células claras
+9341/3,Tumor odontogénico de células claras
+9342/3,Carcinosarcoma odontogénico
+935-937,Tumores varios
+9350/1,"Craneofaringioma, NOS"
+9350/1,Tumor de la bolsa de Rathke
+9351/1,"Craneofaringioma, adamantinomatoso"
+9352/1,"Craneofaringioma, papilar"
+9360/1,Pinealoma
+9361/1,Pineocitoma
+9362/3,Pineoblastoma
+9362/3,Tumor pineal mixto
+9362/3,Pineocitoma-pineoblastoma mixto
+9362/3,Tumor del parénquima pineal de diferenciación intermedia
+9362/3,Tumor pineal transicional
+9363/0,Tumor neuroectodérmico melanótico
+9363/0,Melanoameloblastoma
+9363/0,Progonoma melanótico
+9363/0,Tumor del esbozo de la retina
+9364/3,Sarcoma de Ewing
+9364/3,Tumor de Ewing
+9364/3,Tumor neuroectodérmico periférico
+9364/3,"Tumor neuroectodérmico, NOS"
+9364/3,Tumor neuroectodérmico primitivo periférico
+9364/3,PPNET
+9365/3,Tumor de Askin
+9370/0,Benigno Tumor de células notocordales
+9370/3,"Cordoma, NOS"
+9371/3,Cordoma condroide
+9372/3,Cordoma desdiferenciado
+9373/0,Paracordoma
+938-948,Gliomas
+9380/3,Glioma maligno
+9380/3,"Glioma, NOS"
+9381/3,Gliomatosis cerebral
+9382/3,"Oligoastrocitoma, NOS"
+9382/3,Glioma mixto
+9382/3,Oligoastrocitoma anaplásico
+9383/1,Subependimoma
+9383/1,"Astrocitoma subependimario, NOS"
+9383/1,Glioma subependimario
+9383/1,Subependimoma-ependimoma mixto
+9384/1,Astrocitoma subependimario de células gigantes
+9385/3,"Glioma difuso de la línea media, mutante H3 K27M"
+9385/3,"Glioma pontino intrínseco difuso, mutante H3 K27M"
+9390/0,"Papiloma del plexo coroideo, NOS"
+9390/1,Papiloma del plexo coroideo atípico
+9390/3,Carcinoma del plexo coroideo
+9390/3,"Papiloma del plexo coroideo, anaplásico"
+9390/3,"Papiloma del plexo coroideo, maligno"
+9391/1,Ependimoma silar
+9391/3,"Ependimoma, NOS"
+9391/3,Ependimoma epitelial
+9391/3,Ependimoma celular
+9391/3,Ependimoma de células claras
+9391/3,Ependimoma tanicítico
+9392/3,"Ependimoma, anaplásico"
+9392/3,Ependimoblastoma
+9393/3,Ependimoma papilar
+9394/1,Ependimoma mixopapilar
+9395/3,Tumor papilar de la región pineal
+9396/3,"Ependimoma, fusión RELA positiva"
+9400/3,"Astrocitoma, NOS"
+9400/3,Glioma astrocítico
+9400/3,Astroglioma
+9400/3,"Astrocitoma, bajo grado"
+9400/3,Astrocitoma quístico
+9400/3,"Astrocitoma difuso, NOS"
+9400/3,"Astrocitoma difuso, bajo grado"
+9400/3,"Astrocitoma difuso, IDH mutante"
+9400/3,"Astrocitoma difuso, IDH de tipo salvaje"
+9401/3,"Astrocitoma anaplásico, NOS"
+9401/3,"Astrocitoma anaplásico, IDH mutante"
+9401/3,"Astrocitoma anaplásico, IDH de tipo salvaje"
+9410/3,Astrocitoma protoplásmico
+9411/3,"Astrocitoma gemistocítico, NOS"
+9411/3,"Astrocitoma gemistocítico, IDH mutante"
+9411/3,Gemistocitoma
+9412/1,Astrocitoma infantil desmoplásico
+9412/1,Ganglioglioma infantil desmoplásico
+9413/0,Tumor neuroepitelial disembrioplásico
+9420/3,Astrocitoma fibrilar
+9420/3,Astrocitoma fibroso
+9421/1,Astrocitoma pilocítico
+9421/1,"Espongioblastoma, NOS"
+9421/1,Astrocitoma juvenil
+9421/1,Astrocitoma piloide
+9423/3,Espongioblastoma polar
+9423/3,Espongioblastoma polar primitivo
+9423/3,Espongioblastoma polar
+9424/3,"Xantoastrocitoma pleomórfico, NOS"
+9424/3,Xantoastrocitoma pleomórfico anaplásico
+9425/3,Astrocitoma pilomixoide
+9430/3,Astroblastoma
+9431/1,Glioblastoma angiocéntrico
+9432/1,Pitucitoma
+9440/3,"Glioblastoma, NOS"
+9440/3,Glioblastoma epitelioide
+9440/3,"Glioblastoma, IDH-wildtype"
+9440/3,"Glioblastoma, primario, NOS"
+9440/3,Glioblastoma multiforme
+9440/3,Espongioblastoma multiforme
+9440/3,"Glioma difuso de la línea media, NOS"
+9440/3,Glioma pontino intrínseco difuso
+9441/3,Glioblastoma de células gigantes
+9441/3,Sarcoma monstruosocelular
+9442/1,Gliofibroma
+9442/3,Gliosarcoma
+9442/3,Glioblastoma con componente sarcomatoso
+9444/1,Glioma cordoide
+9444/1,Glioma cordoide del tercer ventrículo
+9445/3,"Glioblastoma, IDH-mutante"
+9445/3,"Glioblastoma, secundario, IDH-mutante"
+9445/3,"Glioblastoma, secundario, NOS"
+9450/3,"Oligodendroglioma, NOS"
+9450/3,"Oligodendroglioma, IDH-mutante y 1p/19q-codelecionado"
+9451/3,"Oligodendroglioma, anaplásico, NOS"
+9451/3,"Oligodendroglioma, anaplásico, IDH-mutante y 1p/19q-codelecionado"
+9460/3,Oligodendroblastoma
+9470/3,"Meduloblastoma, NOS"
+9470/3,Meduloblastoma clásico
+9470/3,Meduloblastoma melanótico
+9471/3,Meduloblastoma nodular desmoplásico
+9471/3,Sarcoma cerebeloso aracnoideo circunscrito
+9471/3,"Meduloblastoma desmoplásico, NOS"
+9471/3,Meduloblastoma con nodularidad extensa
+9471/3,"Meduloblastoma, SHH-activado y TP53-de tipo salvaje"
+9471/3,"Meduloblastoma, SHH activado, NOS"
+9472/3,Medulomioblastoma
+9473/3,"Tumor embrionario del SNC, NOS"
+9473/3,"Tumor neuroectodérmico primitivo, NOS"
+9473/3,"PNET, NOS"
+9473/3,Primitivo central Tumor neuroectodérmico
+9473/3,CPNET
+9473/3,PNET supratentorial
+9474/3,Meduloblastoma de células grandes
+9474/3,Meduloblastoma anaplásico
+9475/3,"Meduloblastoma, activado por WNT, NOS"
+9475/3,"Meduloblastoma, activado por WNT, clásico"
+9475/3,"Meduloblastoma, activado por WNT, tipo de células grandes"
+9475/3,"Meduloblastoma, tipo anaplásico activado por WNT"
+9476/3,"Meduloblastoma, tipo SHH activado y mutante en TP53"
+9477/3,"Meduloblastoma, no WNT/no SHH"
+9477/3,"Meduloblastoma, grupo 3"
+9477/3,"Meduloblastoma, grupo 4"
+9478/3,Tumor embrionario con rosetas multicapa con alteración C19MC
+9478/3,"Tumor embrionario con rosetas multicapa, NOS"
+9480/3,"Sarcoma cerebeloso, NOS"
+949-952,Neoplasias neuroepiteliomatosas
+9490/0,Ganglioneuroma
+9490/3,Ganglioneuroblastoma
+9490/3,Ganglioneuroblastoma del SNC
+9491/0,Ganglioneuromatosis
+9492/0,"Gangliocitoma, NOS"
+9493/0,Gangliocitoma displásico del cerebelo (Lhermitte-Duclos)
+9500/3,"Neuroblastoma, NOS"
+9500/3,Neuroblastoma central
+9500/3,Neuroblastoma del SNC
+9500/3,Simpaticoblastoma
+9501/0,"Meduloepitelioma, benigno"
+9501/0,"Dictioma, benigno"
+9501/3,"Meduloepitelioma, NOS"
+9501/3,"Dictioma, maligno"
+9502/0,"Meduloepitelioma teratoide, benigno"
+9502/3,"Meduloepitelioma teratoide, NOS"
+9503/3,"Neuroepitelioma, NOS"
+9504/3,Espongioneuroblastoma
+9505/1,"Ganglioglioma, NOS"
+9505/1,Glioneuroma
+9505/1,Neuroastrocitoma
+9505/3,"Ganglioglioma, anaplásico"
+9506/1,Neurocitoma central
+9506/1,"Neurocitoma, NOS"
+9506/1,Liponeurocitoma cerebeloso
+9506/1,Meduloblastoma lipomatoso
+9506/1,Medulocitoma
+9506/1,Neurolipocitoma
+9506/1,Neurocitoma extraventricular
+9507/0,Tumor de Pacini
+9508/3,Tumor teratoide/rabdoide atípico
+9508/3,Tumor embrionario del SNC con características rabdoides
+9509/1,Tumor glioneuronal papilar
+9509/1,Tumor glioneuronal formador de rosetas
+9510/0,Retinocitoma
+9510/3,"Retinoblastoma, NOS"
+9511/3,"Retinoblastoma, diferenciado"
+9512/3,"Retinoblastoma, indiferenciado"
+9513/3,"Retinoblastoma, difuso"
+9514/1,"Retinoblastoma, regresión espontánea"
+9520/3,Tumor neurogénico olfatorio
+9521/3,Neurocitoma olfatorio
+9521/3,Estesioneurocitoma
+9522/3,Neuroblastoma olfatorio
+9522/3,Estesioneuroblastoma
+9523/3,Neuroepitelioma olfatorio
+9523/3,Estesioneuroepitelioma
+953,Meningiomas
+9530/0,"Meningioma, NOS"
+9530/0,Meningioma rico en linfoplasmocitos
+9530/0,Meningioma metaplásico
+9530/0,Meningioma microquístico
+9530/0,Meningioma secretor
+9530/3,Meningioma maligno
+9530/3,Sarcoma leptomeníngeo
+9530/3,Sarcoma meníngeo
+9530/3,Meningioma anaplásico
+9530/3,Sarcoma meningotelial
+9531/0,Meningioma meningotelial
+9531/0,Meningioma endoteliomatoso
+9531/0,Meningioma sincitial
+9532/0,Meningioma fibroso
+9532/0,Meningioma fibroblástico
+9533/0,Meningioma psamomatoso
+9534/0,Meningioma angiomatoso
+9535/0,Meningioma hemangioblástico
+9535/0,Meningioma angioblástico
+9537/0,Meningioma transicional
+9537/0,Meningioma mixto
+9538/1,Meningioma de células claras
+9538/1,Meningioma cordoide
+9538/3,Meningioma papilar
+9538/3,Meningioma rabdoide
+9539/1,Meningioma atípico
+9539/3,Meningioma meníngeo Sarcomatosis
+954-957,Tumores de la vaina nerviosa
+9540/0,"Neurofibroma, NOS"
+9540/3,"Tumor maligno de la vaina nerviosa periférica, NOS"
+9540/3,"MPNST, NOS"
+9540/3,Neurofibrosarcoma
+9540/3,Sarcoma neurogénico
+9540/3,Neurosarcoma
+9540/3,MPNST melanótico
+9540/3,MPNST psamomatoso melanótico
+9540/3,MPNST con diferenciación glandular
+9540/3,MPNST con diferenciación mesenquimal
+9540/3,MPNST con diferenciación perineural
+9541/0,Neurofibroma melanótico
+9542/3,"Tumor maligno de la vaina del nervio periférico, epitelioide"
+9542/3,MPNST epitelioide
+9550/0,Neurofibroma plexiforme
+9550/0,Neuroma plexiforme
+9560/0,"Schwannoma, NOS"
+9560/0,"Neurilemoma, NOS"
+9560/0,Neurinoma
+9560/0,Neurinoma acústico
+9560/0,Schwannoma antiguo
+9560/0,Schwannoma celular
+9560/0,Schwannoma degenerado
+9560/0,Schwannoma plexiforme
+9560/0,Schwannoma psamomatoso
+9560/1,Schwannoma melanótico
+9560/1,Schwannoma pigmentado
+9560/3,"Neurilemoma, maligno"
+9560/3,"Schwannoma maligno, NOS"
+9560/3,Neurilemosarcoma
+9561/3,Tumor maligno de la vaina del nervio periférico con rabdomioblastos diferenciación
+9561/3,Schwannoma maligno con diferenciación rabdomioblástica
+9561/3,MPNST con diferenciación rabdomioblástica
+9561/3,"Tumor Triton, maligno"
+9562/0,Mixoma de la vaina nerviosa
+9562/0,Neurotequeoma
+9562/0,Neurotequeoma celular
+9563/0,"Tumor de la vaina nerviosa, NOS"
+9563/0,Tumor híbrido de la vaina nerviosa
+9570/0,"Neuroma, NOS"
+9570/0,Neuroma circunscrito solitario
+9571/0,"Perineurioma, NOS"
+9571/0,Perineurioma intraneural
+9571/0,Perineurioma de tejidos blandos
+9571/3,"Perineurioma, maligno"
+958,Tumores de células granulares y sarcomas de partes blandas alveolares
+9580/0,"Tumor de células granulares, NOS"
+9580/0,"Mioblastoma de células granulares, NOS"
+9580/3,"Tumor de células granulares, maligno"
+9580/3,"Mioblastoma de células granulares, maligno"
+9581/3,Sarcoma de partes blandas alveolares
+9582/0,Tumor de células granulares de la región silar
+959-972,Linfomas de Hodgkin y no Hodgkin
+959,"Linfomas malignos, NOS o difusos"
+9590/3,"Linfoma maligno, NOS"
+9590/3,"Linfoma, NOS"
+9590/3,Microglioma
+9591/1,"Linfocitosis monoclonal de células B, NOS"
+9591/1,"Linfocitosis monoclonal de células B, tipo no LLC"
+9591/3,"Linfoma maligno, no Hodgkin, NOS"
+9591/3,"Linfoma no Hodgkin, NOS"
+9591/3,"Linfoma de células B, NOS"
+9591/3,"Linfosarcoma, NOS"
+9591/3,"Linfosarcoma, difuso"
+9591/3,"Linfoma maligno, difuso, NOS"
+9591/3,"Linfoma maligno, de células no hendidas, NOS"
+9591/3,"Sarcoma de células reticulares, NOS"
+9591/3,"Reticulosarcoma, NOS"
+9591/3,"Sarcoma de células reticulares, difuso"
+9591/3,"Reticulosarcoma, difuso"
+9591/3,Variante de leucemia de células pilosas
+9591/3,"Linfoma maligno, linfocítico, de diferenciación intermedia, nodular"
+9591/3,"Linfoma maligno, linfocítico, poco diferenciado, difuso"
+9591/3,"Linfoma maligno, de células hendidas, NOS"
+9591/3,"Linfoma maligno, de células pequeñas hendidas, NOS"
+9591/3,"Linfoma maligno, de células pequeñas, no hendidas, difuso"
+9591/3,"Linfoma maligno, de tipo celular indiferenciado, NOS"
+9591/3,"Linfoma maligno, de células indiferenciadas, no Burkitt"
+9591/3,"Linfoma maligno, de células pequeñas hendidas, difuso"
+9591/3,"Linfoma/leucemia de células B esplénicas, inclasificable"
+9591/3,Linfoma de células B pequeñas de pulpa roja difuso esplénico
+9596/3,Linfoma compuesto de Hodgkin y no Hodgkin
+9596/3,"Linfoma de células B, inclasificable, con características intermedias entre el linfoma difuso de células B grandes y el linfoma de Hodgkin clásico"
+9597/3,Linfoma primario cutáneo del centro del folículo
+965-966,Linfomas de Hodgkin
+9650/3,"Linfoma de Hodgkin, NOS"
+9650/3,"Enfermedad de Hodgkin, NOS"
+9650/3,"Linfoma maligno, Hodgkin"
+9650/3,"Linfoma de Hodgkin clásico, enfermedad linfoproliferativa postrasplante"
+9651/3,"Linfoma de Hodgkin, rico en linfocitos"
+9651/3,"Linfoma de Hodgkin clásico, rico en linfocitos"
+9651/3,"Enfermedad de Hodgkin, predominio linfocítico, NOS"
+9651/3,"Enfermedad de Hodgkin, predominio linfocítico, difuso"
+9651/3,"Enfermedad de Hodgkin, predominio linfocítico-histiocítico"
+9652/3,"Linfoma de Hodgkin, celularidad mixta, NOS"
+9652/3,"Linfoma de Hodgkin clásico, celularidad mixta, NOS"
+9653/3,"Linfoma de Hodgkin, depleción linfocítica, NOS"
+9653/3,"Linfoma de Hodgkin clásico, depleción linfocítica, NOS"
+9654/3,"Linfoma de Hodgkin, depleción linfocítica, fibrosis difusa"
+9654/3,"Linfoma de Hodgkin clásico, depleción linfocítica, fibrosis difusa"
+9655/3,"Linfoma de Hodgkin, depleción linfocítica, reticular"
+9655/3,"Linfoma de Hodgkin clásico, depleción linfocítica, reticular"
+9659/3,"Linfoma de Hodgkin, linfocito nodular predominante"
+9659/3,"Paragranuloma de Hodgkin, NOS"
+9659/3,"Paragranuloma de Hodgkin, nodular"
+9661/3,Granuloma de Hodgkin
+9662/3,Sarcoma de Hodgkin
+9663/3,"Linfoma de Hodgkin, esclerosis nodular, NOS"
+9663/3,"Linfoma de Hodgkin clásico, esclerosis nodular, NOS"
+9663/3,"Enfermedad de Hodgkin, esclerosis nodular, NOS"
+9664/3,"Linfoma de Hodgkin, esclerosis nodular, fase celular"
+9664/3,"Linfoma de Hodgkin clásico, esclerosis nodular, fase celular"
+9665/3,"Linfoma de Hodgkin, esclerosis nodular, grado 1"
+9665/3,"Linfoma de Hodgkin clásico, esclerosis nodular, grado 1"
+9665/3,"Enfermedad de Hodgkin, esclerosis nodular, predominio linfocítico"
+9665/3,"Enfermedad de Hodgkin, esclerosis nodular, celularidad mixta"
+9667/3,"Linfoma de Hodgkin, esclerosis nodular, grado 2"
+9667/3,"Linfoma de Hodgkin clásico, esclerosis nodular, grado 2"
+9667/3,"Enfermedad de Hodgkin, esclerosis nodular, depleción de linfocitos"
+9667/3,"Enfermedad de Hodgkin, esclerosis nodular, variante sincitial"
+967-972,Linfomas no Hodgkin
+967-969,Linfomas de células B maduras
+9671/3,Linfoma linfoplasmocítico
+9671/3,"Linfoma maligno, linfoplasmocitoide"
+9671/3,Inmunocitoma
+9671/3,"Linfoma maligno, plasmocitoide"
+9671/3,Linfoma plasmocítico
+9673/1,Neoplasia de células del manto in situ
+9673/1,Linfoma de células del manto in situ
+9673/3,Linfoma de células del manto
+9673/3,"Linfoma maligno, centrocítico"
+9673/3,"Linfoma maligno, linfocítico, diferenciación intermedia, difuso"
+9673/3,Poliposis linfomatosa maligna
+9673/3,Linfoma de la zona del manto
+9675/3,"Linfoma maligno, de células pequeñas y grandes, difuso"
+9675/3,"Linfoma maligno, centroblástico-centrocítico, NOS"
+9675/3,"Linfoma maligno, centroblástico-centrocítico, difuso"
+9675/3,"Linfoma maligno, de tipo mixto, difuso"
+9675/3,"Linfoma maligno, linfocítico-histiocítico mixto, difuso"
+9678/3,Linfoma de derrame primario
+9679/3,Linfoma mediastínico de células B grandes
+9679/3,Linfoma tímico de células B grandes
+9680/1,Úlcera mucocutánea positiva para VEB
+9680/3,"Linfoma difuso de células B grandes, NOS"
+9680/3,"Linfoma maligno, de células B grandes, difuso, NOS"
+9680/3,"Linfoma maligno, histiocítico, NOS"
+9680/3,"Linfoma maligno, de células B grandes, NOS"
+9680/3,"Linfoma maligno, de células B grandes, difuso, centroblástico, NOS"
+9680/3,"Linfoma maligno, de células grandes, NOS"
+9680/3,"Linfoma maligno, de células grandes, hendido, NOS"
+9680/3,"Linfoma maligno, de células grandes, difuso, NOS"
+9680/3,"Linfoma maligno de células grandes no hendido, NOS"
+9680/3,"Linfoma maligno no hendido, NOS"
+9680/3,"Linfoma maligno no hendido, difuso, NOS"
+9680/3,"Linfoma maligno histiocítico, difuso"
+9680/3,"Linfoma maligno de células grandes, hendido y no hendido"
+9680/3,"Linfoma maligno de células grandes, hendido, difuso"
+9680/3,"Linfoma maligno de células grandes, no hendido, difuso"
+9680/3,"Linfoma maligno centroblástico, NOS"
+9680/3,"Linfoma difuso de células B grandes, subtipo de células B de centro germinal"
+9680/3,"Linfoma difuso de células B grandes, subtipo de células B activadas"
+9680/3,"Linfoma maligno centroblástico, difuso"
+9680/3,Linfoma anaplásico de células B grandes
+9680/3,"Linfoma de células B, inclasificable, con características intermedias entre el linfoma difuso de células B grandes y el linfoma de Burkitt"
+9680/3,Linfoma difuso de células B grandes asociado con inflamación crónica
+9680/3,Linfoma difuso de células B grandes positivo para VEB
+9680/3,"Linfoma cutáneo primario difuso de células B grandes Linfoma de células B, tipo pierna"
+9680/3,Linfoma primario difuso de células B grandes del SNC
+9680/3,"Linfoma de células B de alto grado, NOS"
+9680/3,Linfoma de células B de alto grado con reordenamientos de MYC y BCL2 y/o BCL6
+9680/3,Linfoma vítreorretiniano
+9684/3,"Linfoma maligno, de células B grandes, difuso, inmunoblástico, NOS"
+9684/3,"Linfoma maligno, inmunoblástico, NOS"
+9684/3,Sarcoma inmunoblástico
+9684/3,"Linfoma maligno, de células grandes, inmunoblástico"
+9687/3,"Linfoma de Burkitt, NOS"
+9687/3,Tumor de Burkitt
+9687/3,"Linfoma maligno, de células pequeñas no hendidas, tipo Burkitt"
+9687/3,"Linfoma maligno, indiferenciado, tipo Burkitt"
+9687/3,"Linfoma tipo Burkitt, NOS"
+9687/3,Linfoma tipo Burkitt con aberración 11q
+9687/3,Leucemia de células de Burkitt
+9687/3,"Leucemia aguda, tipo Burkitt"
+9687/3,"Leucemia linfoblástica aguda, tipo de células B maduras"
+9687/3,B-ALL
+9687/3,FAB L3
+9688/3,Linfoma de células B grandes rico en histiocitos/células T
+9688/3,Linfoma de células B grandes rico en células T
+9688/3,Linfoma de células B grandes rico en histiocitos
+9689/3,Linfoma de células B de la zona marginal esplénica
+9689/3,"Linfoma de la zona marginal esplénica, NOS"
+9689/3,Linfoma esplénico con linfocitos vellosos
+9690/3,"Linfoma folicular, NOS"
+9690/3,"Linfoma maligno, centro folicular, NOS"
+9690/3,"Linfoma maligno, folicular, NOS"
+9690/3,"Linfoma maligno, linfocítico, nodular, NOS"
+9690/3,"Linfoma maligno, nodular, NOS"
+9690/3,"Linfoma maligno, centroblástico-centrocítico, folicular"
+9690/3,"Linfoma maligno, centro folicular, folicular"
+9690/3,"Linfoma folicular, tipo pediátrico"
+9691/3,"Linfoma folicular, grado 2"
+9691/3,"Linfoma maligno, tipo de células mixtas, folicular"
+9691/3,"Linfoma maligno, tipo de células mixtas, nodular"
+9691/3,"Linfoma maligno, linfocítico-histiocítico mixto, nodular"
+9691/3,"Linfoma maligno, mixto de células pequeñas hendidas y grandes, folicular"
+9695/1,Neoplasia folicular in situ
+9695/1,Linfoma folicular in situ
+9695/3,"Linfoma folicular, grado 1"
+9695/3,"Linfoma folicular, células pequeñas hendidas"
+9695/3,"Linfoma maligno, linfocítico, poco diferenciado, nodular"
+9695/3,"Linfoma maligno, células pequeñas hendidas, folicular"
+9695/3,"Linfoma folicular, tipo duodenal"
+9698/3,"Linfoma folicular, grado 3"
+9698/3,"Linfoma maligno, células grandes, folicular, NOS"
+9698/3,"Linfoma maligno, células no hendidas, folicular, NOS"
+9698/3,"Linfoma folicular, grado 3A"
+9698/3,"Linfoma folicular, grado 3B"
+9698/3,"Linfoma maligno, centroblástico, Linfoma maligno histiocítico nodular"
+9698/3,Linfoma maligno de células grandes no hendidas folicular
+9698/3,Linfoma maligno de células grandes hendidas folicular
+9698/3,Linfoma maligno linfocítico bien diferenciado nodular
+9698/3,Linfoma de células B grandes con reordenamiento de IRF4
+9698/3,"Linfoma de células B de la zona marginal, NOS"
+9699/3,"Linfoma de la zona marginal, NOS"
+9699/3,Linfoma BALT
+9699/3,Linfoma de tejido linfoide asociado a bronquios
+9699/3,Linfoma MALT
+9699/3,Linfoma monocitoide de células B
+9699/3,Linfoma de tejido linfoide asociado a mucosas
+9699/3,Linfoma nodal de la zona marginal
+9699/3,Linfoma SALT
+9699/3,Linfoma de tejido linfoide asociado a piel
+9699/3,Linfoma extranodal de la zona marginal de tejido linfoide asociado a mucosas
+9699/3,Linfoma coroideo primario
+9699/3,Linfomas de células T y NK maduras
+970-971,Linfomas de células T y NK maduras
+9700/3,Micosis fungoide
+9700/3,Reticulosis pagetoide
+9700/3,Piel flácida granulomatosa
+9701/3,Síndrome de Sézary
+9701/3,Enfermedad de Sézary
+9702/1,Trastorno linfoproliferativo indolente de células T del tracto gastrointestinal
+9702/3,"Linfoma de células T maduras, NOS"
+9702/3,"Linfoma periférico de células T, NOS"
+9702/3,"Linfoma de células T, NOS"
+9702/3,"Linfoma periférico de células T, células grandes"
+9702/3,"Linfoma periférico de células T, células medianas y grandes pleomórficas"
+9702/3,"Linfoma periférico de células T, células pequeñas pleomórficas"
+9702/3,Linfoma de la zona T
+9702/3,Linfoma linfoepitelioide
+9702/3,Linfoma de Lennert
+9702/3,Linfoma folicular de células T
+9702/3,Linfoma nodal periférico de células T con fenotipo de células T auxiliares foliculares
+9705/3,Linfoma angioinmunoblástico de células T
+9705/3,Linfoma angioinmunoblástico
+9705/3,"Linfoma periférico de células T, AILD (Linfoma angioinmunoblástico Linfadenopatía con disproteinemia)"
+9708/3,Linfoma subcutáneo de células T similar a paniculitis
+9709/1,Trastorno linfoproliferativo cutáneo primario de células T pequeñas/medianas CD4 positivo
+9709/1,Linfoma cutáneo primario de células T pequeñas/medianas CD4 positivo
+9709/3,"Linfoma cutáneo de células T, NOS"
+9709/3,"Linfoma cutáneo, NOS"
+9709/3,Linfoma cutáneo primario de células T citotóxicas epidermotrópicas agresivas CD8 positivo
+9709/3,Linfoma cutáneo primario de células T acral CD8 positivo
+9712/3,Linfoma intravascular de células B grandes
+9712/3,Linfoma intravascular de células B
+9712/3,Angioendoteliomatosis
+9712/3,Linfoma angiotrópico
+9714/3,"Linfoma anaplásico de células grandes, tipo de células T y células nulas"
+9714/3,Linfoma de células grandes (Ki-1 positivo)
+9714/3,"Linfoma anaplásico de células grandes, NOS"
+9714/3,"Linfoma anaplásico de células grandes, CD30 positivo"
+9714/3,"Linfoma anaplásico de células grandes, ALK positivo"
+9715/3,"Linfoma anaplásico de células grandes, ALK negativo"
+9715/3,Linfoma anaplásico de células grandes asociado a implantes mamarios linfoma de células T
+9716/3,Linfoma hepatoesplénico de células T
+9716/3,Linfoma hepatoesplénico de células gamma-delta
+9717/3,Linfoma intestinal de células T
+9717/3,Linfoma de células T asociado a enteropatía
+9717/3,Linfoma intestinal de células T tipo enteropatía
+9717/3,Linfoma intestinal de células T epiteliotrópico monomórfico
+9718/1,Trastorno linfoproliferativo cutáneo primario de células T CD30 positivo
+9718/1,Papulosis linfomatoide
+9718/3,Linfoma anaplásico cutáneo primario de células grandes
+9718/3,Linfoma cutáneo primario de células T grandes CD30 positivo
+9719/3,"Linfoma de células NK/T, nasal y tipo nasal"
+9719/3,"Reticulación maligna, NOS"
+9719/3,Linfoma angiocéntrico de células T
+9719/3,"Linfoma extranodal de células NK/T, tipo nasal"
+9719/3,Reticulación maligna de la línea media
+9719/3,Reticulación polimórfica
+9719/3,Linfoma de células T/NK
+972,Linfomas linfoblásticos de células precursoras
+9724/3,Enfermedad linfoproliferativa sistémica de células T EBV positiva de la infancia
+9725/1,Enfermedad linfoproliferativa similar a la hidroa vacciniforme Trastorno
+9725/1,Linfoma tipo hidroa vacciniforme
+9726/3,Linfoma cutáneo primario de células T gamma-delta
+9727/3,"Linfoma linfoblástico de células precursoras, NOS"
+9727/3,"Linfoma maligno, linfoblástico, NOS"
+9727/3,Linfoblastoma
+9727/3,"Linfoma maligno, de células contorneadas"
+9727/3,Linfoma blástico de células NK
+9727/3,Neoplasia blástica de células dendríticas plasmocitoides
+973,Neoplasias de células plasmáticas
+9731/3,"Plasmacitoma, NOS"
+9731/3,Tumor de células plasmáticas
+9731/3,Plasmacitoma de hueso
+9731/3,Mieloma solitario
+9731/3,Plasmacitoma solitario
+9732/3,Mieloma de células plasmáticas
+9732/3,Mieloma múltiple
+9732/3,"Mieloma, NOS"
+9732/3,Mielomatosis
+9733/3,Leucemia de células plasmáticas
+9733/3,Leucemia plasmocítica
+9734/3,Plasmacitoma extramedular
+9734/3,Plasmacitoma extraóseo
+9735/3,Linfoma plasmoblástico
+9737/3,Linfoma de células B grandes ALK positivo
+9738/3,Linfoma difuso de células B grandes HHV8 positivo
+9738/3,Linfoma de células B grandes que surge en la enfermedad de Castleman multicéntrica asociada a HHV8
+974,Matocitos Neoplasias
+9740/1,"Mastocitoma, NOS"
+9740/1,"Tumor de mastocitos, NOS"
+9740/1,"Mastocitosis cutánea, NOS"
+9740/1,Mastocitosis cutánea difusa
+9740/1,Mastocitoma extracutáneo
+9740/1,Mastocitoma solitario de la piel
+9740/1,Urticaria pigmentosa
+9740/3,Sarcoma de mastocitos
+9740/3,Tumor maligno de mastocitos
+9740/3,Mastocitoma maligno
+9741/1,Mastocitosis sistémica indolente
+9741/3,Mastocitosis maligna
+9741/3,Enfermedad tisular sistémica de mastocitos
+9741/3,Mastocitosis sistémica agresiva
+9741/3,Mastocitosis sistémica con AHNMD
+9741/3,Mastocitosis sistémica con trastorno hematológico clonal no mastocítico asociado
+9742/3,Leucemia de mastocitos
+9749/3,Enfermedad de Erdheim-Chester
+975,Neoplasias de histiocitos y células linfoides accesorias
+9750/3,Histiocitosis maligna
+9750/3,Reticulosis medular histiocítica
+9751/1,"Histiocitosis de células de Langerhans, NOS"
+9751/1,"Histiocitosis de células de Langerhans, monostótica"
+9751/1,"Histiocitosis de células de Langerhans, polistótica"
+9751/3,Histiocitosis de células de Langerhans diseminada
+9751/3,Granulomatosis de células de Langerhans
+9751/3,Granuloma eosinofílico
+9751/3,Histiocitosis X progresiva aguda
+9751/3,"Histiocitosis X, NOS"
+9751/3,Enfermedad de Hand-Schuller-Christian
+9751/3,Enfermedad de Letterer-Siwe
+9751/3,Reticuloendoteliosis no lipídica
+9755/3,Sarcoma histiocítico
+9755/3,Linfoma histiocítico verdadero
+9756/3,Sarcoma de células de Langerhans
+9757/3,Sarcoma de células dendríticas interdigitadas
+9757/3,Sarcoma de células interdigitadas
+9757/3,"Sarcoma de células dendríticas, NOS"
+9757/3,Tumor de células dendríticas indeterminado
+9758/3,Sarcoma de células dendríticas foliculares
+9758/3,Tumor de células dendríticas foliculares
+9759/3,Tumor de células reticulares fibroblásticas
+976,Enfermedades inmunoproliferativas
+9760/3,"Enfermedad inmunoproliferativa, NOS"
+9761/1,Gammapatía monoclonal IgM de significado incierto
+9761/3,Macroglobulinemia de Waldenström
+9762/3,"Enfermedad de la cadena pesada, NOS"
+9762/3,Enfermedad de la cadena pesada alfa
+9762/3,Enfermedad de la cadena pesada gamma
+9762/3,Enfermedad de Franklin
+9762/3,Enfermedad de la cadena pesada Mu
+9764/3,Enfermedad inmunoproliferativa del intestino delgado Enfermedad
+9764/3,Linfoma mediterráneo
+9765/1,"Gammapatía monoclonal de significado incierto, NOS"
+9765/1,MGUS
+9765/1,"Gammapatía monoclonal, NOS"
+9766/1,Lesión inmunoproliferativa angiocéntrica
+9766/1,"Granulomatosis linfomatoide, NOS"
+9766/1,"Granulomatosis linfomatoide, grado 1"
+9766/1,"Granulomatosis linfomatoide, grado 2"
+9766/3,"Granulomatosis linfomatoide, grado 3"
+9767/1,Linfoadenopatía angioinmunoblástica (AIL)
+9767/1,Linfoadenopatía inmunoblástica (IBL)
+9768/1,Enfermedad linfoproliferativa T-gamma
+9769/1,Enfermedad por depósito de inmunoglobulina
+9769/1,Amiloidosis primaria
+9769/1,Enfermedad sistémica de cadenas ligeras
+980-994,Leucemias
+980,"Leucemias, NOS"
+9800/3,"Leucemia, NOS"
+9800/3,"Leucemia aleucémica, NOS"
+9800/3,"Leucemia crónica, NOS"
+9800/3,"Leucemia subaguda, NOS"
+9801/3,"Leucemia aguda, NOS"
+9801/3,Leucemia de células blásticas
+9801/3,Leucemia de células madre
+9801/3,Leucemia indiferenciada
+9805/3,Leucemia bifenotípica aguda
+9805/3,Leucemia bilineal aguda
+9805/3,Leucemia de linaje mixto aguda leucemia
+9806/3,Leucemia aguda de fenotipo mixto con t(9;22)(q34;q11.2); BCR-ABL1
+9807/3,Leucemia aguda de fenotipo mixto con t(v;11q23); MLL reordenado
+9808/3,"Leucemia aguda de fenotipo mixto, B/mieloide, NOS"
+9809/3,"Leucemia aguda de fenotipo mixto, T/mieloide, NOS"
+981-983,Leucemias linfoides
+9811/3,"Leucemia/linfoma linfoblástico B, NOS"
+9811/3,C-ALL
+9811/3,ALL común
+9811/3,ALL de precursores comunes de células B
+9811/3,ALL pre-B
+9811/3,ALL pre-pre-B
+9811/3,ALL pro-B
+9811/3,Linfoma linfoblástico de precursores de células B
+9811/3,Leucemia linfoblástica de precursores de células B
+9811/3,Leucemia linfoblástica B/linfoma con iAMP21
+9812/3,Leucemia/linfoma linfoblástico B con t(9;22)(q34;q11.2); BCR-ABL1
+9813/3,Leucemia/linfoma linfoblástico B con t(v;11q23); MLL reordenado
+9814/3,Leucemia/linfoma linfoblástico B con t(12;21)(p13;q22); TEL-AML1 (ETV6-RUNX1)
+9815/3,Leucemia/linfoma linfoblástico B con hiperdiploidía
+9816/3,Leucemia/linfoma linfoblástico B con hipodiploidía (LLA hipodiploide)
+9817/3,Leucemia/linfoma linfoblástico B con t(5;14)(q31;q32); IL3-IGH
+9818/3,Leucemia/linfoma linfoblástico B con t(1;19)(q23;p13.3); E2A-PBX1 (TCF3-PBX1)
+9819/3,"Leucemia/linfoma linfoblástico B, similar a BCR-ABL1"
+9820/3,"Leucemia linfoide, NOS"
+9820/3,"Leucemia linfática, NOS"
+9820/3,"Leucemia linfocítica, NOS"
+9820/3,Leucemia linfoide aleucémica
+9820/3,Leucemia linfática aleucémica
+9820/3,Leucemia linfocítica aleucémica
+9820/3,Leucemia de células de linfosarcoma
+9820/3,Leucemia linfoide subaguda
+9820/3,Leucemia linfática subaguda
+9820/3,Leucemia linfocítica subaguda
+9823/1,"Linfocitosis monoclonal de células B, tipo LLC"
+9823/3,Leucemia linfocítica crónica de células B/linfoma linfocítico pequeño
+9823/3,Leucemia linfática crónica
+9823/3,Leucemia linfocítica crónica
+9823/3,"Leucemia linfocítica crónica, tipo de células B"
+9823/3,Leucemia linfoide crónica
+9823/3,"Linfoma maligno, linfocítico B pequeño, NOS"
+9823/3,"Linfoma maligno, linfocítico, NOS"
+9823/3,"Linfoma maligno, linfocítico, difuso, NOS"
+9823/3,"Linfoma maligno, de células pequeñas, NOS"
+9823/3,"Linfoma maligno, linfocítico pequeño, NOS"
+9823/3,"Linfoma maligno, linfocítico, bien diferenciado, difuso"
+9823/3,"Linfoma maligno, de células pequeñas, difuso"
+9823/3,"Linfoma maligno, linfocítico pequeño, difuso"
+9827/3,Leucemia/linfoma de células T en adultos (HTLV-1 positivo)
+9827/3,Leucemia de células T en adultos
+9827/3,Linfoma de células T en adultos linfoma
+9827/3,Linfoma/leucemia de células T en adultos
+9831/3,Leucemia linfocítica granular grande de células T
+9831/3,"Linfocitosis granular grande, NOS"
+9831/3,Leucemia linfocítica granular grande de células NK
+9831/3,Linfocitosis granular grande de células T
+9831/3,Trastorno linfoproliferativo crónico de las células NK
+9832/3,"Leucemia prolinfocítica, NOS"
+9833/3,"Leucemia prolinfocítica, tipo de células B"
+9834/3,"Leucemia prolinfocítica, tipo de células T"
+9835/3,"Leucemia linfoblástica de células precursoras, NOS"
+9835/3,"Leucemia linfoblástica aguda, NOS"
+9835/3,"Leucemia linfoblástica aguda, tipo L2, NOS"
+9835/3,"Linfoma-leucemia linfoblástica aguda, NOS"
+9835/3,"Leucemia linfoblástica, NOS"
+9835/3,Leucemia linfática aguda
+9835/3,Leucemia linfocítica aguda
+9835/3,Leucemia linfoide aguda
+9835/3,FAB L1
+9835/3,FAB L2
+9835/3,"Leucemia linfoblástica de células precursoras, no fenotipada"
+9835/3,"Leucemia linfoblástica aguda, tipo de células precursoras"
+9837/3,Leucemia linfoblástica de células T precursoras
+9837/3,LLA T cortical
+9837/3,LLA T madura
+9837/3,LLA pre-T
+9837/3,LLA pro-T
+9837/3,Linfoma linfoblástico de células T precursoras
+9837/3,Leucemia/linfoma linfoblástico T
+9837/3,Leucemia linfoblástica aguda de células T precursoras tempranas
+984-993,Leucemias mieloides
+9840/3,Leucemia eritroide aguda
+9840/3,"Leucemia mieloide aguda, tipo M6"
+9840/3,Eritremia aguda
+9840/3,Mielosis eritrémica aguda
+9840/3,LMA M6
+9840/3,Enfermedad de Di Guglielmo
+9840/3,"Mielosis eritrémica, NOS"
+9840/3,Eritroleucemia
+9840/3,FAB M6
+9840/3,M6A
+9840/3,M6B
+9860/3,"Leucemia mieloide, NOS"
+9860/3,"Leucemia granulocítica, NOS"
+9860/3,"Leucemia mielocítica, NOS"
+9860/3,"Leucemia mielógena, NOS"
+9860/3,"Leucemia mielomonocítica, NOS"
+9860/3,"Leucemia no linfocítica, NOS"
+9860/3,Leucemia mieloide aleucémica
+9860/3,Leucemia granulocítica aleucémica
+9860/3,Leucemia mielógena aleucémica
+9860/3,Leucemia monocítica aleucémica
+9860/3,Leucemia monocítica crónica
+9860/3,"Leucemia eosinofílica, NOS"
+9860/3,"Leucemia monocítica, NOS"
+9860/3,Leucemia monocítica subaguda
+9860/3,Leucemia mieloide subaguda
+9860/3,Leucemia granulocítica subaguda
+9860/3,Leucemia mielógena subaguda
+9861/3,"Leucemia mieloide aguda, NOS"
+9861/3,Leucemia granulocítica aguda
+9861/3,Leucemia mielocítica aguda
+9861/3,Leucemia mielógena aguda
+9861/3,Leucemia Leucemia no linfocítica
+9863/3,"Leucemia mieloide crónica, NOS"
+9863/3,"Leucemia granulocítica crónica, NOS"
+9863/3,"Leucemia mielocítica crónica, NOS"
+9863/3,"Leucemia mielógena crónica, NOS"
+9865/3,Leucemia mieloide aguda con t(6;9)(p23;q34); DEK-NUP214
+9866/3,"Leucemia promielocítica aguda, t(15;17)(q22;q11-12)"
+9866/3,"Leucemia promielocítica aguda, NOS"
+9866/3,"Leucemia mieloide aguda, PML/RAR-alfa"
+9866/3,"Leucemia mieloide aguda, t(15;17)(q22;q11-12)"
+9866/3,"Leucemia promielocítica aguda, PML/RAR-alfa"
+9866/3,FAB M3
+9867/3,"Leucemia mielomonocítica aguda, NOS"
+9867/3,FAB M4
+9869/3,Leucemia mieloide aguda con inv(3)(q21;q26.2) o t(3;3)(q21;q26.2); RPN1-EVI1
+9870/3,Leucemia basófila aguda
+9871/3,Leucemia mieloide aguda con eosinófilos anormales en la médula ósea
+9871/3,"Leucemia mieloide aguda, CBF-beta/MYH11"
+9871/3,"Leucemia mieloide aguda, inv(16)(p13;q22)"
+9871/3,"Leucemia mieloide aguda, t(16;16)(p13;q11)"
+9871/3,Leucemia mielomonocítica aguda con eosinófilos anormales
+9871/3,FAB M4Eo
+9872/3,"Leucemia mieloide aguda, diferenciación mínima"
+9872/3,Leucemia mieloblástica aguda
+9872/3,FAB M0
+9873/3,Leucemia mieloide aguda sin maduración
+9873/3,FAB M1
+9874/3,Leucemia mieloide aguda con maduración
+9874/3,"FAB M2, NOS"
+9875/3,"Leucemia mieloide crónica, BCR/ABL positiva"
+9875/3,"Leucemia mielógena crónica, BCR/ABL positiva"
+9875/3,"Leucemia granulocítica crónica Leucemia, BCR/ABL"
+9875/3,"Leucemia granulocítica crónica, cromosoma Filadelfia (Ph1) positivo"
+9875/3,"Leucemia granulocítica crónica, t(9;22)(q34;q11)"
+9875/3,"Leucemia mieloide crónica, cromosoma Filadelfia (Ph1) positivo"
+9875/3,"Leucemia mieloide crónica, cromosoma Filadelfia (Ph1) positivo"
+9875/3,"Leucemia mieloide crónica, t(9;22)(q34;q11)"
+9875/3,"Leucemia mieloide crónica, t(9;22)(q34;q11)"
+9876/3,"Leucemia mieloide crónica atípica, BCR/ABL negativo"
+9876/3,"Leucemia mieloide crónica atípica, cromosoma Filadelfia (Ph1) negativo"
+9877/3,Leucemia mieloide aguda con NPM1 mutado
+9878/3,Leucemia mieloide aguda con mutación bialélica de CEBPA
+9879/3,Leucemia mieloide aguda con RUNX1 mutado
+9891/3,Leucemia monocítica aguda Leucemia
+9891/3,"Leucemia monoblástica, NOS"
+9891/3,Leucemia monoblástica aguda
+9891/3,FAB M5
+9891/3,Leucemia monoblástica y monocítica aguda
+9895/3,Leucemia mieloide aguda con cambios relacionados con mielodisplasia
+9895/3,Leucemia mieloide aguda con displasia multilinaje
+9895/3,Leucemia mieloide aguda con síndrome mielodisplásico previo
+9895/3,Leucemia mieloide aguda sin síndrome mielodisplásico previo
+9896/3,"Leucemia mieloide aguda, t(8;21)(q22;q22)"
+9896/3,"Leucemia mieloide aguda, AML1(CBF-alfa)/ETO"
+9896/3,Leucemia mieloide aguda con t(8;21)(q22;q22); RUNX1-RUNX1T1
+9896/3,"FAB M2, AML1(CBF-alfa)/ETO"
+9896/3,"FAB M2, t(8;21)(q22;q22)"
+9897/3,"Leucemia mieloide aguda, anomalías 11q23"
+9897/3,"Leucemia mieloide aguda, MLL"
+9897/3,Leucemia mieloide aguda con t(9;11)(p22;q23); MLLT3-MLL
+9898/1,Mielopoyesis anormal transitoria
+9898/3,Leucemia mieloide asociada con el síndrome de Down
+9910/3,Leucemia megacarioblástica aguda
+9910/3,Leucemia megacariocítica
+9910/3,FAB M7
+9911/3,Leucemia mieloide aguda (megacarioblástica) con t(1;22)(p13;q13); RBM15-MKL1
+9912/3,Leucemia mieloide aguda con BCR-ABL1
+9920/3,Neoplasia mieloide relacionada con el tratamiento
+9920/3,"Leucemia mieloide aguda relacionada con el tratamiento, NOS"
+9920/3,"Leucemia mieloide aguda relacionada con el tratamiento, relacionada con agentes alquilantes"
+9920/3,"Leucemia mieloide aguda relacionada con el tratamiento, relacionada con epipodofilotoxina"
+9930/3,Sarcoma mieloide
+9930/3,Cloroma
+9930/3,Sarcoma granulocítico
+9931/3,Pamielosis aguda con mielofibrosis
+9931/3,"Mieloesclerosis aguda, NOS"
+9931/3,"Pamielosis aguda, NOS"
+9931/3,Mielofibrosis aguda
+9931/3,Mieloesclerosis maligna
+994,Otras leucemias
+9940/3,"Leucemia de células pilosas, NOS"
+9940/3,Reticuloendoteliosis leucémica
+9945/3,"Leucemia mielomonocítica crónica, NOS"
+9945/3,"Leucemia mielomonocítica crónica, tipo I"
+9945/3,"Leucemia mielomonocítica crónica, tipo II"
+9945/3,Leucemia mielomonocítica crónica Leucemia en transformación
+9946/3,"Leucemia mielomonocítica juvenil, NOS"
+9946/3,Leucemia mielomonocítica crónica juvenil
+9948/3,Leucemia agresiva de células NK
+995-996,Neoplasias mieloproliferativas
+9950/3,Policitemia vera
+9950/3,Eritremia crónica
+9950/3,Policitemia rubra vera
+9950/3,Policitemia proliferativa
+9960/3,"Neoplasia mieloproliferativa, NOS"
+9960/3,"Enfermedad mieloproliferativa crónica, NOS"
+9960/3,Trastorno mieloproliferativo crónico
+9960/3,"Enfermedad mieloproliferativa, NOS"
+9961/3,Mielofibrosis primaria
+9961/3,Metaplasia mieloide agnogénica
+9961/3,Mielofibrosis idiopática crónica
+9961/3,Mieloesclerosis megacariocítica
+9961/3,Mielofibrosis como resultado de enfermedad mieloproliferativa
+9961/3,Mielofibrosis con metaplasia mieloide
+9961/3,Mieloesclerosis con metaplasia mieloide
+9962/3,Trombocitemia esencial
+9962/3,Trombocitemia hemorrágica esencial
+9962/3,Trombocitemia idiopática Trombocitemia hemorrágica
+9962/3,Trombocitemia idiopática
+9963/3,Leucemia neutrofílica crónica
+9964/3,Leucemia eosinofílica crónica
+9964/3,Síndrome hipereosinofílico
+9965/3,Neoplasia mieloide o linfoide con reordenamiento de PDGFRA
+9966/3,Neoplasia mieloide con reordenamiento de PDGFRB
+9967/3,Neoplasia mieloide o linfoide con anomalías de FGFR1
+9968/3,Neoplasia mieloide o linfoide con PCM1-JAK2
+997,Otras neoplasias hematológicas
+9970/1,"Trastorno linfoproliferativo, NOS"
+9970/1,"Enfermedad linfoproliferativa, NOS"
+9971/1,"Trastorno linfoproliferativo postrasplante, NOS"
+9971/1,"PTLD, NOS"
+9971/1,Trastorno linfoproliferativo postrasplante polimórfico
+9975/3,"Neoplasia mieloproliferativa, inclasificable"
+9975/3,"Neoplasia mielodisplásica/mieloproliferativa, inclasificable"
+998-999,Síndromes mielodisplásicos
+9980/3,Síndrome mielodisplásico con displasia de linaje único
+9980/3,"Anemia refractaria, NOS"
+9980/3,Anemia refractaria sin sideroblastos
+9980/3,Neutropenia refractaria
+9980/3,Trombocitopenia refractaria
+9982/3,Síndrome mielodisplásico con sideroblastos en anillo y linaje único displasia
+9982/3,Anemia refractaria con sideroblastos
+9982/3,RARS
+9982/3,Anemia refractaria con sideroblastos en anillo asociada a trombocitosis marcada
+9982/3,"Anemia refractaria con sideroblastos en anillo, NOS"
+9982/3,"Síndrome mielodisplásico con sideroblastos en anillo, NOS"
+9983/3,Síndrome mielodisplásico con exceso de blastos
+9983/3,"Anemia refractaria con exceso de blastos, NOS"
+9983/3,"RAEB, NOS"
+9983/3,RAEB I
+9983/3,RAEB II
+9984/3,Anemia refractaria con exceso de blastos en transformación
+9984/3,RAEB-T
+9985/3,Síndrome mielodisplásico con displasia multilinaje
+9985/3,Citopenia refractaria con displasia multilinaje
+9985/3,Citopenia refractaria de la infancia
+9986/3,Síndrome mielodisplásico con del (5q) aislada
+9986/3,Síndrome mielodisplásico con síndrome de deleción 5q (5q-)
+9987/3,"Síndrome mielodisplásico relacionado con el tratamiento, NOS"
+9987/3,"Síndrome mielodisplásico relacionado con el tratamiento, relacionado con agentes alquilantes"
+9987/3,"Síndrome mielodisplásico relacionado con el tratamiento, relacionado con epipodofilotoxina"
+9989/3,"Síndrome mielodisplásico, NOS"
+9989/3,Preleucemia
+9989/3,Síndrome preleucémico
+9989/3,"Síndrome mielodisplásico, inclasificable"
+9993/3,Síndrome mielodisplásico con sideroblastos en anillo y displasia multilinaje

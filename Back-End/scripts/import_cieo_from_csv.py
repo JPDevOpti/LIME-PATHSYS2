@@ -1,34 +1,38 @@
 #!/usr/bin/env python3
 """
-Importa CIE-O desde el CSV de CIE-10, extrayendo solo diagnosticos de cancer (C00-D48).
+Importa CIE-O morfológico desde CSV con formato: código,nombre (ej. 8000/3,"Neoplasia, maligna").
 
-Usa la misma coleccion diseases, misma fuente que CIE-10. No crea coleccion nueva.
-
-Variables de entorno: MONGODB_URI, DATABASE_NAME (o MONGODB_URL para compatibilidad)
+Elimina todos los registros CIEO anteriores (colección diseases + colección cieo) y los reemplaza.
 
 Uso:
-    python scripts/import_cieo_from_csv.py [ruta_csv_cie10]
-    Si no se pasa ruta, busca scripts/cie-10.csv; si no existe intenta descargarlo.
+    python scripts/import_cieo_from_csv.py [--dry-run] [--dest-url MONGO_URI] [--dest-db DB_NAME]
+
+Ejemplos:
+    # Local
+    python scripts/import_cieo_from_csv.py
+
+    # Atlas
+    python scripts/import_cieo_from_csv.py --dest-url "mongodb+srv://user:pass@cluster.mongodb.net" --dest-db pathsys
 """
 
+import argparse
 import csv
 import os
 import sys
-import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from pymongo import MongoClient
+from pymongo.database import Database
 
-if os.getenv("MONGODB_URL") and not os.getenv("MONGODB_URI"):
-    os.environ["MONGODB_URI"] = os.getenv("MONGODB_URL")
 
-from app.database import get_db
+DEFAULT_URL = os.environ.get("MONGODB_URI", "mongodb://localhost:27017")
+DEFAULT_DB = os.environ.get("MONGODB_DB", "pathsys")
 
-CSV_SOURCES = [
-    "https://raw.githubusercontent.com/nickhould/CIE-10/master/data/cie10.csv",
-    "https://raw.githubusercontent.com/codificar/tabela_cid/main/cid10.csv",
-]
+
+def get_db(dest_url: str, dest_db: str) -> Database:
+    client: MongoClient = MongoClient(dest_url)
+    return client[dest_db]
 
 
 def normalize_text(text: str | None) -> str | None:
@@ -37,48 +41,27 @@ def normalize_text(text: str | None) -> str | None:
     return " ".join(str(text).split()).strip()
 
 
-def is_cancer_code(code: str) -> bool:
-    """C00-C97 malignos, D00-D48 in situ/benignos/inciertos."""
-    if not code or len(code) < 1:
-        return False
-    c = code.upper()[0]
-    if c == "C":
-        return True
-    if c == "D" and len(code) > 1:
-        return code[1] in "01234"  # D00-D48
-    return False
-
-
-def try_download(dest: Path) -> bool:
-    for url in CSV_SOURCES:
-        try:
-            print(f"  Descargando desde {url} ...")
-            urllib.request.urlretrieve(url, dest)
-            with open(dest, encoding="utf-8") as f:
-                headers = [h.strip().lower() for h in f.readline().split(",")]
-            if "code" in headers and "description" in headers:
-                print(f"  Descarga exitosa -> {dest}")
-                return True
-            dest.unlink(missing_ok=True)
-        except Exception as e:
-            print(f"  Fallo {url}: {e}")
-    return False
-
-
-def is_individual_code(code: str) -> bool:
-    """Filtra rangos como C00-C97; acepta solo codigos individuales."""
-    return bool(code) and '-' not in code
-
-
 def process_csv(file_path: Path) -> list[dict]:
-    diseases = []
+    """Lee CSV con formato: código,nombre. Sin encabezado."""
+    diseases: list[dict] = []
+    seen: set[str] = set()
+
     with open(file_path, encoding="utf-8") as f:
-        reader = csv.DictReader(f)
+        reader = csv.reader(f)
         for row in reader:
-            code = normalize_text(row.get("code"))
-            name = normalize_text(row.get("description"))
-            if not code or not name or not is_individual_code(code) or not is_cancer_code(code):
+            if len(row) < 2:
                 continue
+            code = normalize_text(row[0])
+            name = normalize_text(row[1])
+            if not code or not name:
+                continue
+
+            # Clave única: código + nombre para evitar duplicados exactos
+            key = f"{code}|{name}"
+            if key in seen:
+                continue
+            seen.add(key)
+
             diseases.append({
                 "table": "CIEO",
                 "code": code,
@@ -86,81 +69,92 @@ def process_csv(file_path: Path) -> list[dict]:
                 "description": name,
                 "is_active": True,
             })
+
     return diseases
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Importa CIE-O morfológico desde CSV. Elimina los anteriores y los reemplaza."
+    )
+    parser.add_argument("--dest-url", default=DEFAULT_URL, help="MongoDB URI")
+    parser.add_argument("--dest-db", default=DEFAULT_DB, help="Database name")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Solo muestra lo que haría sin modificar la base de datos",
+    )
+    args = parser.parse_args()
+
+    # Buscar el CSV
     script_dir = Path(__file__).resolve().parent
-    backend_root = script_dir.parent
-    default_paths = [
-        script_dir / "cie-10.csv",
-        backend_root.parent / "sistema-antiguo" / "Back-End" / "Scripts" / "cie-10.csv",
-    ]
+    csv_path = script_dir / "CIE -O.csv"
+    if not csv_path.exists():
+        csv_path = script_dir / "CIE-O.csv"
+    if not csv_path.exists():
+        print("ERROR: No se encontró el archivo 'CIE -O.csv' en Back-End/scripts/")
+        sys.exit(1)
 
-    file_path = sys.argv[1] if len(sys.argv) > 1 else None
-    if file_path:
-        path = Path(file_path)
-    else:
-        path = next((p for p in default_paths if p.exists()), None)
-
-    if not path or not path.exists():
-        print("CSV cie-10.csv no encontrado. Intentando descarga automatica...")
-        dest = script_dir / "cie-10.csv"
-        if not try_download(dest):
-            print(
-                "ADVERTENCIA: No se pudo obtener cie-10.csv. "
-                "Coloca el archivo en Back-End/scripts/cie-10.csv y vuelve a ejecutar."
-            )
-            sys.exit(0)
-        path = dest
-
-    diseases = process_csv(path)
+    diseases = process_csv(csv_path)
     if not diseases:
-        print("ADVERTENCIA: El CSV no contiene codigos de cancer (C00-D48). Se omite la importacion.")
-        sys.exit(0)
+        print("ERROR: El CSV no contiene datos válidos.")
+        sys.exit(1)
 
     total = len(diseases)
     print("=" * 60)
-    print("IMPORTACION CIE-O (diagnosticos de cancer C00-D48)")
+    print("IMPORTACIÓN CIE-O MORFOLÓGICO")
     print("=" * 60)
     print(f"Fecha        : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print(f"Fuente       : {path}")
-    print(f"Total CSV    : {total}")
+    print(f"Fuente       : {csv_path}")
+    print(f"Registros    : {total}")
+    print(f"Modo         : {'DRY-RUN (sin cambios)' if args.dry_run else 'EJECUCIÓN REAL'}")
+    print(f"Destino      : {args.dest_url} / {args.dest_db}")
     print("=" * 60)
 
+    if args.dry_run:
+        for i, d in enumerate(diseases[:20], 1):
+            print(f"  [{i:>5}] {d['code']:<12} - {d['name'][:55]}")
+        if total > 20:
+            print(f"  ... y {total - 20} más")
+        print("=" * 60)
+        print(f"[DRY-RUN] Se eliminarían los CIEO existentes y se insertarían {total} registros nuevos.")
+        return
+
+    db = get_db(args.dest_url, args.dest_db)
     try:
-        db = get_db()
         db.command("ping")
+        print("Conexión a MongoDB: OK")
     except Exception as e:
-        print(f"Error de conexion a MongoDB: {e}")
+        print(f"Error de conexión a MongoDB: {e}")
         sys.exit(1)
 
-    coll = db.get_collection("diseases")
+    # 1. Eliminar CIEO de la colección diseases
+    diseases_col = db.get_collection("diseases")
+    deleted_diseases = diseases_col.delete_many({"table": {"$regex": r"^CIE\s*-?\s*O$", "$options": "i"}}).deleted_count
+    print(f"Eliminados de 'diseases': {deleted_diseases}")
 
-    # Eliminar CIEO anteriores
-    deleted = coll.delete_many({"table": "CIEO"}).deleted_count
-    if deleted:
-        print(f"Eliminados   : {deleted} registros CIEO anteriores")
-        print("=" * 60)
+    # 2. Eliminar toda la colección cieo (alternativa/legacy)
+    cieo_col = db.get_collection("cieo")
+    deleted_cieo = cieo_col.delete_many({}).deleted_count
+    print(f"Eliminados de 'cieo'    : {deleted_cieo}")
+    print("-" * 60)
 
+    # 3. Insertar nuevos registros
     now = datetime.now(timezone.utc).isoformat()
-    to_insert = []
-
-    for i, d in enumerate(diseases, 1):
+    for d in diseases:
         d["created_at"] = now
         d["updated_at"] = now
-        to_insert.append(d)
-        print(f"[{i:>5}/{total}] {d['code']:<8} - {d['name'][:60]}  [OK]")
 
-    # Insertar en lotes de 500
-    created = 0
     batch = 500
-    for start in range(0, len(to_insert), batch):
-        coll.insert_many(to_insert[start:start + batch], ordered=False)
-        created += len(to_insert[start:start + batch])
+    created = 0
+    for start in range(0, len(diseases), batch):
+        chunk = diseases[start : start + batch]
+        diseases_col.insert_many(chunk, ordered=False)
+        created += len(chunk)
+        print(f"  Insertados: {created}/{total}")
 
     print("=" * 60)
-    print(f"Completado. Creadas: {created} entradas CIE-O (solo cancer).")
+    print(f"Completado. {created} registros CIE-O morfológico importados.")
     print("=" * 60)
 
 
