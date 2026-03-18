@@ -187,7 +187,7 @@ export function CaseForm(props: CaseFormCreateProps | CaseFormEditProps) {
                     if (field === 'code') {
                         return { ...t, code: String(value), name: String(value) || t.name };
                     }
-                    return { ...t, quantity: Number(value) || 1 };
+                    return { ...t, quantity: value === '' ? 0 : Math.max(0, Number(value)) };
                 });
                 return { ...s, tests };
             });
@@ -200,6 +200,20 @@ export function CaseForm(props: CaseFormCreateProps | CaseFormEditProps) {
                 return next;
             });
         }
+    };
+
+    const handleTestQuantityBlur = (sampleIndex: number, testIndex: number) => {
+        setFormData(prev => {
+            const samples = prev.samples.map((s, i) => {
+                if (i !== sampleIndex) return s;
+                const tests = s.tests.map((t, j) => {
+                    if (j !== testIndex) return t;
+                    return { ...t, quantity: t.quantity < 1 || isNaN(t.quantity) ? 1 : t.quantity };
+                });
+                return { ...s, tests };
+            });
+            return { ...prev, samples };
+        });
     };
 
     const handleTestSelected = (sampleIndex: number, testIndex: number, code: string, name: string, time?: number) => {
@@ -510,8 +524,9 @@ export function CaseForm(props: CaseFormCreateProps | CaseFormEditProps) {
                                                         <Input
                                                             type="number"
                                                             min={1}
-                                                            value={test.quantity}
+                                                            value={test.quantity === 0 ? '' : test.quantity}
                                                             onChange={(e) => handleTestChange(sampleIndex, testIndex, 'quantity', e.target.value)}
+                                                            onBlur={() => handleTestQuantityBlur(sampleIndex, testIndex)}
                                                         />
                                                     </FormField>
                                                 </div>

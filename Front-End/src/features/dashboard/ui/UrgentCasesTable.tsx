@@ -88,6 +88,24 @@ const StatusBadge = ({ status }: { status: string }) => {
   );
 };
 
+function getTestsFromUrgentCase(c: UrgentCase): { code: string; name: string; count: number }[] {
+  const counts: Record<string, { count: number; name: string }> = {};
+  const order: string[] = [];
+
+  (c.pruebas || []).forEach((p) => {
+    const code = p.split(" - ")[0] || "";
+    if (!code) return;
+
+    if (!counts[code]) {
+      counts[code] = { count: 0, name: p };
+      order.push(code);
+    }
+    counts[code].count += 1;
+  });
+
+  return order.map((code) => ({ code, name: counts[code].name, count: counts[code].count }));
+}
+
 export const UrgentCasesTable = ({
   cases,
   onViewCase,
@@ -97,12 +115,16 @@ export const UrgentCasesTable = ({
 
   const nonHamaCases = cases.filter((caseItem) => !isHamaCase(caseItem));
 
+  const incompleteCases = nonHamaCases.filter(
+    (c) => c.estado !== "Completado" && c.estado !== "Por entregar"
+  );
+
   const visibleCases = isPatologo && user?.name
-    ? nonHamaCases.filter(
-        (c) =>
-          c.patologo.trim().toLowerCase() === user.name!.trim().toLowerCase(),
-      )
-    : nonHamaCases;
+    ? incompleteCases.filter(
+      (c) =>
+        c.patologo.trim().toLowerCase() === user.name!.trim().toLowerCase(),
+    )
+    : incompleteCases;
 
   const resultsHref = (caseCode: string) =>
     canSignResults
@@ -234,20 +256,28 @@ export const UrgentCasesTable = ({
                   </div>
                 </td>
 
-                <td className="px-6 py-4">
-                  <div className="flex flex-wrap justify-center gap-1.5">
-                    {item.pruebas.slice(0, 2).map((p, idx) => (
+                <td className="px-3 py-3 text-center">
+                  <div className="flex flex-wrap justify-center gap-1">
+                    {getTestsFromUrgentCase(item).slice(0, 6).map((g, idx) => (
                       <span
-                        key={idx}
-                        className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-neutral-100 text-neutral-600 border border-neutral-200"
-                        title={p}
+                        key={`${g.code}-${idx}`}
+                        className="inline-flex items-center justify-center bg-gray-100 text-gray-700 font-mono text-xs px-2 py-1 rounded border relative"
+                        title={g.name}
                       >
-                        {p.split(" ")[0]}
+                        <span className="truncate">{g.code}</span>
+                        {g.count > 1 && (
+                          <sub className="absolute -top-1 -right-1 w-4 h-4 bg-blue-200 text-blue-800 text-[10px] font-bold rounded-full flex items-center justify-center">
+                            {g.count}
+                          </sub>
+                        )}
                       </span>
                     ))}
-                    {item.pruebas.length > 2 && (
-                      <span className="inline-flex items-center px-1.5 py-1 rounded-md text-xs font-medium bg-neutral-100 text-neutral-500 border border-neutral-200">
-                        +{item.pruebas.length - 2}
+                    {getTestsFromUrgentCase(item).length > 6 && (
+                      <span
+                        className="inline-flex items-center justify-center bg-blue-50 text-blue-600 font-mono text-xs px-2 py-1 rounded border"
+                        title={`${getTestsFromUrgentCase(item).length - 6} pruebas más`}
+                      >
+                        +{getTestsFromUrgentCase(item).length - 6}
                       </span>
                     )}
                   </div>

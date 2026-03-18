@@ -80,7 +80,7 @@ class DashboardRepository:
         self, pathologist_name: str = None, limit: int = 10
     ) -> list[dict]:
         query = {
-            "state": {"$ne": "Completado"},
+            "state": {"$nin": ["Completado", "Por entregar"]},
             "priority": {"$in": ["prioritario", "Prioritario"]},
         }
         if pathologist_name:
@@ -123,10 +123,10 @@ class DashboardRepository:
                         "entidad": entidad or None,
                     },
                     "pruebas": [
-                        t.get("name")
+                        f"{t.get('id')} - {t.get('name')}" if t.get("id") else t.get("name")
                         for s in doc.get("samples", [])
                         for t in s.get("tests", [])
-                        if t.get("name")
+                        if t.get("name") or t.get("id")
                     ],
                     "patologo": (doc.get("assigned_pathologist") or {}).get("name") or "Sin asignar",
                     "fecha_creacion": created_at_str or "",
