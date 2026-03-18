@@ -67,6 +67,7 @@ function apiToCase(raw: Record<string, unknown>): Case {
         opportunity_info: raw.opportunity_info as Case['opportunity_info'],
         assigned_pathologist: raw.assigned_pathologist as Case['assigned_pathologist'],
         assistant_pathologists: raw.assistant_pathologists as Case['assistant_pathologists'],
+        assigned_resident: raw.assigned_resident as Case['assigned_resident'],
         result: raw.result as Case['result'],
         audit_info: raw.audit_info as Case['audit_info'],
         date_info: raw.date_info as Case['date_info'],
@@ -267,6 +268,12 @@ export const caseService = {
 
     async updateCaseAssistants(caseId: string, assistants: AssignedPathologist[]): Promise<Case> {
         const body = { assistant_pathologists: assistants };
+        const raw = await apiClient.put<Record<string, unknown>>(`${API_BASE}/${caseId}`, body, getUserHeaders());
+        return apiToCase(raw);
+    },
+
+    async updateCaseResident(caseId: string, resident: AssignedPathologist | null): Promise<Case> {
+        const body = { assigned_resident: resident };
         const raw = await apiClient.put<Record<string, unknown>>(`${API_BASE}/${caseId}`, body, getUserHeaders());
         return apiToCase(raw);
     },

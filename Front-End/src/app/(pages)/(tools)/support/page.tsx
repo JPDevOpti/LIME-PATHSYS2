@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { NewTicket, ActualTickets } from '@/features/support/components';
+import { usePermissions } from '@/features/auth/hooks/usePermissions';
 import { ticketsService } from '@/features/support/services/tickets.service';
 import type { SupportTicket } from '@/features/support/types/support.types';
 
 export default function SupportPage() {
     const [tickets, setTickets] = useState<SupportTicket[]>([]);
     const [loading, setLoading] = useState(false);
+    const { isAdmin } = usePermissions();
 
     const loadTickets = async () => {
         setLoading(true);
@@ -48,7 +50,7 @@ export default function SupportPage() {
                 <div className="lg:col-span-2">
                     <ActualTickets
                         tickets={tickets}
-                        isAdmin={true}
+                        isAdmin={isAdmin}
                         onStatusChanged={onStatusChanged}
                         onDeleted={onDeleted}
                         onRefresh={loadTickets}

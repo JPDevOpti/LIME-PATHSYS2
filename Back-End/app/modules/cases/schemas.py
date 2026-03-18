@@ -139,6 +139,7 @@ class CaseUpdate(BaseModel):
     entity: Optional[str] = None
     assigned_pathologist: Optional[AssignedPathologistSchema] = None
     assistant_pathologists: Optional[list[AssignedPathologistSchema]] = None
+    assigned_resident: Optional[AssignedPathologistSchema] = None
     delivered_to: Optional[str] = None
 
 
@@ -152,6 +153,7 @@ class CaseResponse(BaseModel):
     requesting_physician: str
     assigned_pathologist: Optional[AssignedPathologistSchema] = None
     assistant_pathologists: Optional[list[AssignedPathologistSchema]] = None
+    assigned_resident: Optional[AssignedPathologistSchema] = None
     patient_info: PatientInfoSchema
     samples: list[SampleInfoSchema]
     observations: Optional[str] = None

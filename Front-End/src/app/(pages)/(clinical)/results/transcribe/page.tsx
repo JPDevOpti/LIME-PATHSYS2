@@ -300,8 +300,10 @@ export default function TranscribeResultsPage() {
                             caseId={caseData.id}
                             currentPathologist={caseData.assigned_pathologist}
                             currentAssistants={caseData.assistant_pathologists}
+                            currentResident={caseData.assigned_resident}
                             onAssigned={(p) => setCaseData((prev) => (prev ? { ...prev, assigned_pathologist: p } : null))}
                             onAssistantsUpdated={(assistants) => setCaseData((prev) => (prev ? { ...prev, assistant_pathologists: assistants } : null))}
+                            onResidentUpdated={(r) => setCaseData((prev) => (prev ? { ...prev, assigned_resident: r ?? undefined } : null))}
                         />
 
                         {caseData.status && (caseData.status === 'Por entregar' || caseData.status === 'Completado') && (

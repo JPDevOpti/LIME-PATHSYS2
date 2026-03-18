@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import {
     RadialBarChart,
     RadialBar,
@@ -11,13 +12,104 @@ import { DonutSpinner } from '@/shared/components/ui/loading';
 import type { EstadisticasOportunidad } from '../model/dashboard.types';
 import { ArrowUpRight, ArrowDownRight, Clock, CheckCircle, AlertTriangle, ClipboardList } from 'lucide-react';
 import { clsx } from 'clsx';
+import { caseService } from '@/features/cases/services/case.service';
+import type { Case } from '@/features/cases/types/case.types';
+import { OutOfOpportunityCasesModal } from './OutOfOpportunityCasesModal';
 
 type OportunityPercentageProps = {
     data: EstadisticasOportunidad | null;
     loading?: boolean;
 };
 
+const normalizeText = (value?: string): string =>
+    (value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+
+const hasHamaPattern = (value?: string) => {
+    const normalizedValue = normalizeText(value);
+    if (!normalizedValue) return false;
+    return (
+        normalizedValue === 'hama' ||
+        normalizedValue.includes('alma mater') ||
+        normalizedValue.includes('alma mater de antioquia') ||
+        normalizedValue.includes('hospital alma mater')
+    );
+};
+
+const isHamaCase = (caseItem: Case) => {
+    const entityInfo = caseItem.patient?.entity_info;
+    const entityCodes = [
+        normalizeText(entityInfo?.entity_code),
+        normalizeText(entityInfo?.code),
+    ];
+
+    if (entityCodes.includes('hama')) return true;
+
+    return [
+        caseItem.entity,
+        entityInfo?.entity_name,
+        entityInfo?.eps_name,
+    ].some(hasHamaPattern);
+};
+
 export const OportunityPercentage = ({ data, loading }: OportunityPercentageProps) => {
+    const [isOutCasesModalOpen, setIsOutCasesModalOpen] = useState(false);
+    const [isLoadingOutCases, setIsLoadingOutCases] = useState(false);
+    const [hasLoadedOutCases, setHasLoadedOutCases] = useState(false);
+    const [outOfOpportunityCases, setOutOfOpportunityCases] = useState<Case[]>([]);
+    const [outCasesError, setOutCasesError] = useState<string | null>(null);
+
+    useEffect(() => {
+        setHasLoadedOutCases(false);
+        setOutOfOpportunityCases([]);
+        setOutCasesError(null);
+    }, [data?.mes_anterior.inicio, data?.mes_anterior.fin]);
+
+    useEffect(() => {
+        if (!data || !isOutCasesModalOpen || hasLoadedOutCases) return;
+
+        const loadOutCases = async () => {
+            try {
+                setIsLoadingOutCases(true);
+                setOutCasesError(null);
+                const monthEnd = new Date(data.mes_anterior.fin);
+                const createdAtTo = Number.isNaN(monthEnd.getTime())
+                    ? data.mes_anterior.fin
+                    : (() => {
+                        monthEnd.setUTCDate(monthEnd.getUTCDate() - 1);
+                        return monthEnd.toISOString().slice(0, 10);
+                    })();
+
+                const response = await caseService.getCases({
+                    created_at_from: data.mes_anterior.inicio,
+                    created_at_to: createdAtTo,
+                    status: 'Completado',
+                    sort_by: 'created_at',
+                    sort_order: 'desc',
+                    limit: 100000,
+                });
+
+                const filteredCases = response.data.filter((caseItem) => {
+                    const wasTimely = caseItem.opportunity_info?.[0]?.was_timely;
+                    if (wasTimely !== false) return false;
+                    return !isHamaCase(caseItem);
+                });
+
+                setOutOfOpportunityCases(filteredCases);
+            } catch {
+                setOutCasesError('No fue posible cargar los casos inoportunos.');
+            } finally {
+                setIsLoadingOutCases(false);
+                setHasLoadedOutCases(true);
+            }
+        };
+
+        loadOutCases();
+    }, [data, isOutCasesModalOpen, hasLoadedOutCases]);
+
     if (loading || !data) {
         return (
             <BaseCard className="h-full flex flex-col items-center justify-center gap-4 min-h-[300px]">
@@ -38,7 +130,8 @@ export const OportunityPercentage = ({ data, loading }: OportunityPercentageProp
     const isPositive = data.cambio_porcentual >= 0;
 
     return (
-        <BaseCard className="flex flex-col h-full">
+        <>
+            <BaseCard className="flex flex-col h-full">
             <div className="flex items-start justify-between">
                 <div>
                     <h3 className="text-lg font-semibold text-neutral-900">
@@ -122,9 +215,15 @@ export const OportunityPercentage = ({ data, loading }: OportunityPercentageProp
                         <span className="text-sm font-medium text-rose-800 mb-1 flex items-center gap-1.5">
                             <AlertTriangle className="w-4 h-4" /> Fuera
                         </span>
-                        <span className="text-3xl font-bold text-rose-700">
+                        <button
+                            type="button"
+                            onClick={() => setIsOutCasesModalOpen(true)}
+                            className="text-3xl font-bold text-rose-700 hover:text-rose-800 hover:underline underline-offset-4 focus:outline-hidden focus:ring-2 focus:ring-rose-300 rounded-md px-1"
+                            title="Ver casos fuera de oportunidad"
+                        >
                             {data.casos_fuera_oportunidad}
-                        </span>
+                        </button>
+                        <span className="text-xs text-rose-700/80 mt-1">Ver casos</span>
                     </div>
 
                     <div className="flex flex-col items-center justify-center p-4 rounded-xl bg-neutral-100 border border-neutral-200 col-span-2 sm:col-span-1">
@@ -147,7 +246,20 @@ export const OportunityPercentage = ({ data, loading }: OportunityPercentageProp
                         <span>Mes anterior: <strong className="text-neutral-900">{data.total_casos_mes_anterior}</strong> casos</span>
                     </div>
                 </div>
+
+                {outCasesError && (
+                    <p className="text-xs text-rose-600 px-1">{outCasesError}</p>
+                )}
             </div>
-        </BaseCard>
+            </BaseCard>
+
+            <OutOfOpportunityCasesModal
+                isOpen={isOutCasesModalOpen}
+                onClose={() => setIsOutCasesModalOpen(false)}
+                cases={outOfOpportunityCases}
+                loading={isLoadingOutCases}
+                monthName={data.mes_anterior.nombre}
+            />
+        </>
     );
 };

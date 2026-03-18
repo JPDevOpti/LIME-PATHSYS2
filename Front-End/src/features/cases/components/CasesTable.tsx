@@ -304,7 +304,7 @@ export function CasesTable({
                         {c.patient?.full_name}
                       </p>
                       <p className="text-gray-500 text-xs">
-                        {c.patient?.identification_number}
+                        {c.patient?.identification_type ? `${c.patient.identification_type}-` : ''}{c.patient?.identification_number}
                       </p>
                     </div>
                   </td>
@@ -535,7 +535,7 @@ export function CasesTable({
                       {c.patient?.full_name}
                     </p>
                     <p className="text-gray-500 text-xs">
-                      {c.patient?.identification_number}
+                      {c.patient?.identification_type ? `${c.patient.identification_type}-` : ''}{c.patient?.identification_number}
                     </p>
                     {c.priority && (
                       <span

@@ -123,6 +123,7 @@ export function ActualTickets({
         }));
 
     const changeStatus = async (code: string, newStatus: string) => {
+        if (!isAdmin || loading) return;
         try {
             setLoading(true);
             await ticketsService.changeStatus(code, newStatus as TicketStatus);
@@ -136,7 +137,7 @@ export function ActualTickets({
     };
 
     const doDelete = async () => {
-        if (!confirmDelete) return;
+        if (!isAdmin || !confirmDelete || loading) return;
         try {
             setLoading(true);
             await ticketsService.deleteTicket(confirmDelete);

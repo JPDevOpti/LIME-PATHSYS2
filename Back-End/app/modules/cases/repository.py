@@ -266,6 +266,10 @@ class CaseRepository:
                 for item in assistants
             ]
 
+        resident = data.get("assigned_resident")
+        if isinstance(resident, dict):
+            data["assigned_resident"] = self._normalize_pathologist_ref(resident)
+
     def _sync_case_seq(self, year: int) -> None:
         """Sincroniza el contador con el máximo seq real en la colección para ese año."""
         key = f"case_seq_{year}"

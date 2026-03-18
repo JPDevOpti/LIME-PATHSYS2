@@ -136,15 +136,18 @@ class CasePdfService:
 
         assistants = case.get("assistant_pathologists") or []
 
-        # Separar residentes de patólogos asistentes por el campo role
-        resident_names = [
-            a.get("name") for a in assistants
-            if a.get("role") == "resident" and a.get("name")
-        ]
-        assistant_names = [
-            a.get("name") for a in assistants
-            if a.get("role") != "resident" and a.get("name")
-        ]
+        # Separar residentes de patólogos asistentes
+        resident_names: list[str] = []
+        assistant_names: list[str] = []
+        for a in assistants:
+            name = a.get("name")
+            if not name:
+                continue
+            role = a.get("role") or self._resolve_user_role(a.get("id"))
+            if role == "resident":
+                resident_names.append(name)
+            else:
+                assistant_names.append(name)
 
         all_pathologists = []
         if pathologist_name:
@@ -421,6 +424,18 @@ class CasePdfService:
             return Markup(signature)
 
         return ""
+
+    def _resolve_user_role(self, user_id: str | None) -> str:
+        """Consulta el role del usuario en la BD. Retorna '' si no lo encuentra."""
+        if not user_id:
+            return ""
+        try:
+            user = self.db.get_collection("users").find_one(
+                {"_id": ObjectId(user_id)}, {"role": 1}
+            )
+            return str(user.get("role") or "") if user else ""
+        except Exception:
+            return ""
 
     def _methods_to_display(self, methods: list[Any]) -> str:
         values: list[str] = []

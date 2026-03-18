@@ -139,6 +139,7 @@ export interface Case {
     opportunity_info?: OpportunityInfo[];
     assigned_pathologist?: AssignedPathologist;
     assistant_pathologists?: AssignedPathologist[];
+    assigned_resident?: AssignedPathologist;
     result?: CaseResult;
     audit_info?: AuditEntry[];
     date_info?: DateEntry[];
