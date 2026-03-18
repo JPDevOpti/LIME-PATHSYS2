@@ -204,10 +204,8 @@ export function useCancerReport() {
     setLoading(true);
     setError(null);
     try {
-      // Solo casos completados; el filtro de fecha se aplica sobre delivered_at en cliente
-      const all = await caseService.getAllCasesForExport({
-        status: 'Completado',
-      });
+      // Todos los casos — el filtro de CIE-O se aplica en cliente
+      const all = await caseService.getAllCasesForExport({});
 
       // Filtrar por fecha de entrega (delivered_at)
       const fromDate = filters.from ? new Date(filters.from + 'T00:00:00') : null;
