@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from pymongo.database import Database
@@ -18,6 +18,7 @@ from app.modules.cases.schemas import (
     CaseUpdate,
 )
 from app.modules.cases.service import CaseService
+from app.security import verify_token
 
 router = APIRouter()
 
@@ -86,19 +87,37 @@ def get_case_by_code(
     return service.get_by_code(code)
 
 
+def _extract_token(request: Request) -> str:
+    """Extrae JWT desde header Authorization o query param ?token=."""
+    auth = request.headers.get("authorization", "")
+    if auth.lower().startswith("bearer "):
+        raw = auth[7:].strip()
+    else:
+        raw = request.query_params.get("token", "")
+    if not raw:
+        raise HTTPException(status_code=401, detail="Token requerido")
+    subject = verify_token(raw)
+    if subject is None:
+        raise HTTPException(status_code=401, detail="Token invalido o expirado")
+    return subject
+
+
 @router.get("/{id}/pdf")
 def get_case_pdf(
     id: str,
+    request: Request,
     pdf_service: CasePdfService = Depends(get_case_pdf_service),
-    _: str = Depends(get_current_user_id),
 ):
+    _extract_token(request)
     try:
-        pdf_bytes, case_code = pdf_service.generate_case_pdf_by_id(id)
-        filename = f"{case_code}.pdf".replace("/", "_").replace(" ", "_")
+        pdf_bytes, filename_base = pdf_service.generate_case_pdf_by_id(id)
+        filename = f"{filename_base}.pdf"
         return StreamingResponse(
             iter([pdf_bytes]),
             media_type="application/pdf",
-            headers={"Content-Disposition": f"inline; filename*=UTF-8''{quote(filename)}"},
+            headers={
+                "Content-Disposition": f"inline; filename=\"{filename}\"; filename*=UTF-8''{quote(filename)}",
+            },
         )
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc

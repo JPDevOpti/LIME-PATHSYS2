@@ -61,7 +61,7 @@ function getAuthHeaders(): Record<string, string> {
   return { Authorization: `Bearer ${token}` };
 }
 
-function buildUrl(path: string, params?: Record<string, string | number | undefined>): string {
+export function buildApiUrl(path: string, params?: Record<string, string | number | undefined>): string {
   if (!BASE_URL) {
     throw new Error(
       "NEXT_PUBLIC_API_URL no está configurado. Crea Front-End/.env.local con NEXT_PUBLIC_API_URL=http://localhost:8000",
@@ -137,7 +137,7 @@ export const apiClient = {
     params?: Record<string, string | number | undefined>,
     extraHeaders?: { responseType?: string; suppressErrorLog?: boolean } & Record<string, string | boolean | undefined>,
   ): Promise<T> {
-    const url = buildUrl(path, params);
+    const url = buildApiUrl(path, params);
     const { responseType, suppressErrorLog, ...headersOnly } = extraHeaders || {};
     const headers: Record<string, string> = { ...getAuthHeaders() };
     Object.entries(headersOnly).forEach(([key, value]) => {
@@ -163,7 +163,7 @@ export const apiClient = {
       ...getAuthHeaders(),
       ...headersOnly,
     };
-    const url = buildUrl(path);
+    const url = buildApiUrl(path);
     try {
       const response = await fetch(url, {
         method: "POST",
@@ -188,7 +188,7 @@ export const apiClient = {
       ...getAuthHeaders(),
       ...headersOnly,
     };
-    const url = buildUrl(path);
+    const url = buildApiUrl(path);
     try {
       const response = await fetch(url, {
         method: "PUT",
@@ -213,7 +213,7 @@ export const apiClient = {
       ...getAuthHeaders(),
       ...headersOnly,
     };
-    const url = buildUrl(path);
+    const url = buildApiUrl(path);
     try {
       const response = await fetch(url, {
         method: "PATCH",
@@ -228,7 +228,7 @@ export const apiClient = {
   },
 
   async delete(path: string): Promise<void> {
-    const url = buildUrl(path);
+    const url = buildApiUrl(path);
     try {
       const response = await fetch(url, {
         method: "DELETE",

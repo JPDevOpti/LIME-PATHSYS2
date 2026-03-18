@@ -48,13 +48,13 @@ class CasePdfService:
         case = self.case_service.get_by_id(case_id)
         prepared = self._prepare_case(case)
         pdf_bytes = self._render_pdf([prepared])
-        return pdf_bytes, prepared.get("case_code") or case_id
+        return pdf_bytes, self._build_pdf_filename_base(prepared, case_id)
 
     def generate_case_pdf_by_code(self, case_code: str) -> tuple[bytes, str]:
         case = self.case_service.get_by_code(case_code)
         prepared = self._prepare_case(case)
         pdf_bytes = self._render_pdf([prepared])
-        return pdf_bytes, prepared.get("case_code") or case_code
+        return pdf_bytes, self._build_pdf_filename_base(prepared, case_code)
 
     def generate_batch_pdf(
         self, case_ids: list[str] | None = None, case_codes: list[str] | None = None
@@ -82,11 +82,44 @@ class CasePdfService:
 
     def _render_pdf(self, prepared_cases: list[dict[str, Any]]) -> bytes:
         template = self.jinja_env.get_template("case_report_pdf.html")
-        html = template.render(cases=prepared_cases, header=self._header_context)
+        pdf_title = self._compute_pdf_title(prepared_cases)
+        html = template.render(
+            cases=prepared_cases,
+            header=self._header_context,
+            pdf_title=pdf_title,
+        )
         pdf_bytes = HTML(string=html).write_pdf()
         if pdf_bytes is None:
             raise ValueError("WeasyPrint no pudo generar el PDF")
         return pdf_bytes
+
+    def _compute_pdf_title(self, prepared_cases: list[dict[str, Any]]) -> str:
+        if not prepared_cases:
+            return "Informe"
+        return str(prepared_cases[0].get("case_code") or "Informe")
+
+    def _build_pdf_filename_base(
+        self, prepared_case: dict[str, Any], fallback_case_code: str
+    ) -> str:
+        case_code = self._normalize_filename_part(
+            str(prepared_case.get("case_code") or fallback_case_code).strip()
+        )
+        patient_name = self._normalize_filename_part(
+            str(prepared_case.get("patient_name") or "").strip()
+        )
+
+        if patient_name:
+            filename_base = f"{case_code}-{patient_name}"
+        else:
+            filename_base = case_code
+
+        return filename_base
+
+    def _normalize_filename_part(self, value: str) -> str:
+        normalized = re.sub(r"\s+", "_", value.strip())
+        normalized = re.sub(r"[^0-9A-Za-zÁÉÍÓÚáéíóúÑñÜü_-]", "", normalized)
+        normalized = re.sub(r"_+", "_", normalized)
+        return normalized.strip("_-")
 
     def _build_header_context(self) -> dict[str, str]:
         public_dir = self._repo_root / "Front-End" / "public"
@@ -170,11 +203,7 @@ class CasePdfService:
         additional_notes = case.get("additional_notes") or []
         case_code = case.get("case_code") or ""
 
-        # Leer todas las fechas desde date_info (fuente centralizada)
         sample_reception_date = self._get_date_from_date_info(case, "created_at")
-        sample_day, sample_month, sample_year = self._split_date_parts(
-            sample_reception_date
-        )
         transcription_date = self._format_date(
             self._get_date_from_date_info(case, "transcribed_at")
         )
@@ -239,17 +268,16 @@ class CasePdfService:
         else:
             patient_age_display = self._format_age(None, patient_info.get("birth_date"))
 
+        patient_name = patient_info.get("full_name") or patient_info.get("name") or ""
+
         return {
             "case_code": case_code,
             "report_date": self._format_date(
                 self._get_date_from_date_info(case, "signed_at")
                 or self._get_date_from_date_info(case, "update_at")
             ),
-            "patient_name": patient_info.get("full_name")
-            or patient_info.get("name")
-            or "",
+            "patient_name": patient_name,
             "patient_document": patient_document,
-            "patient_hc": patient_document,
             "patient_phone": patient_info.get("phone") or "Sin dato",
             "patient_email": patient_info.get("email") or "Sin dato",
             "patient_residence": patient_residence or "Sin dato",
@@ -260,11 +288,7 @@ class CasePdfService:
             ),
             "patient_age": patient_age_display,
             "patient_gender": patient_info.get("gender") or "",
-            "sample_reception_day": sample_day,
-            "sample_reception_month": sample_month,
-            "sample_reception_year": sample_year,
             "sample_reception_date": self._format_date(sample_reception_date),
-            "study_number": case_code,
             "previous_study_display": previous_study_display,
             "transcription_date": transcription_date,
             "signature_date": signature_date,
@@ -553,14 +577,3 @@ class CasePdfService:
         clean = re.sub(r"</?([a-zA-Z0-9]+)(\b[^>]*)?>", _filter_tag, clean)
         return Markup(clean)
 
-    def _split_date_parts(self, value: Any) -> tuple[str, str, str]:
-        formatted = self._format_date(value)
-        if not formatted:
-            return "", "", ""
-
-        parts = formatted.split("/")
-        if len(parts) != 3:
-            return "", "", ""
-
-        day, month, year = parts
-        return day, month, year
