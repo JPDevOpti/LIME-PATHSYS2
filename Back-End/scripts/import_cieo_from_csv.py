@@ -31,7 +31,13 @@ DEFAULT_DB = os.environ.get("MONGODB_DB", "pathsys")
 
 
 def get_db(dest_url: str, dest_db: str) -> Database:
-    client: MongoClient = MongoClient(dest_url)
+    client: MongoClient = MongoClient(
+        dest_url,
+        serverSelectionTimeoutMS=10000,
+        connectTimeoutMS=10000,
+        socketTimeoutMS=30000,
+        tls=True if "mongodb+srv" in dest_url else None,
+    )
     return client[dest_db]
 
 
@@ -120,23 +126,27 @@ def main() -> None:
         print(f"[DRY-RUN] Se eliminarían los CIEO existentes y se insertarían {total} registros nuevos.")
         return
 
+    print("Conectando a MongoDB...", flush=True)
     db = get_db(args.dest_url, args.dest_db)
     try:
         db.command("ping")
-        print("Conexión a MongoDB: OK")
+        print("Conexión a MongoDB: OK", flush=True)
     except Exception as e:
         print(f"Error de conexión a MongoDB: {e}")
         sys.exit(1)
 
-    # 1. Eliminar CIEO de la colección diseases
     diseases_col = db.get_collection("diseases")
-    deleted_diseases = diseases_col.delete_many({"table": {"$regex": r"^CIE\s*-?\s*O$", "$options": "i"}}).deleted_count
-    print(f"Eliminados de 'diseases': {deleted_diseases}")
+
+    # 1. Eliminar CIEO de la colección diseases (sin regex, directo)
+    print("Eliminando CIEO de 'diseases'...", flush=True)
+    deleted_diseases = diseases_col.delete_many({"table": "CIEO"}).deleted_count
+    print(f"Eliminados de 'diseases': {deleted_diseases}", flush=True)
 
     # 2. Eliminar toda la colección cieo (alternativa/legacy)
+    print("Eliminando colección 'cieo'...", flush=True)
     cieo_col = db.get_collection("cieo")
     deleted_cieo = cieo_col.delete_many({}).deleted_count
-    print(f"Eliminados de 'cieo'    : {deleted_cieo}")
+    print(f"Eliminados de 'cieo'    : {deleted_cieo}", flush=True)
     print("-" * 60)
 
     # 3. Insertar nuevos registros
