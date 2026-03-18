@@ -7,7 +7,15 @@
         <style>
             @page {
                 size: Letter;
-                margin: 15mm 12mm 12mm 12mm;
+                margin: 32mm 12mm 12mm 12mm;
+                @top-left-corner { content: none; }
+                @top-left { content: none; }
+                @top-right { content: none; }
+                @top-right-corner { content: none; }
+                @top-center {
+                    content: element(running-header);
+                    width: 100%;
+                }
                 @bottom-right {
                     content: "Página " counter(page) " de " counter(pages);
                     font-size: 10px;
@@ -35,8 +43,11 @@
                 }
             }
 
-            @page :not(:first) {
-                margin-top: 18mm;
+            @page :first {
+                margin-top: 15mm;
+                @top-center {
+                    content: none;
+                }
             }
 
             * {
@@ -342,10 +353,59 @@
                 margin-top: 4px;
                 font-size: 10px;
             }
+
+            .running-header {
+                position: running(running-header);
+                width: 100%;
+            }
+
+            .running-header .header-container {
+                display: flex;
+                align-items: stretch;
+                justify-content: space-between;
+                margin-bottom: 0;
+            }
+
+            .running-header .title-bar {
+                text-align: center;
+                font-weight: bold;
+                font-size: 12px;
+                letter-spacing: 0.3px;
+                border: 1px solid #000;
+                border-top: 0;
+                padding: 3mm 0;
+                margin: 0;
+                background: #fff;
+            }
         </style>
     </head>
 
     <body>
+        <div class="running-header">
+            <div class="header-container">
+                <div class="logos-section">
+                    {% if header.unified_banner %}
+                    <img
+                        src="{{ header.unified_banner }}"
+                        alt="Logos LIME UdeA HAMA"
+                        class="logos-banner"
+                    />
+                    {% endif %}
+                </div>
+                <div class="code-box">
+                    <div class="code-row">
+                        <span>Código:</span>
+                        <span>{{ header.document_code }}</span>
+                    </div>
+                    <div class="code-row">
+                        <span>Versión:</span>
+                        <span>{{ header.document_version }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="title-bar">INFORME DE RESULTADOS ANATOMOPATOLÓGICOS</div>
+        </div>
+
         {% for case in cases %}
         <section class="case-page">
             <div class="header-container">
