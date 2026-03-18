@@ -143,10 +143,33 @@ def _doc_to_case(doc: dict) -> dict:
     # Compatibilidad de datos legacy para response_model (list[str])
     out["additional_notes"] = _normalize_additional_notes(out.get("additional_notes"))
 
-    if "entity" not in out and "patient_info" in out:
+    # Normalizar entity a objeto {id, name}
+    raw_entity = out.get("entity")
+    if isinstance(raw_entity, dict):
+        # Ya es objeto, asegurar que tenga id y name
+        out["entity"] = {
+            "id": raw_entity.get("id") or None,
+            "name": raw_entity.get("name") or "",
+        }
+    elif isinstance(raw_entity, str) and raw_entity.strip():
+        # Legacy: entity era un string con el nombre
+        out["entity"] = {"id": None, "name": raw_entity}
+    else:
+        # No hay entity top-level, intentar poblar desde patient_info
         pi = out.get("patient_info") or {}
         ei = pi.get("entity_info") or {}
-        out["entity"] = ei.get("entity_name") or ""
+        entity_name = ei.get("entity_name") or ""
+        out["entity"] = {"id": None, "name": entity_name}
+
+    # Normalizar tests en samples: id→test_code con id como ObjectId
+    if isinstance(out.get("samples"), list):
+        for sample in out["samples"]:
+            if isinstance(sample, dict) and isinstance(sample.get("tests"), list):
+                for test in sample["tests"]:
+                    if isinstance(test, dict) and "test_code" not in test:
+                        # Legacy: el campo "id" contiene el test_code
+                        test["test_code"] = test.pop("id", "")
+                        test["id"] = None
     return out
 
 
@@ -308,7 +331,7 @@ class CaseRepository:
     _SORT_FIELDS = {
         "case_code": "case_code",
         "patient": "patient_info.full_name",
-        "entity": "patient_info.entity_info.entity_name",
+        "entity": "entity.name",
         "pathologist": "assigned_pathologist.name",
         "status": "state",
         "created_at": "date_info.0.created_at",
@@ -362,7 +385,7 @@ class CaseRepository:
             query["date_info.0.created_at"] = q
 
         if entity and entity.strip():
-            query["patient_info.entity_info.entity_name"] = _contains_regex(entity.strip())
+            query["entity.name"] = _contains_regex(entity.strip())
 
         if assigned_pathologist and assigned_pathologist.strip():
             query["assigned_pathologist.name"] = _contains_regex(assigned_pathologist.strip())
@@ -386,7 +409,7 @@ class CaseRepository:
             query["requesting_physician"] = _contains_regex(doctor.strip())
 
         if test and test.strip():
-            and_conditions.append({"samples.tests.id": test.strip()})
+            and_conditions.append({"samples.tests.test_code": test.strip()})
 
         if patient_id and patient_id.strip():
             try:
@@ -618,7 +641,7 @@ class CaseRepository:
         if approval_state and approval_state.strip():
             query["approval_state"] = approval_state.strip()
         if entity and entity.strip():
-            query["patient_info.entity_info.entity_name"] = _contains_regex(entity.strip())
+            query["entity.name"] = _contains_regex(entity.strip())
         if pathologist_id and pathologist_id.strip():
             query["assigned_pathologist.id"] = pathologist_id.strip()
         if test_code and test_code.strip():

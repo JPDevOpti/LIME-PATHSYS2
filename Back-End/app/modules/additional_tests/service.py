@@ -174,7 +174,7 @@ class AdditionalTestsService:
                 body_region="Pruebas adicionales",
                 tests=[
                     TestInfoSchema(
-                        id=t.get("code", ""),
+                        test_code=t.get("code", ""),
                         name=t.get("name", ""),
                         quantity=t.get("quantity", 1),
                     )

@@ -93,6 +93,7 @@ export function EditTestSection() {
     }, []);
 
     const hasChanges = form && selectedTest && (
+        form.testCode !== selectedTest.test_code ||
         form.testName !== selectedTest.name ||
         form.testDescription !== selectedTest.description ||
         form.timeDays !== selectedTest.time ||
@@ -141,6 +142,7 @@ export function EditTestSection() {
         setIsLoading(true);
         try {
             const result = await labTestsService.update(selectedTest.test_code, {
+                test_code: form.testCode.trim().toUpperCase(),
                 name: form.testName.trim(),
                 description: form.testDescription.trim(),
                 time: form.timeDays,
@@ -281,7 +283,7 @@ export function EditTestSection() {
                                     id="edit-testCode"
                                     placeholder="e.g. BIO-01"
                                     value={form.testCode}
-                                    disabled
+                                    onChange={(e) => updateForm('testCode', e.target.value)}
                                     error={errors.testCode}
                                 />
                             </FormField>

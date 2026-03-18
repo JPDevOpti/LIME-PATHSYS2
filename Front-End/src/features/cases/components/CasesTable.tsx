@@ -139,7 +139,7 @@ function getTestsFromCase(c: Case): { code: string; count: number }[] {
   const order: string[] = [];
   c.samples?.forEach((sample) => {
     sample.tests?.forEach((t) => {
-      const code = t.code || t.name || "";
+      const code = t.test_code || t.name || "";
       if (!code) return;
       if (!counts[code]) {
         counts[code] = 0;
@@ -343,7 +343,7 @@ export function CasesTable({
                             </span>
                           )}
                       </div>
-                      <p className="text-gray-500 text-xs">{c.entity ?? "-"}</p>
+                      <p className="text-gray-500 text-xs">{c.entity?.name || "-"}</p>
                     </div>
                   </td>
                   <td className="px-3 py-3 text-center">
@@ -585,7 +585,7 @@ export function CasesTable({
                   <div>
                     <p className="text-gray-500">Entidad</p>
                     <p className="text-gray-800 font-medium">
-                      {c.entity ?? "-"}
+                      {c.entity?.name || "-"}
                     </p>
                   </div>
                   <div>

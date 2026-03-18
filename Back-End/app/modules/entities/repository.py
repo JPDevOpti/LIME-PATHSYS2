@@ -11,6 +11,7 @@ from app.core.date_utils import format_iso_datetime
 
 class EntitiesRepository:
     def __init__(self, db: Database) -> None:
+        self._db = db
         self.collection = db.get_collection("entities")
 
     def _ensure_indexes(self) -> None:
@@ -77,9 +78,27 @@ class EntitiesRepository:
 
     def update_by_code(self, code: str, data: dict[str, Any]) -> dict[str, Any] | None:
         normalized = code.strip().upper()
+        new_code = data.get("code", normalized)
         data["updated_at"] = datetime.now(timezone.utc).isoformat()
         result = self.collection.update_one({"code": normalized}, {"$set": data})
         if result.matched_count == 0:
             return None
-        doc = self.collection.find_one({"code": normalized})
+        doc = self.collection.find_one({"code": new_code})
         return self._doc_to_dict(doc) if doc else None
+
+    def propagate_to_cases(self, entity_id: str, updates: dict[str, str]) -> int:
+        """Propaga cambios de name a todos los casos que referencian esta entidad."""
+        cases_col = self._db.get_collection("cases")
+
+        set_fields: dict[str, Any] = {}
+        if "name" in updates:
+            set_fields["entity.name"] = updates["name"]
+
+        if not set_fields:
+            return 0
+
+        result = cases_col.update_many(
+            {"entity.id": entity_id},
+            {"$set": set_fields},
+        )
+        return result.modified_count

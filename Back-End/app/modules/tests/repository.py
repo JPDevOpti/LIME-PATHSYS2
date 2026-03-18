@@ -11,6 +11,7 @@ from app.core.date_utils import format_iso_datetime
 
 class TestsRepository:
     def __init__(self, db: Database) -> None:
+        self._db = db
         self.collection = db.get_collection("tests")
 
     def _ensure_indexes(self) -> None:
@@ -81,9 +82,34 @@ class TestsRepository:
 
     def update_by_code(self, code: str, data: dict[str, Any]) -> Optional[dict[str, Any]]:
         normalized = code.strip().upper()
+        new_code = data.get("test_code", normalized)
         data["updated_at"] = datetime.now(timezone.utc).isoformat()
         result = self.collection.update_one({"test_code": normalized}, {"$set": data})
         if result.matched_count == 0:
             return None
-        doc = self.collection.find_one({"test_code": normalized})
+        doc = self.collection.find_one({"test_code": new_code})
         return self._doc_to_dict(doc) if doc else None
+
+    def propagate_to_cases(self, test_id: str, updates: dict[str, str]) -> int:
+        """Propaga cambios de test_code y/o name a todos los casos que referencian esta prueba."""
+        cases_col = self._db.get_collection("cases")
+        try:
+            oid = ObjectId(test_id)
+        except Exception:
+            return 0
+
+        set_fields: dict[str, Any] = {}
+        if "test_code" in updates:
+            set_fields["samples.$[].tests.$[t].test_code"] = updates["test_code"]
+        if "name" in updates:
+            set_fields["samples.$[].tests.$[t].name"] = updates["name"]
+
+        if not set_fields:
+            return 0
+
+        result = cases_col.update_many(
+            {"samples.tests.id": str(oid)},
+            {"$set": set_fields},
+            array_filters=[{"t.id": str(oid)}],
+        )
+        return result.modified_count

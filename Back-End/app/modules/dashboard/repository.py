@@ -109,8 +109,14 @@ class DashboardRepository:
                 )
 
             patient_info = doc.get("patient_info", {})
-            entity_info = patient_info.get("entity_info") or {}
-            entidad = entity_info.get("entity_name") or doc.get("entity") or ""
+            raw_entity = doc.get("entity")
+            if isinstance(raw_entity, dict):
+                entidad = raw_entity.get("name") or ""
+            elif isinstance(raw_entity, str):
+                entidad = raw_entity
+            else:
+                entity_info = patient_info.get("entity_info") or {}
+                entidad = entity_info.get("entity_name") or ""
             opp_info = doc.get("opportunity_info") or [{}]
             max_opp_time = opp_info[0].get("max_opportunity_time") if opp_info else None
             results.append(
@@ -123,10 +129,10 @@ class DashboardRepository:
                         "entidad": entidad or None,
                     },
                     "pruebas": [
-                        f"{t.get('id')} - {t.get('name')}" if t.get("id") else t.get("name")
+                        f"{t.get('test_code')} - {t.get('name')}" if t.get("test_code") else t.get("name")
                         for s in doc.get("samples", [])
                         for t in s.get("tests", [])
-                        if t.get("name") or t.get("id")
+                        if t.get("name") or t.get("test_code")
                     ],
                     "patologo": (doc.get("assigned_pathologist") or {}).get("name") or "Sin asignar",
                     "fecha_creacion": created_at_str or "",
@@ -184,6 +190,7 @@ class DashboardRepository:
                     {"patient_info.entity_info.code": {"$regex": "^HAMA$", "$options": "i"}},
                     {"patient_info.entity_code": {"$regex": "^HAMA$", "$options": "i"}},
                     {"entity_code": {"$regex": "^HAMA$", "$options": "i"}},
+                    {"entity.name": {"$regex": entity_name_pattern, "$options": "i"}},
                     {"entity": {"$regex": entity_name_pattern, "$options": "i"}},
                     {"patient_info.entity_info.entity_name": {"$regex": entity_name_pattern, "$options": "i"}},
                     {"patient_info.entity_info.name": {"$regex": entity_name_pattern, "$options": "i"}},

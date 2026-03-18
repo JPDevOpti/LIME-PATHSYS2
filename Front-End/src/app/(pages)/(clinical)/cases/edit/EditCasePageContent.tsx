@@ -161,7 +161,9 @@ export function EditCasePageContent({ caseId }: EditCasePageContentProps) {
                                 onPatientUpdated={(updatedPatient) => setCaseData(prev => prev ? {
                                     ...prev,
                                     patient: updatedPatient,
-                                    entity: updatedPatient.entity_info?.entity_name || prev.entity
+                                    entity: updatedPatient.entity_info?.entity_name
+                                        ? { id: prev.entity?.id || '', name: updatedPatient.entity_info.entity_name }
+                                        : prev.entity
                                 } : null)}
                             />
                         </div>

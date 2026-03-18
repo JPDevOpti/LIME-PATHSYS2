@@ -77,8 +77,8 @@ class BillingRepository:
             {
                 "$group": {
                     "_id": {
-                        "test_code": "$samples.tests.id",
-                        "entity": "$patient_info.entity_info.entity_name",
+                        "test_code": "$samples.tests.test_code",
+                        "entity": "$entity.name",
                     },
                     "count": {"$sum": "$samples.tests.quantity"},
                 }
@@ -149,15 +149,15 @@ class BillingRepository:
             {
                 "$match": {
                     "date_info.0.created_at": {"$gte": start, "$lt": end},
-                    "samples.tests.id": test_code,
+                    "samples.tests.test_code": test_code,
                 }
             },
             {"$unwind": "$samples"},
             {"$unwind": "$samples.tests"},
-            {"$match": {"samples.tests.id": test_code}},
+            {"$match": {"samples.tests.test_code": test_code}},
             {
                 "$group": {
-                    "_id": "$patient_info.entity_info.entity_name",
+                    "_id": "$entity.name",
                     "cantidad": {"$sum": "$samples.tests.quantity"},
                 }
             },

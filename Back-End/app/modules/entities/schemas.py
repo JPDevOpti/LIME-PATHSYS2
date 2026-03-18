@@ -11,6 +11,7 @@ class EntityCreate(BaseModel):
 
 
 class EntityUpdate(BaseModel):
+    code: str | None = Field(None, min_length=1, max_length=50, pattern=r"^[A-Za-z0-9_-]+$")
     name: str | None = Field(None, min_length=1, max_length=200)
     observations: str | None = Field(None, max_length=1000)
     is_active: bool | None = None

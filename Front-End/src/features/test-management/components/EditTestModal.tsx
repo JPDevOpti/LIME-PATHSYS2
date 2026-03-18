@@ -8,8 +8,10 @@ import { labTestsService } from '../services/lab-tests.service';
 import type { LabTest, UpdateTestRequest, TestAgreement } from '../types/lab-tests.types';
 import { TestAgreementsForm } from './TestAgreementsForm';
 
-function validateForm(data: { testName: string; testDescription: string; timeDays: number; price: number }): Record<string, string> {
+function validateForm(data: { testCode: string; testName: string; testDescription: string; timeDays: number; price: number }): Record<string, string> {
     const errors: Record<string, string> = {};
+    if (!data.testCode?.trim()) errors.testCode = 'El codigo es obligatorio';
+    else if (!/^[A-Za-z0-9_-]+$/.test(data.testCode.trim())) errors.testCode = 'Solo letras, numeros, guiones y guiones bajos';
     if (!data.testName?.trim()) errors.testName = 'El nombre es obligatorio';
     if (!data.testDescription?.trim()) errors.testDescription = 'La descripcion es obligatoria';
     if (!data.timeDays || data.timeDays <= 0) errors.timeDays = 'Ingresa un tiempo valido en dias';
@@ -26,6 +28,7 @@ interface EditTestModalProps {
 }
 
 export function EditTestModal({ test, onClose, onSave }: EditTestModalProps) {
+    const [testCode, setTestCode] = useState('');
     const [testName, setTestName] = useState('');
     const [testDescription, setTestDescription] = useState('');
     const [timeDays, setTimeDays] = useState(1);
@@ -37,6 +40,7 @@ export function EditTestModal({ test, onClose, onSave }: EditTestModalProps) {
 
     useEffect(() => {
         if (test) {
+            setTestCode(test.test_code);
             setTestName(test.name);
             setTestDescription(test.description);
             setTimeDays(test.time);
@@ -48,6 +52,7 @@ export function EditTestModal({ test, onClose, onSave }: EditTestModalProps) {
     }, [test]);
 
     const update = useCallback((field: string, value: string | number | boolean | TestAgreement[]) => {
+        if (field === 'testCode') setTestCode(value as string);
         if (field === 'testName') setTestName(value as string);
         if (field === 'testDescription') setTestDescription(value as string);
         if (field === 'timeDays') setTimeDays(value as number);
@@ -64,7 +69,7 @@ export function EditTestModal({ test, onClose, onSave }: EditTestModalProps) {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!test) return;
-        const data = { testName, testDescription, timeDays, price };
+        const data = { testCode, testName, testDescription, timeDays, price };
         const validation = validateForm(data);
         if (Object.keys(validation).length > 0) {
             setErrors(validation);
@@ -74,6 +79,7 @@ export function EditTestModal({ test, onClose, onSave }: EditTestModalProps) {
         setSaving(true);
         try {
             const payload: UpdateTestRequest = {
+                test_code: testCode.trim().toUpperCase(),
                 name: testName.trim(),
                 description: testDescription.trim(),
                 time: timeDays,
@@ -92,7 +98,7 @@ export function EditTestModal({ test, onClose, onSave }: EditTestModalProps) {
         }
     };
 
-    const data = { testName, testDescription, timeDays, price };
+    const data = { testCode, testName, testDescription, timeDays, price };
     const isValid = Object.keys(validateForm(data)).length === 0;
 
     if (!test) return null;
@@ -130,12 +136,12 @@ export function EditTestModal({ test, onClose, onSave }: EditTestModalProps) {
                             onChange={(e) => update('testName', e.target.value)}
                         />
                     </FormField>
-                    <FormField label="Codigo" htmlFor="edit-modal-testCode">
+                    <FormField label="Codigo" error={errors.testCode} htmlFor="edit-modal-testCode">
                         <Input
                             id="edit-modal-testCode"
-                            value={test.test_code}
-                            disabled
-                            className="bg-neutral-100"
+                            placeholder="Ej. BIO001"
+                            value={testCode}
+                            onChange={(e) => update('testCode', e.target.value)}
                         />
                     </FormField>
                     <FormField label="Tiempo estimado (dias)" error={errors.timeDays} htmlFor="edit-modal-timeDays">

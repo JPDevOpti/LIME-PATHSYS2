@@ -35,6 +35,7 @@ function buildCreateBody(data: CreateTestRequest): Record<string, unknown> {
 
 function buildUpdateBody(data: UpdateTestRequest): Record<string, unknown> {
     const body: Record<string, unknown> = {};
+    if (data.test_code != null) body.test_code = data.test_code.trim().toUpperCase();
     if (data.name != null) body.name = data.name.trim();
     if (data.description !== undefined) body.description = data.description?.trim() || null;
     if (data.time != null) body.time = data.time;

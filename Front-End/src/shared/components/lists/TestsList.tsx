@@ -9,7 +9,7 @@ import { Input } from '@/shared/components/ui/form';
 interface TestsComboboxProps {
     value: string;
     onChange: (value: string) => void;
-    onTestSelected?: (code: string, name: string, time?: number) => void;
+    onTestSelected?: (code: string, name: string, time?: number, id?: string) => void;
     onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
     placeholder?: string;
     disabled?: boolean;
@@ -109,7 +109,7 @@ export function TestsCombobox({
         const opt = options.find((o) => o.value === newValue);
         if (opt && onTestSelected) {
             const testObj = allTests.find(t => t.test_code === newValue);
-            onTestSelected(opt.value, opt.label, testObj?.time);
+            onTestSelected(opt.value, opt.label, testObj?.time, testObj?.id);
         }
     };
 

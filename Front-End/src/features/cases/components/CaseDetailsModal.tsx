@@ -227,7 +227,7 @@ export function CaseDetailsModal({ visible, caseData, onClose, onCaseUpdated }: 
                                     </div>
                                 )}
                                 <InfoItem label="Servicio" value={caseData.service} />
-                                <InfoItem label="Entidad" value={caseData.entity} />
+                                <InfoItem label="Entidad" value={caseData.entity?.name} />
                                 <InfoItem
                                     label="Solicitud de pruebas adicionales"
                                     value={hasAdditionalTestsRequest ? 'Sí' : 'No'}
@@ -295,8 +295,7 @@ export function CaseDetailsModal({ visible, caseData, onClose, onCaseUpdated }: 
                                                 <ul className="mt-1 text-xs text-neutral-600 space-y-0.5">
                                                     {s.tests.map((t, j) => (
                                                         <li key={j}>
-                                                            {TEST_OPTIONS.find(o => o.value === t.code)
-                                                                ?.label ?? t.name ?? t.code}{' '}
+                                                            <span className="font-medium">{t.test_code}</span> - {t.name}{' '}
                                                             (x{t.quantity})
                                                         </li>
                                                     ))}

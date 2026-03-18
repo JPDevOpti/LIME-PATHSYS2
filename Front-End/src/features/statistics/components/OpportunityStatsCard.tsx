@@ -28,7 +28,7 @@ interface OpportunityStatsCardProps {
 const isCaseFromHama = (caseItem: Case): boolean => {
     const entityInfo = caseItem.patient?.entity_info;
     return [
-        caseItem.entity,
+        caseItem.entity?.name,
         entityInfo?.entity_name,
         entityInfo?.eps_name,
         entityInfo?.entity_code,

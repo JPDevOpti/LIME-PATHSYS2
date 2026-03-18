@@ -28,6 +28,7 @@ function buildCreateBody(data: CreateEntityRequest): Record<string, unknown> {
 
 function buildUpdateBody(data: UpdateEntityRequest): Record<string, unknown> {
     const body: Record<string, unknown> = {};
+    if (data.code != null) body.code = data.code.trim().toUpperCase();
     if (data.name != null) body.name = data.name.trim();
     if (data.observations !== undefined) body.observations = data.observations?.trim() || null;
     if (data.is_active !== undefined) body.is_active = data.is_active;

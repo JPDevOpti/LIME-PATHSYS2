@@ -98,7 +98,7 @@ const CITOLOGY_CODES = new Set(['CITOLOGIA', 'CITO_QUIR', 'PAP', 'FROTIS']);
 
 function getMetodoDiagnostico(c: Case): string {
   const isCito = c.samples?.some(s =>
-    s.tests?.some(t => CITOLOGY_CODES.has((t.code ?? '').toUpperCase()))
+    s.tests?.some(t => CITOLOGY_CODES.has((t.test_code ?? '').toUpperCase()))
   );
   return isCito ? '5' : '7';
 }
@@ -155,7 +155,7 @@ export function mapCaseToRpca(c: Case): RpcaRecord {
 
   return {
     cod_institucion: c.case_code ?? '',
-    institucion_notificadora: c.entity ?? '',
+    institucion_notificadora: c.entity?.name ?? '',
     apellido1: p?.first_lastname ?? '',
     apellido2: p?.second_lastname ?? '',
     nombre1: p?.first_name ?? '',
@@ -171,7 +171,7 @@ export function mapCaseToRpca(c: Case): RpcaRecord {
     direccion: p?.location?.address ?? '',
     eapb: p?.entity_info?.eps_name ?? '',
     codigo_caso: c.case_code ?? '',
-    institucion_remite: c.entity ?? '',
+    institucion_remite: c.entity?.name ?? '',
     fecha_diagnostico: formatDMY(signedAt),
     metodo_diagnostico: getMetodoDiagnostico(c),
     localizacion_primaria: localizacion,
@@ -224,7 +224,7 @@ export function useCancerReport() {
       });
 
       const withoutHama = byDate.filter(c => {
-        const entityName = c.entity ?? c.patient?.entity_info?.entity_name;
+        const entityName = c.entity?.name ?? c.patient?.entity_info?.entity_name;
         const entityCode = c.patient?.entity_info?.entity_code ?? c.patient?.entity_info?.code;
         return !isHamaEntity(entityName) && !isHamaEntity(entityCode);
       });

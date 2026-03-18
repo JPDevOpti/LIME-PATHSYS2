@@ -119,7 +119,7 @@ export function CaseSuccessModal({ isOpen, onClose, caseData, variant = 'create'
                             </div>
                             <InfoItem label="Usuario que ingresó" value={caseData.created_by} />
                             <InfoItem label="Servicio" value={caseData.service} />
-                            <InfoItem label="Entidad" value={caseData.entity} />
+                            <InfoItem label="Entidad" value={caseData.entity?.name} />
                             <div>
                                 <p className="text-xs font-medium text-neutral-500">Médico remitente</p>
                                 <p className="text-sm text-neutral-900">{caseData.doctor}</p>
@@ -151,7 +151,7 @@ export function CaseSuccessModal({ isOpen, onClose, caseData, variant = 'create'
                                             <ul className="mt-1 text-xs text-neutral-600 space-y-0.5">
                                                 {s.tests.map((t, j) => (
                                                     <li key={j}>
-                                                        {TEST_OPTIONS.find(o => o.value === t.code)?.label || t.name || t.code} (x{t.quantity})
+                                                        {t.test_code} - {t.name} (x{t.quantity})
                                                     </li>
                                                 ))}
                                             </ul>

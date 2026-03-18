@@ -8,7 +8,7 @@ import type { ComboboxOption } from '@/shared/components/ui/form/Combobox';
 interface EntitiesComboboxProps {
     value: string;
     onChange: (value: string) => void;
-    onEntitySelected?: (code: string, name: string) => void;
+    onEntitySelected?: (code: string, name: string, id: string) => void;
     onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
     placeholder?: string;
     disabled?: boolean;
@@ -29,6 +29,7 @@ export function EntitiesCombobox({
     required
 }: EntitiesComboboxProps) {
     const [options, setOptions] = useState<ComboboxOption[]>([]);
+    const [entityIdMap, setEntityIdMap] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -37,15 +38,19 @@ export function EntitiesCombobox({
             .getAll(false)
             .then((entities) => {
                 if (cancelled) return;
+                const active = entities.filter((e) => e.is_active !== false);
                 setOptions(
-                    entities
-                        .filter((e) => e.is_active !== false)
-                        .map((e) => ({
+                    active.map((e) => ({
                         value: e.code,
                         label: e.name,
                         subtitle: e.code
                     }))
                 );
+                const idMap: Record<string, string> = {};
+                for (const e of active) {
+                    idMap[e.code] = e.id;
+                }
+                setEntityIdMap(idMap);
             })
             .catch(() => {
                 if (cancelled) return;
@@ -62,11 +67,16 @@ export function EntitiesCombobox({
     const handleChange = (newValue: string) => {
         onChange(newValue);
         const opt = options.find((o) => o.value === newValue);
-        if (opt && onEntitySelected) onEntitySelected(opt.value, opt.label);
+        if (opt && onEntitySelected) onEntitySelected(opt.value, opt.label, entityIdMap[opt.value] || '');
     };
 
-    // Permite controlar el componente con código (value) o nombre (label)
-    const normalizedValue = options.find((o) => o.value === value || o.label === value)?.value || value;
+    const normalizedValue = (() => {
+        if (!value) return '';
+        const v = value.trim().toLowerCase();
+        return options.find(
+            (o) => o.value.toLowerCase() === v || o.label.toLowerCase() === v
+        )?.value || value;
+    })();
 
     return (
         <div className="relative">

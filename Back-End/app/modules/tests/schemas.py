@@ -22,6 +22,7 @@ class TestCreate(BaseModel):
 
 
 class TestUpdate(BaseModel):
+    test_code: Optional[str] = Field(None, min_length=1, max_length=50, pattern=r"^[A-Za-z0-9_-]+$")
     name: Optional[str] = Field(None, min_length=1, max_length=200)
     description: Optional[str] = Field(None, max_length=1000)
     time: Optional[int] = Field(None, ge=1, le=365)

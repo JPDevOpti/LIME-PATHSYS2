@@ -37,6 +37,7 @@ class StatisticsRepository:
                 {"patient_info.entity_info.code": {"$regex": entity_code_pattern, "$options": "i"}},
                 {"patient_info.entity_code": {"$regex": entity_code_pattern, "$options": "i"}},
                 {"entity_code": {"$regex": entity_code_pattern, "$options": "i"}},
+                {"entity.name": {"$regex": entity_name_pattern, "$options": "i"}},
                 {"entity": {"$regex": entity_name_pattern, "$options": "i"}},
                 {"patient_info.entity_info.entity_name": {"$regex": entity_name_pattern, "$options": "i"}},
                 {"patient_info.entity_info.name": {"$regex": entity_name_pattern, "$options": "i"}},
@@ -72,7 +73,7 @@ class StatisticsRepository:
             match["state"] = "Completado"
 
         if entity_name:
-            match["patient_info.entity_info.entity_name"] = entity_name
+            match["entity.name"] = entity_name
         return match
 
     def _test_name_map(self) -> dict[str, str]:
@@ -172,7 +173,7 @@ class StatisticsRepository:
             {"$unwind": "$samples.tests"},
             {
                 "$group": {
-                    "_id": "$samples.tests.id",
+                    "_id": "$samples.tests.test_code",
                     "name": {"$first": "$samples.tests.name"},
                     "within": {
                         "$sum": {"$cond": [{"$eq": ["$opp_was_timely", True]}, 1, 0]}
@@ -253,7 +254,7 @@ class StatisticsRepository:
             }},
             {
                 "$group": {
-                    "_id": "$patient_info.entity_info.entity_name",
+                    "_id": "$entity.name",
                     "ambulatorios": {
                         "$sum": {"$cond": [{"$eq": ["$patient_info.care_type", "Ambulatorio"]}, 1, 0]}
                     },
@@ -353,7 +354,7 @@ class StatisticsRepository:
         # Detalles: todos los casos del mes (no solo completados) para pruebas/patólogos
         match = {
             **self._base_match(year, month, completed_only=False, exclude_hama=True),
-            "patient_info.entity_info.entity_name": entity_name,
+            "entity.name": entity_name,
         }
         test_names = self._test_name_map()
 
@@ -363,7 +364,7 @@ class StatisticsRepository:
             {"$unwind": "$samples.tests"},
             {
                 "$group": {
-                    "_id": "$samples.tests.id",
+                    "_id": "$samples.tests.test_code",
                     "name": {"$first": "$samples.tests.name"},
                     "total": {"$sum": 1},
                 }
@@ -424,7 +425,7 @@ class StatisticsRepository:
             {"$unwind": "$samples.tests"},
             {
                 "$group": {
-                    "_id": "$samples.tests.id",
+                    "_id": "$samples.tests.test_code",
                     "name": {"$first": "$samples.tests.name"},
                     "ambulatorios": {
                         "$sum": {"$cond": [{"$eq": ["$patient_info.care_type", "Ambulatorio"]}, 1, 0]}
@@ -513,7 +514,7 @@ class StatisticsRepository:
             {"$match": match},
             {
                 "$group": {
-                    "_id": "$patient_info.entity_info.entity_name",
+                    "_id": "$entity.name",
                     "total": {"$sum": 1},
                 }
             },
@@ -563,7 +564,7 @@ class StatisticsRepository:
             {"$unwind": "$samples.tests"},
             {
                 "$group": {
-                    "_id": "$samples.tests.id",
+                    "_id": "$samples.tests.test_code",
                     "name": {"$first": "$samples.tests.name"},
                     "total": {"$sum": 1},
                 }

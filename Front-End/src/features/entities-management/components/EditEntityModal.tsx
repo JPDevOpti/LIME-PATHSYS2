@@ -7,8 +7,10 @@ import { FormField, Input, Textarea } from '@/shared/components/ui/form';
 import { entitiesService } from '../services/entities.service';
 import type { Entity, UpdateEntityRequest } from '../types/entity.types';
 
-function validateForm(data: { name: string }): Record<string, string> {
+function validateForm(data: { code: string; name: string }): Record<string, string> {
     const errors: Record<string, string> = {};
+    if (!data.code?.trim()) errors.code = 'El codigo es obligatorio';
+    else if (!/^[A-Za-z0-9_-]+$/.test(data.code.trim())) errors.code = 'Solo letras, numeros, guiones y guiones bajos';
     if (!data.name?.trim()) errors.name = 'El nombre es obligatorio';
     return errors;
 }
@@ -20,6 +22,7 @@ interface EditEntityModalProps {
 }
 
 export function EditEntityModal({ entity, onClose, onSave }: EditEntityModalProps) {
+    const [code, setCode] = useState('');
     const [name, setName] = useState('');
     const [observations, setObservations] = useState('');
     const [isActive, setIsActive] = useState(true);
@@ -28,6 +31,7 @@ export function EditEntityModal({ entity, onClose, onSave }: EditEntityModalProp
 
     useEffect(() => {
         if (entity) {
+            setCode(entity.code);
             setName(entity.name);
             setObservations(entity.observations ?? '');
             setIsActive(entity.is_active);
@@ -36,6 +40,7 @@ export function EditEntityModal({ entity, onClose, onSave }: EditEntityModalProp
     }, [entity]);
 
     const update = useCallback((field: string, value: string | boolean) => {
+        if (field === 'code') setCode(value as string);
         if (field === 'name') setName(value as string);
         if (field === 'observations') setObservations(value as string);
         if (field === 'isActive') setIsActive(value as boolean);
@@ -49,7 +54,7 @@ export function EditEntityModal({ entity, onClose, onSave }: EditEntityModalProp
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!entity) return;
-        const data = { name };
+        const data = { code, name };
         const validation = validateForm(data);
         if (Object.keys(validation).length > 0) {
             setErrors(validation);
@@ -59,6 +64,7 @@ export function EditEntityModal({ entity, onClose, onSave }: EditEntityModalProp
         setSaving(true);
         try {
             const payload: UpdateEntityRequest = {
+                code: code.trim().toUpperCase(),
                 name: name.trim(),
                 observations: observations.trim() || undefined,
                 is_active: isActive,
@@ -74,7 +80,7 @@ export function EditEntityModal({ entity, onClose, onSave }: EditEntityModalProp
         }
     };
 
-    const isValid = Object.keys(validateForm({ name })).length === 0;
+    const isValid = Object.keys(validateForm({ code, name })).length === 0;
 
     if (!entity) return null;
 
@@ -111,12 +117,12 @@ export function EditEntityModal({ entity, onClose, onSave }: EditEntityModalProp
                             onChange={(e) => update('name', e.target.value)}
                         />
                     </FormField>
-                    <FormField label="Codigo" htmlFor="edit-modal-entityCode">
+                    <FormField label="Codigo" error={errors.code} htmlFor="edit-modal-entityCode">
                         <Input
                             id="edit-modal-entityCode"
-                            value={entity.code}
-                            disabled
-                            className="bg-neutral-100"
+                            placeholder="Ej. HAMA"
+                            value={code}
+                            onChange={(e) => update('code', e.target.value)}
                         />
                     </FormField>
                 </div>

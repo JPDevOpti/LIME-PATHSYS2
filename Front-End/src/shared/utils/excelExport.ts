@@ -196,7 +196,7 @@ export async function exportCasesToExcel(cases: Case[]) {
             opportunity: opportunityText,
             doctor: c.doctor,
             service: c.service,
-            entity: c.entity,
+            entity: c.entity?.name || '',
             pathologist_name: c.assigned_pathologist?.name || 'No asignado',
             reception_date: createdTimestamp ? new Date(createdTimestamp).toLocaleString() : '',
             signed_at: signedTimestamp ? new Date(signedTimestamp).toLocaleString() : '',
@@ -230,7 +230,7 @@ export async function exportCasesToExcel(cases: Case[]) {
 
             const testsSummary = (sample.tests ?? [])
                 .map(t => {
-                    const base = t.code || t.name || '';
+                    const base = t.test_code || t.name || '';
                     if (!base) return '';
                     const qty = t.quantity && t.quantity > 1 ? ` (x${t.quantity})` : '';
                     return `${base}${qty}`;

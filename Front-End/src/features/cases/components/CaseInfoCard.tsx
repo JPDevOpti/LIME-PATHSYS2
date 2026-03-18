@@ -90,7 +90,7 @@ export function CaseInfoCard({
 
                 <Section icon={User} title="Solicitud">
                     <InfoItem label="Médico Solicitante" value={caseData.doctor} />
-                    <InfoItem label="Entidad" value={caseData.entity} />
+                    <InfoItem label="Entidad" value={caseData.entity?.name} />
                 </Section>
 
                 <Section icon={User} title="Patólogos">
@@ -129,7 +129,7 @@ export function CaseInfoCard({
                                 <ul className="list-disc list-inside text-sm text-neutral-700 space-y-0.5">
                                     {sample.tests?.map((t, j) => (
                                         <li key={j}>
-                                            <span className="font-medium">{t.code}</span> - {t.name}
+                                            <span className="font-medium">{t.test_code}</span> - {t.name}
                                             {t.quantity > 1 && ` (x${t.quantity})`}
                                         </li>
                                     ))}

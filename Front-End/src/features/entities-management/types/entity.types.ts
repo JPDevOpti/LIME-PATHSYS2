@@ -16,6 +16,7 @@ export interface CreateEntityRequest {
 }
 
 export interface UpdateEntityRequest {
+    code?: string;
     name?: string;
     observations?: string;
     is_active?: boolean;

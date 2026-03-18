@@ -49,7 +49,7 @@ const isHamaCase = (caseItem: Case) => {
     if (entityCodes.includes('hama')) return true;
 
     return [
-        caseItem.entity,
+        caseItem.entity?.name,
         entityInfo?.entity_name,
         entityInfo?.eps_name,
     ].some(hasHamaPattern);

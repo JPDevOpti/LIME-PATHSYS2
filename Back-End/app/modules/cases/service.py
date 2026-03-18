@@ -74,8 +74,8 @@ class CaseService:
         
         # Paridad: si vienen en el caso, actualizar al paciente
         patient_updates = {}
-        if data.entity:
-            patient_updates["entity_info.entity_name"] = data.entity
+        if data.entity and data.entity.name:
+            patient_updates["entity_info.entity_name"] = data.entity.name
         if data.care_type:
             patient_updates["care_type"] = data.care_type
         
@@ -127,9 +127,11 @@ class CaseService:
         # Paridad: si vienen en el caso, actualizar al paciente real
         patient_updates = {}
         if "entity" in payload:
-            entity_val = payload.pop("entity")
-            payload["patient_info.entity_info.entity_name"] = entity_val
-            patient_updates["entity_info.entity_name"] = entity_val
+            entity_val = payload["entity"]
+            entity_name = entity_val.get("name") if isinstance(entity_val, dict) else entity_val
+            if entity_name:
+                payload["patient_info.entity_info.entity_name"] = entity_name
+                patient_updates["entity_info.entity_name"] = entity_name
         if "care_type" in payload:
             care_val = payload.pop("care_type")
             payload["patient_info.care_type"] = care_val

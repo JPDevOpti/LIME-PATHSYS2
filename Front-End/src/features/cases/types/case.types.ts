@@ -11,7 +11,8 @@ export type CaseStatus =
     | 'Completado';
 
 export interface TestInfo {
-    code: string;
+    id: string;
+    test_code: string;
     name: string;
     quantity: number;
     time?: number;
@@ -22,6 +23,11 @@ export interface SampleInfo {
     tests: TestInfo[];
 }
 
+export interface CaseEntity {
+    id: string;
+    name: string;
+}
+
 export interface CreateCaseRequest {
     patientId: string;
     priority: CasePriority;
@@ -29,7 +35,7 @@ export interface CreateCaseRequest {
     service: string;
     previous_study: boolean;
     observations: string;
-    entity?: string;
+    entity?: CaseEntity;
     care_type?: CareType;
     numberOfSamples: number;
     samples: SampleInfo[];
@@ -131,7 +137,7 @@ export interface Case {
     doctor: string;
     service: string;
     previous_study: boolean;
-    entity: string;
+    entity: CaseEntity;
     observations: string;
     samples: SampleInfo[];
     created_by?: string;

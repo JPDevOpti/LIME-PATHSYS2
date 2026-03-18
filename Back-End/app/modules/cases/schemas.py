@@ -8,6 +8,11 @@ from app.modules.patients.schemas import (
 )
 
 
+class CaseEntitySchema(BaseModel):
+    id: Optional[str] = None
+    name: Optional[str] = None
+
+
 class AuditEntrySchema(BaseModel):
     action: Literal["created", "edited", "delivered", "signed", "transcribed"]
     user_name: str
@@ -52,7 +57,8 @@ class PatientInfoSchema(BaseModel):
 
 
 class TestInfoSchema(BaseModel):
-    id: str
+    id: Optional[str] = None
+    test_code: str
     name: str
     quantity: int
 
@@ -107,7 +113,7 @@ class CaseCreate(BaseModel):
     samples: list[SampleInfoSchema] = Field(...)
     max_opportunity_time: Optional[float] = Field(None, ge=0)
     previous_study: Optional[Any] = None
-    entity: Optional[str] = None
+    entity: Optional[CaseEntitySchema] = None
     care_type: Optional[str] = None
     assigned_pathologist: Optional[AssignedPathologistSchema] = None
     assistant_pathologists: Optional[list[AssignedPathologistSchema]] = None
@@ -136,7 +142,7 @@ class CaseUpdate(BaseModel):
     max_opportunity_time: Optional[float] = Field(None, ge=0)
     state: Optional[str] = None
     care_type: Optional[str] = None
-    entity: Optional[str] = None
+    entity: Optional[CaseEntitySchema] = None
     assigned_pathologist: Optional[AssignedPathologistSchema] = None
     assistant_pathologists: Optional[list[AssignedPathologistSchema]] = None
     assigned_resident: Optional[AssignedPathologistSchema] = None
@@ -157,7 +163,7 @@ class CaseResponse(BaseModel):
     patient_info: PatientInfoSchema
     samples: list[SampleInfoSchema]
     observations: Optional[str] = None
-    entity: Optional[str] = None
+    entity: Optional[CaseEntitySchema] = None
     previous_study: Optional[Any] = None
     additional_notes: Optional[list[NoteSchema]] = None
     complementary_tests: Optional[list[ComplementaryTestSchema]] = None

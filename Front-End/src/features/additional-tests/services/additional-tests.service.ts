@@ -13,7 +13,9 @@ function mapApiToApproval(api: Record<string, unknown>): ApprovalRequestResponse
         approval_code: String(api.approval_code ?? api.original_case_code ?? ''),
         original_case_code: String(api.original_case_code ?? api.approval_code ?? ''),
         approval_state: (api.approval_state as ApprovalRequestResponse['approval_state']) ?? 'request_made',
-        entity: api.entity != null ? String(api.entity) : undefined,
+        entity: api.entity != null
+            ? (typeof api.entity === 'object' ? String((api.entity as Record<string, unknown>).name ?? '') : String(api.entity))
+            : undefined,
         additional_tests: ct.map((t) => ({
             code: String((t as Record<string, unknown>).code ?? ''),
             name: String((t as Record<string, unknown>).name ?? ''),

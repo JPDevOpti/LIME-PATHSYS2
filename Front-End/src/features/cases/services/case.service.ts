@@ -4,6 +4,7 @@ import {
     CreateCaseRequest,
     UpdateCaseRequest,
     Case,
+    CaseEntity,
     CaseFilters,
     CaseNote,
     TestInfo,
@@ -25,10 +26,12 @@ function apiToCase(raw: Record<string, unknown>): Case {
     const patientInfo = raw.patient_info as Record<string, unknown> | undefined;
     const samples = (raw.samples as SampleInfo[] | undefined)?.map(s => ({
         body_region: s.body_region,
-        tests: (s.tests || []).map((t: { id?: string; code?: string; name: string; quantity: number }) => ({
-            code: t.id ?? t.code ?? '',
+        tests: (s.tests || []).map((t: { id?: string; test_code?: string; code?: string; name: string; quantity: number; time?: number }) => ({
+            id: t.id ?? '',
+            test_code: t.test_code ?? t.code ?? '',
             name: t.name,
-            quantity: t.quantity ?? 1
+            quantity: t.quantity ?? 1,
+            time: t.time,
         }))
     })) ?? [];
     const patient: Patient = patientInfo ? {
@@ -59,7 +62,14 @@ function apiToCase(raw: Record<string, unknown>): Case {
         doctor: String(raw.requesting_physician ?? ''),
         service: String(raw.service ?? ''),
         previous_study: Boolean(raw.previous_study),
-        entity: String(raw.entity ?? ''),
+        entity: ((): CaseEntity => {
+            const e = raw.entity;
+            if (e && typeof e === 'object') {
+                const obj = e as Record<string, unknown>;
+                return { id: String(obj.id ?? ''), name: String(obj.name ?? '') };
+            }
+            return { id: '', name: String(e ?? '') };
+        })(),
         observations: String(raw.observations ?? ''),
         samples,
         created_by: raw.created_by as string | undefined,
@@ -85,13 +95,14 @@ function toCreateBody(data: CreateCaseRequest): Record<string, unknown> {
         priority,
         requesting_physician: data.doctor,
         service: data.service || undefined,
-        entity: data.entity || undefined,
+        entity: data.entity?.name ? data.entity : undefined,
         observations: data.observations || undefined,
         previous_study: data.previous_study,
         samples: (data.samples || []).map(s => ({
             body_region: s.body_region,
-            tests: (s.tests || []).map((t: any) => ({
-                id: t.code || t.id,
+            tests: (s.tests || []).map((t: TestInfo) => ({
+                id: t.id || undefined,
+                test_code: t.test_code,
                 name: t.name,
                 quantity: t.quantity ?? 1
             }))
@@ -119,13 +130,14 @@ function toUpdateBody(data: UpdateCaseRequest): Record<string, unknown> {
         priority,
         requesting_physician: data.doctor,
         service: clearable(data.service),
-        entity: clearable(data.entity),
+        entity: data.entity?.name ? data.entity : (data.entity === undefined ? undefined : null),
         observations: clearable(data.observations),
         previous_study: data.previous_study,
         samples: (data.samples || []).map(s => ({
             body_region: s.body_region,
-            tests: (s.tests || []).map((t: TestInfo & { id?: string }) => ({
-                id: t.code ?? t.id ?? '',
+            tests: (s.tests || []).map((t: TestInfo) => ({
+                id: t.id || undefined,
+                test_code: t.test_code,
                 name: t.name,
                 quantity: t.quantity ?? 1
             }))

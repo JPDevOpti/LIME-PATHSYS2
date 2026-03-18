@@ -284,6 +284,10 @@ class CasePdfService:
             "patient_email": patient_info.get("email") or "Sin dato",
             "patient_residence": patient_residence or "Sin dato",
             "entity_name": (
+                (case.get("entity") or {}).get("name")
+                if isinstance(case.get("entity"), dict)
+                else (case.get("entity") or "")
+            ) or (
                 (patient_info.get("entity_info") or {}).get("entity_name")
                 or (patient_info.get("entity_info") or {}).get("name")
                 or ""

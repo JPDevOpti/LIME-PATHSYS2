@@ -25,7 +25,7 @@ const CASE_STATUS_OPTIONS: { value: CaseStatus; label: string }[] = [
     { value: 'Completado', label: 'Completado' }
 ];
 
-const createEmptyTest = (): TestInfo => ({ code: '', name: '', quantity: 1 });
+const createEmptyTest = (): TestInfo => ({ id: '', test_code: '', name: '', quantity: 1 });
 const createEmptySample = (): SampleInfo => ({ body_region: '', tests: [createEmptyTest()] });
 
 const INITIAL_FORM_DATA: Omit<CreateCaseRequest, 'patientId'> = {
@@ -34,7 +34,7 @@ const INITIAL_FORM_DATA: Omit<CreateCaseRequest, 'patientId'> = {
     service: '',
     previous_study: false,
     observations: '',
-    entity: '',
+    entity: { id: '', name: '' },
     care_type: '' as CareType,
     numberOfSamples: 1,
     samples: [createEmptySample()],
@@ -77,7 +77,7 @@ function caseToFormData(c: Case): CreateCaseRequest & { assigned_pathologist?: {
         numberOfSamples: c.samples?.length || 1,
         samples: c.samples?.length ? c.samples.map(s => ({
             body_region: s.body_region,
-            tests: s.tests?.map(t => ({ code: t.code, name: t.name, quantity: t.quantity || 1 })) || [createEmptyTest()]
+            tests: s.tests?.map(t => ({ id: t.id || '', test_code: t.test_code, name: t.name, quantity: t.quantity || 1 })) || [createEmptyTest()]
         })) : [createEmptySample()],
         assigned_pathologist: c.assigned_pathologist,
         status: c.status,
@@ -117,7 +117,7 @@ export function CaseForm(props: CaseFormCreateProps | CaseFormEditProps) {
                 if (patient) {
                     setFormData(prev => ({
                         ...prev,
-                        entity: patient.entity_info?.entity_name || '',
+                        entity: { id: '', name: patient.entity_info?.entity_name || '' },
                         care_type: patient.care_type
                     }));
                 }
@@ -178,14 +178,14 @@ export function CaseForm(props: CaseFormCreateProps | CaseFormEditProps) {
         });
     };
 
-    const handleTestChange = (sampleIndex: number, testIndex: number, field: 'code' | 'quantity', value: string | number) => {
+    const handleTestChange = (sampleIndex: number, testIndex: number, field: 'test_code' | 'quantity', value: string | number) => {
         setFormData(prev => {
             const samples = prev.samples.map((s, i) => {
                 if (i !== sampleIndex) return s;
                 const tests = s.tests.map((t, j) => {
                     if (j !== testIndex) return t;
-                    if (field === 'code') {
-                        return { ...t, code: String(value), name: String(value) || t.name };
+                    if (field === 'test_code') {
+                        return { ...t, test_code: String(value), name: String(value) || t.name };
                     }
                     return { ...t, quantity: value === '' ? 0 : Math.max(0, Number(value)) };
                 });
@@ -193,7 +193,7 @@ export function CaseForm(props: CaseFormCreateProps | CaseFormEditProps) {
             });
             return { ...prev, samples };
         });
-        if (field === 'code') {
+        if (field === 'test_code') {
             setFieldErrors(prev => {
                 const next = { ...prev };
                 Object.keys(next).filter(k => k.startsWith(`sample_${sampleIndex}_test_`)).forEach(k => delete next[k]);
@@ -216,13 +216,13 @@ export function CaseForm(props: CaseFormCreateProps | CaseFormEditProps) {
         });
     };
 
-    const handleTestSelected = (sampleIndex: number, testIndex: number, code: string, name: string, time?: number) => {
+    const handleTestSelected = (sampleIndex: number, testIndex: number, test_code: string, name: string, time?: number, id?: string) => {
         setFormData(prev => {
             const samples = prev.samples.map((s, i) => {
                 if (i !== sampleIndex) return s;
                 const tests = s.tests.map((t, j) => {
                     if (j !== testIndex) return t;
-                    return { ...t, code, name: name || code, time };
+                    return { ...t, id: id || '', test_code, name: name || test_code, time };
                 });
                 return { ...s, tests };
             });
@@ -278,7 +278,7 @@ export function CaseForm(props: CaseFormCreateProps | CaseFormEditProps) {
                 errors[`sample_${i}_body_region`] = true;
                 errorItems.push({ field: `Muestra ${i + 1} - Región del cuerpo`, message: 'Requerido' });
             }
-            if (!s.tests.length || s.tests.every(t => !t.code?.trim())) {
+            if (!s.tests.length || s.tests.every(t => !t.test_code?.trim())) {
                 errors[`sample_${i}_test_0`] = true;
                 errorItems.push({ field: `Muestra ${i + 1} - Pruebas`, message: 'Al menos una prueba requerida' });
             }
@@ -296,11 +296,12 @@ export function CaseForm(props: CaseFormCreateProps | CaseFormEditProps) {
     };
 
     const sanitizeCasePayload = <T extends Record<string, any>>(data: T): T => {
-        const optionalStrFields = ['service', 'observations', 'entity'] as const;
+        const optionalStrFields = ['service', 'observations'] as const;
         const out: any = { ...data };
         for (const field of optionalStrFields) {
             if (out[field] === '') out[field] = null;
         }
+        if (out.entity && !out.entity.name) out.entity = null;
         return out;
     };
 
@@ -358,12 +359,12 @@ export function CaseForm(props: CaseFormCreateProps | CaseFormEditProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                     <FormField label="Entidad">
                         <EntitiesCombobox
-                            value={formData.entity || ''}
+                            value={formData.entity?.name || ''}
                             onChange={(v) => {
-                                setFormData(prev => ({ ...prev, entity: v }));
+                                setFormData(prev => ({ ...prev, entity: { id: '', name: v } }));
                             }}
-                            onEntitySelected={(_code, name) => {
-                                setFormData(prev => ({ ...prev, entity: name }));
+                            onEntitySelected={(_code, name, id) => {
+                                setFormData(prev => ({ ...prev, entity: { id: id || '', name } }));
                             }}
                             placeholder="Buscar entidad..."
                         />
@@ -510,10 +511,10 @@ export function CaseForm(props: CaseFormCreateProps | CaseFormEditProps) {
                                                 <div className="flex-1 min-w-0">
                                                     <FormField label={`Prueba #${testIndex + 1}`}>
                                                         <TestsCombobox
-                                                            value={test.code}
-                                                            onChange={(v) => handleTestChange(sampleIndex, testIndex, 'code', v)}
-                                                            onTestSelected={(code, name, time) => handleTestSelected(sampleIndex, testIndex, code, name, time)}
-                                                            extraOptions={sample.tests.map((t) => ({ code: t.code, name: t.name || t.code }))}
+                                                            value={test.test_code}
+                                                            onChange={(v) => handleTestChange(sampleIndex, testIndex, 'test_code', v)}
+                                                            onTestSelected={(code, name, time, id) => handleTestSelected(sampleIndex, testIndex, code, name, time, id)}
+                                                            extraOptions={sample.tests.map((t) => ({ code: t.test_code, name: t.name || t.test_code }))}
                                                             placeholder={`Buscar prueba ${testIndex + 1}...`}
                                                             error={fieldErrors[`sample_${sampleIndex}_test_${testIndex}`] ? ' ' : undefined}
                                                         />

@@ -82,7 +82,7 @@ function getTestsFromCase(c: Case): { code: string; count: number }[] {
   const order: string[] = [];
   c.samples?.forEach((sample) => {
     sample.tests?.forEach((t) => {
-      const code = t.code || t.name || "";
+      const code = t.test_code || t.name || "";
       if (!code) return;
       if (!counts[code]) { counts[code] = 0; order.push(code); }
       counts[code] += t.quantity || 1;

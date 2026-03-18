@@ -47,10 +47,35 @@ class TestsService:
         existing = self._repo.find_by_code(code)
         if not existing:
             raise not_found_exception("Test", code)
+
+        test_id = existing["id"]
         payload = data.model_dump(exclude_none=True)
+
         if "description" in payload and payload["description"] is not None:
             payload["description"] = payload["description"].strip() or None
+
+        # Normalizar test_code si viene en el payload
+        if "test_code" in payload:
+            new_code = payload["test_code"].strip().upper()
+            if new_code != existing["test_code"]:
+                if self._repo.code_exists(new_code, exclude_id=test_id):
+                    raise conflict_exception("Ya existe una prueba con este codigo")
+            payload["test_code"] = new_code
+
+        if "name" in payload:
+            payload["name"] = payload["name"].strip()
+
         result = self._repo.update_by_code(code, payload)
         if not result:
             raise not_found_exception("Test", code)
+
+        # Propagar cambios de test_code y name a los casos
+        propagate: dict[str, str] = {}
+        if "test_code" in payload and payload["test_code"] != existing["test_code"]:
+            propagate["test_code"] = payload["test_code"]
+        if "name" in payload and payload["name"] != existing["name"]:
+            propagate["name"] = payload["name"]
+        if propagate:
+            self._repo.propagate_to_cases(test_id, propagate)
+
         return result

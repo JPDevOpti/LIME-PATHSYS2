@@ -35,7 +35,7 @@ function buildCaseEdits(cases: Case[]): CaseEdit[] {
         const tests: TestEdit[] = [];
         c.samples?.forEach((sample, sIdx) => {
             sample.tests?.forEach((t, tIdx) => {
-                const code = t.code || t.name || '';
+                const code = t.test_code || t.name || '';
                 if (!code) return;
                 const existing = tests.find(e => e.code === code);
                 if (existing) {
