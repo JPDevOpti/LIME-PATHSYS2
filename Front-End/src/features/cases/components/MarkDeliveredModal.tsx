@@ -193,6 +193,7 @@ export function MarkDeliveredModal({ isOpen, cases, onClose, onConfirm }: MarkDe
             setCaseEdits(buildCaseEdits(cases));
             setDeliveredTo('');
             setError(null);
+            setIsLoading(false);
         }
     }, [isOpen, cases]);
 
