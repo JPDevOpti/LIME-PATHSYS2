@@ -9,8 +9,9 @@ import { BODY_REGION_OPTIONS, TEST_OPTIONS } from '../data/case-options';
 import { SuccessModal } from '@/shared/components/overlay/SuccessModal';
 import { CloseButton } from '@/shared/components/ui/buttons';
 import { BaseCard } from '@/shared/components/base/BaseCard';
-import { FileText, User, Phone, MapPin, Building2, FlaskConical, UserRoundPen, History, ShieldCheck, Microscope, ZoomIn, ChevronLeft, ChevronRight, X as XIcon, Image, NotebookPen } from 'lucide-react';
+import { FileText, User, Phone, MapPin, Building2, FlaskConical, UserRoundPen, History, ShieldCheck, Microscope, ZoomIn, ChevronLeft, ChevronRight, X as XIcon, Image, NotebookPen, Clock } from 'lucide-react';
 import { formatAge } from '@/shared/utils/formatAge';
+import { getElapsedDays, getMaxOpportunityTime, getWasTimely } from '@/shared/utils/dateUtils';
 import { sanitizeHtml } from '@/shared/utils/sanitizeHtml';
 import { usePermissions } from '@/features/auth/hooks/usePermissions';
 import { AddNoteModal } from './AddNoteModal';
@@ -359,6 +360,30 @@ export function CaseDetailsModal({ visible, caseData, onClose, onCaseUpdated }: 
                                         </div>
                                     )}
                                 </div>
+                                {(() => {
+                                    const maxTime = getMaxOpportunityTime(caseData);
+                                    const elapsed = getElapsedDays(caseData);
+                                    const wasTimely = getWasTimely(caseData);
+                                    if (maxTime === undefined) return null;
+                                    const isFinished = caseData.status === 'Completado' || caseData.status === 'Por entregar';
+                                    const overdue = isFinished ? wasTimely === false : elapsed > maxTime;
+                                    return (
+                                        <div className={`flex items-center gap-3 mt-3 px-3 py-2 rounded-lg border ${overdue ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
+                                            <Clock className={`w-4 h-4 flex-shrink-0 ${overdue ? 'text-red-500' : 'text-green-500'}`} />
+                                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+                                                <span className="text-neutral-600">
+                                                    Tiempo máximo de oportunidad: <span className="font-semibold text-neutral-800">{maxTime} día{maxTime !== 1 ? 's' : ''}</span>
+                                                </span>
+                                                <span className="text-neutral-600">
+                                                    Tiempo {isFinished ? 'transcurrido' : 'actual'}: <span className={`font-semibold ${overdue ? 'text-red-700' : 'text-green-700'}`}>{elapsed} día{elapsed !== 1 ? 's' : ''}</span>
+                                                </span>
+                                                <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${overdue ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                                                    {overdue ? 'Fuera de oportunidad' : 'En oportunidad'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
                             </div>
                         </BaseCard>
                     )}

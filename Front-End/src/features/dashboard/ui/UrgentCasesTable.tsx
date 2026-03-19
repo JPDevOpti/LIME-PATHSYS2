@@ -116,7 +116,10 @@ export const UrgentCasesTable = ({
   const nonHamaCases = cases.filter((caseItem) => !isHamaCase(caseItem));
 
   const incompleteCases = nonHamaCases.filter(
-    (c) => c.estado !== "Completado" && c.estado !== "Por entregar"
+    (c) =>
+      c.estado !== "Completado" &&
+      c.estado !== "Por entregar" &&
+      c.dias_en_sistema > (c.tiempo_oportunidad_max || 6)
   );
 
   const visibleCases = isPatologo && user?.name
