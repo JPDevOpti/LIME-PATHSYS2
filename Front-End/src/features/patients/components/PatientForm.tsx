@@ -43,11 +43,17 @@ interface PatientFormProps {
     onCancel?: () => void;
     onDelete?: () => void | Promise<void>;
     hideCrearCasoLink?: boolean;
+    prefillIdentificationType?: string;
+    prefillIdentificationNumber?: string;
 }
 
-export function PatientForm({ initialData, isEditMode = false, onCloseSuccess, onCancel, onDelete, hideCrearCasoLink = false }: PatientFormProps) {
+export function PatientForm({ initialData, isEditMode = false, onCloseSuccess, onCancel, onDelete, hideCrearCasoLink = false, prefillIdentificationType, prefillIdentificationNumber }: PatientFormProps) {
     const { email: userEmail } = useCurrentUser();
-    const [formData, setFormData] = useState<CreatePatientRequest>({ ...INITIAL_FORM_DATA });
+    const [formData, setFormData] = useState<CreatePatientRequest>(() => ({
+        ...INITIAL_FORM_DATA,
+        ...(prefillIdentificationType ? { identification_type: prefillIdentificationType as IdentificationType } : {}),
+        ...(prefillIdentificationNumber ? { identification_number: prefillIdentificationNumber } : {}),
+    }));
 
     const [isLoading, setIsLoading] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);

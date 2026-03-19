@@ -112,8 +112,12 @@ export async function exportCasesToExcel(cases: Case[]) {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Casos');
 
-    // Encontrar el máximo número de muestras en un caso para definir columnas por muestra
+    // Encontrar el máximo número de muestras y el máximo de pruebas por muestra
     const maxSamples = Math.max(...cases.map(c => c.samples?.length ?? 0), 0);
+    const maxTestsPerSample = Math.max(
+        ...cases.flatMap(c => (c.samples ?? []).map(s => s.tests?.length ?? 0)),
+        0
+    );
 
     // 1. Columnas de Información General del Caso
     const generalColumns = [
@@ -147,14 +151,17 @@ export async function exportCasesToExcel(cases: Case[]) {
         { header: 'Paciente Email', key: 'p_email', width: 28 },
     ];
 
-    // 3. Columnas dinámicas por muestra (región del cuerpo y pruebas de esa muestra)
-    const sampleColumns = [];
+    // 3. Columnas dinámicas por muestra: Región, luego pares (Prueba, Cantidad)
+    const sampleColumns: { header: string; key: string; width: number }[] = [];
     for (let i = 1; i <= maxSamples; i++) {
-        sampleColumns.push({ header: `Muestra ${i} - Región`, key: `sample_region_${i}`, width: 28 });
-        sampleColumns.push({ header: `Muestra ${i} - Pruebas`, key: `sample_tests_${i}`, width: 45 });
+        sampleColumns.push({ header: `Muestra ${i} - Región`, key: `s${i}_region`, width: 28 });
+        for (let j = 1; j <= maxTestsPerSample; j++) {
+            sampleColumns.push({ header: `M${i} Prueba ${j}`, key: `s${i}_test${j}`, width: 14 });
+            sampleColumns.push({ header: `M${i} Cantidad ${j}`, key: `s${i}_qty${j}`, width: 12 });
+        }
     }
 
-    // 4. Resultados (Descriptive tags stripped in row mapping)
+    // 4. Resultados
     const resultColumns = [
         { header: 'Macroscopía', key: 'macro', width: 60 },
         { header: 'Microscopía', key: 'micro', width: 60 },
@@ -220,26 +227,22 @@ export async function exportCasesToExcel(cases: Case[]) {
             p_email: c.patient?.email || ''
         };
 
-        // Rellenar información por muestra: región del cuerpo y pruebas de cada muestra
+        // Rellenar por muestra: región + pares (prueba, cantidad)
         (c.samples ?? []).forEach((sample, idx) => {
             const i = idx + 1;
             const regionLabel =
                 BODY_REGION_OPTIONS.find(o => o.value === sample.body_region)?.label ||
                 sample.body_region ||
                 '';
+            rowData[`s${i}_region`] = regionLabel;
 
-            const testsSummary = (sample.tests ?? [])
-                .map(t => {
-                    const base = t.test_code || t.name || '';
-                    if (!base) return '';
-                    const qty = t.quantity && t.quantity > 1 ? ` (x${t.quantity})` : '';
-                    return `${base}${qty}`;
-                })
-                .filter(Boolean)
-                .join('; ');
-
-            rowData[`sample_region_${i}`] = regionLabel;
-            rowData[`sample_tests_${i}`] = testsSummary;
+            (sample.tests ?? []).forEach((t, tIdx) => {
+                const j = tIdx + 1;
+                const code = t.test_code || t.name || '';
+                if (!code) return;
+                rowData[`s${i}_test${j}`] = code;
+                rowData[`s${i}_qty${j}`] = t.quantity || 1;
+            });
         });
 
         worksheet.addRow(rowData);

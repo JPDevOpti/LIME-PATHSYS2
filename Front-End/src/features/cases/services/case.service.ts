@@ -298,14 +298,20 @@ export const caseService = {
         deliveredTo: string
     ): Promise<Case[]> {
         const headers = getUserHeaders();
+        const BATCH_SIZE = 10;
         const results: Case[] = [];
-        for (const edit of caseEdits) {
-            const raw = await apiClient.put<Record<string, unknown>>(
-                `${API_BASE}/${edit.caseId}`,
-                { state: 'Completado', delivered_to: deliveredTo },
-                headers
+        for (let i = 0; i < caseEdits.length; i += BATCH_SIZE) {
+            const batch = caseEdits.slice(i, i + BATCH_SIZE);
+            const batchResults = await Promise.all(
+                batch.map(edit =>
+                    apiClient.put<Record<string, unknown>>(
+                        `${API_BASE}/${edit.caseId}`,
+                        { state: 'Completado', delivered_to: deliveredTo },
+                        headers
+                    ).then(apiToCase)
+                )
             );
-            results.push(apiToCase(raw));
+            results.push(...batchResults);
         }
         return results;
     },

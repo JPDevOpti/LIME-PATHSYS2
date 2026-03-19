@@ -129,7 +129,7 @@ start_services() {
         local)
             backend_uri="$LOCAL_MONGODB_URI"
             write_backend_env "$backend_uri" "local"
-            write_frontend_env "http://localhost:8000"
+            write_frontend_env "http://localhost:8001"
             ;;
         atlas)
             load_atlas_config
@@ -141,7 +141,7 @@ start_services() {
             fi
             backend_uri="$ATLAS_MONGODB_URI"
             write_backend_env "$backend_uri" "atlas"
-            write_frontend_env "http://localhost:8000"
+            write_frontend_env "http://localhost:8001"
             ;;
         *)
             echo "Error: modo desconocido '$mode'"
@@ -149,7 +149,7 @@ start_services() {
             ;;
     esac
 
-    log "Iniciando Back-End en puerto 8000 (modo: $mode)"
+    log "Iniciando Back-End en puerto 8001 (modo: $mode)"
     # Todas las variables críticas se pasan explícitamente al proceso
     (cd "$BACK_DIR" && \
         MONGODB_URI="$backend_uri" \
@@ -159,9 +159,9 @@ start_services() {
         .venv/bin/python run.py 2>&1) &
     local backend_pid=$!
 
-    # Esperar hasta que el puerto 8000 esté activo (máx 15 seg)
+    # Esperar hasta que el puerto 8001 esté activo (máx 15 seg)
     local i=0
-    while ! lsof -ti:8000 >/dev/null 2>&1; do
+    while ! lsof -ti:8001 >/dev/null 2>&1; do
         i=$((i + 1))
         if [ "$i" -ge 30 ]; then
             echo "Error: el Back-End no levantó en 15 segundos. Revisa los logs."
@@ -174,7 +174,7 @@ start_services() {
     log "Iniciando Front-End en puerto 3001"
     (cd "$FRONT_DIR" && npm run dev) &
 
-    log "Servicios activos → Front-End: http://localhost:3001 | Back-End: http://localhost:8000"
+    log "Servicios activos → Front-End: http://localhost:3001 | Back-End: http://localhost:8001"
 }
 
 wait_port_free() {
@@ -213,13 +213,13 @@ stop_services() {
     rm -f "$SCRIPT_DIR/.pathsys.pids" 2>/dev/null || true
 
     pkill -f "$BACK_DIR/.venv/bin/python run.py" 2>/dev/null || true
-    pkill -f "uvicorn.*8000" 2>/dev/null || true
+    pkill -f "uvicorn.*8001" 2>/dev/null || true
     pkill -f "$FRONT_DIR/node_modules/.bin/next dev" 2>/dev/null || true
     pkill -f "next dev" 2>/dev/null || true
     pkill -f "node.*3001" 2>/dev/null || true
 
     # Asegurar que los puertos queden completamente libres
-    wait_port_free 8000
+    wait_port_free 8001
     wait_port_free 3001
     wait_port_free 3000
 
