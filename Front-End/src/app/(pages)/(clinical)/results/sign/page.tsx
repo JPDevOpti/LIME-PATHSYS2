@@ -8,7 +8,7 @@ import { PatientInfoCard, CaseInfoCard, CaseSearch } from '@/features/cases/comp
 import { SignResultEditor, SignSuccessModal, AdditionalTestsModal, AssignPathologistModal, PendingSignCasesTable } from '@/features/results/components';
 import { caseService } from '@/features/cases/services/case.service';
 import { resultsService } from '@/features/results/services/results.service';
-import { Case } from '@/features/cases/types/case.types';
+import { Case, SampleInfo } from '@/features/cases/types/case.types';
 import { PageTitleCard } from '@/shared/components/ui/page-title';
 import { BaseCard, BaseButton } from '@/shared/components/base';
 import { Search, FileCheck, ClipboardList, SaveAll } from 'lucide-react';
@@ -32,6 +32,7 @@ export default function SignResultsPage() {
     const [searchError, setSearchError] = useState('');
     const [caseFound, setCaseFound] = useState(false);
     const [caseData, setCaseData] = useState<Case | null>(null);
+    const [samples, setSamples] = useState<SampleInfo[]>([]);
     const [sections, setSections] = useState<ResultSections>(INITIAL_SECTIONS);
     const [activeSection, setActiveSection] = useState<ResultEditorSection>('method');
     const [cie10, setCie10] = useState<CIE10Diagnosis | null>(null);
@@ -84,6 +85,7 @@ export default function SignResultsPage() {
 
             if (data) {
                 setCaseData(data);
+                setSamples(data.samples || []);
                 setCaseFound(true);
                 setCaseCode(data.case_code);
                 setSections(
@@ -118,6 +120,7 @@ export default function SignResultsPage() {
         setCaseCode('');
         setCaseFound(false);
         setCaseData(null);
+        setSamples([]);
         setSearchError('');
         setSections(INITIAL_SECTIONS);
         setActiveSection('method');
@@ -199,6 +202,7 @@ export default function SignResultsPage() {
                 complementary_tests: hasComplementaryRequest ? complementaryTests.filter((t) => t.code?.trim() || t.name?.trim()) : undefined,
                 complementary_tests_reason: hasComplementaryRequest ? complementaryTestsReason.trim() || undefined : undefined,
                 diagnosisImages: sections.diagnosisImages ?? [],
+                samples: samples,
             }, skipStateUpdate);
             if (updated) setCaseData(updated);
             setSuccessVariant('progress');
@@ -231,6 +235,7 @@ export default function SignResultsPage() {
                 complementaryTests: hasComplementaryRequest ? complementaryTests.filter((t) => t.code?.trim() || t.name?.trim()) : undefined,
                 complementaryTestsReason: hasComplementaryRequest ? complementaryTestsReason.trim() || undefined : undefined,
                 diagnosisImages: sections.diagnosisImages ?? [],
+                samples: samples,
             });
             if (updated) setCaseData(updated);
             setSuccessVariant('signed');
@@ -349,6 +354,8 @@ export default function SignResultsPage() {
                             cieo={cieo}
                             onCie10Change={setCie10}
                             onCieoChange={setCieo}
+                            samples={samples}
+                            onSamplesChange={setSamples}
                             showValidation={showValidation}
                             disabled={signing || cannotEdit}
                             assignedPathologist={caseData.assigned_pathologist?.name}

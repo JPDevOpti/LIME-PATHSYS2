@@ -191,6 +191,7 @@ type TranscriptionData = {
     diagnosis_images?: string[];
     complementary_tests?: { code: string; name: string; quantity: number }[];
     complementary_tests_reason?: string;
+    samples?: Case['samples'];
 };
 
 function toTranscriptionBody(data: TranscriptionData): Record<string, unknown> {
@@ -204,6 +205,7 @@ function toTranscriptionBody(data: TranscriptionData): Record<string, unknown> {
     if (data.diagnosis_images !== undefined) body.diagnosis_images = data.diagnosis_images;
     if (data.complementary_tests !== undefined) body.complementary_tests = data.complementary_tests;
     if (data.complementary_tests_reason !== undefined) body.complementary_tests_reason = data.complementary_tests_reason;
+    if (data.samples !== undefined) body.samples = data.samples;
     return body;
 }
 

@@ -609,6 +609,7 @@ class CaseRepository:
         complementary_tests_reason: str | None = None,
         approval_state: str | None = None,
         audit_action: str = "transcribed",
+        samples: list | None = None,
     ) -> Optional[dict]:
         """Actualiza result y opcionalmente state del caso."""
         try:
@@ -631,6 +632,8 @@ class CaseRepository:
             set_data["complementary_tests_reason"] = complementary_tests_reason
         if approval_state is not None:
             set_data["approval_state"] = approval_state
+        if samples is not None:
+            set_data["samples"] = samples
         # Upsert condicional en date_info según la acción
         current_date_info = doc.get("date_info") or []
         current_date_info = _update_date_info(current_date_info, "update_at", now)

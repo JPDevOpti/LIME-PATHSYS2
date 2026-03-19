@@ -130,6 +130,7 @@ class CaseTranscriptionUpdate(BaseModel):
     diagnosis_images: Optional[list[str]] = None
     complementary_tests: Optional[list[ComplementaryTestSchema]] = None
     complementary_tests_reason: Optional[str] = None
+    samples: Optional[list[SampleInfoSchema]] = None
 
 
 # Update

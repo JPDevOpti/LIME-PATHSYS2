@@ -3,10 +3,11 @@
 import { BaseCard } from '@/shared/components/base/BaseCard';
 import { RichTextEditor } from '@/shared/components/ui/form';
 import { MethodSection } from './MethodSection';
+import { BodyRegionSection } from './BodyRegionSection';
 import { DiseaseSearch } from './DiseaseSearch';
 import { DiagnosisImagesPanel } from './DiagnosisImagesPanel';
 import type { ResultEditorSection, ResultSections, CIE10Diagnosis, CIEODiagnosis } from '../types/results.types';
-import { AssignedPathologist } from '@/features/cases/types/case.types';
+import { AssignedPathologist, SampleInfo } from '@/features/cases/types/case.types';
 import { clsx } from 'clsx';
 import { UserPlus } from 'lucide-react';
 
@@ -34,6 +35,8 @@ interface SignResultEditorProps {
     cieo: CIEODiagnosis | null;
     onCie10Change: (value: CIE10Diagnosis | null) => void;
     onCieoChange: (value: CIEODiagnosis | null) => void;
+    samples?: SampleInfo[];
+    onSamplesChange?: (samples: SampleInfo[]) => void;
     showValidation?: boolean;
     disabled?: boolean;
     footer?: React.ReactNode;
@@ -53,6 +56,8 @@ export function SignResultEditor({
     cieo,
     onCie10Change,
     onCieoChange,
+    samples = [],
+    onSamplesChange,
     showValidation = false,
     disabled = false,
     footer,
@@ -173,12 +178,21 @@ export function SignResultEditor({
 
             <div className="flex-1 p-6 min-h-[320px]">
                 {activeSection === 'method' ? (
-                    <MethodSection
-                        value={sections.method || []}
-                        onChange={(v) => updateSection('method', v)}
-                        showValidation={showValidation}
-                        disabled={disabled}
-                    />
+                    <div className="space-y-6">
+                        <MethodSection
+                            value={sections.method || []}
+                            onChange={(v) => updateSection('method', v)}
+                            showValidation={showValidation}
+                            disabled={disabled}
+                        />
+                        {onSamplesChange && (
+                            <BodyRegionSection
+                                samples={samples}
+                                onChange={onSamplesChange}
+                                disabled={disabled}
+                            />
+                        )}
+                    </div>
                 ) : activeSection === 'cie' ? (
                     <div className="min-h-[320px]">
                         <DiseaseSearch

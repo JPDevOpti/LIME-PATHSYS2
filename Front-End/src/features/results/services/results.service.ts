@@ -86,6 +86,7 @@ export const resultsService = {
             complementaryTests?: { code: string; name: string; quantity: number }[];
             complementaryTestsReason?: string;
             diagnosisImages?: string[];
+            samples?: Case['samples'];
         }
     ): Promise<Case | null> {
         const existing = await caseService.getCaseByCode(caseCode);
@@ -100,6 +101,7 @@ export const resultsService = {
             diagnosis_images: data.diagnosisImages,
             complementary_tests: data.complementaryTests,
             complementary_tests_reason: data.complementaryTestsReason,
+            samples: data.samples,
         };
         return await caseService.signCase(existing.id, payload);
     },

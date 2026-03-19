@@ -1,3 +1,5 @@
+import { SampleInfo } from '@/features/cases/types/case.types';
+
 export type ResultEditorSection = 'method' | 'macro' | 'micro' | 'diagnosis' | 'images' | 'cie';
 
 export interface ResultSections {
@@ -25,6 +27,7 @@ export interface UpdateResultRequest {
     cieo_diagnosis?: CIEODiagnosis | null;
     complementary_tests?: ComplementaryTest[];
     complementary_tests_reason?: string;
+    samples?: SampleInfo[];
 }
 
 export interface CIE10Diagnosis {

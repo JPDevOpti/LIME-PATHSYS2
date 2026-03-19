@@ -226,11 +226,12 @@ class CaseService:
         if not existing:
             raise not_found_exception("Case", id)
         payload = data.model_dump(exclude_none=True)
+        samples = payload.pop("samples", None)
         existing_result = existing.get("result") or {}
         merged = {**existing_result, **payload}
         new_state = None if skip_state_update else self._compute_transcription_state(merged)
         result = self._repo.update_transcription(
-            id, merged, new_state, updated_by_email=updated_by_email, updated_by_name=updated_by_name, audit_action="transcribed"
+            id, merged, new_state, updated_by_email=updated_by_email, updated_by_name=updated_by_name, audit_action="transcribed", samples=samples
         )
         if not result:
             raise not_found_exception("Case", id)
@@ -280,6 +281,7 @@ class CaseService:
                 detail="Solo el administrador o el patologo asignado pueden firmar este caso",
             )
         payload = data.model_dump(exclude_none=True)
+        samples = payload.pop("samples", None)
         complementary_tests = payload.pop("complementary_tests", None)
         complementary_tests_reason = payload.pop("complementary_tests_reason", None)
         existing_result = existing.get("result") or {}
@@ -295,6 +297,7 @@ class CaseService:
             complementary_tests_reason=complementary_tests_reason,
             approval_state=approval_state,
             audit_action="signed",
+            samples=samples,
         )
         if not result:
             raise not_found_exception("Case", id)
