@@ -73,6 +73,7 @@ export interface CaseFilters {
     doctor?: string;
     patient_id?: string;
     identification_number?: string;
+    opportunity?: 'fuera' | 'dentro' | '';
     sort_by?: CaseSortKey;
     sort_order?: 'asc' | 'desc';
     skip?: number;

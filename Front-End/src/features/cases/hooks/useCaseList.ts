@@ -19,6 +19,7 @@ export interface CaseListFilters {
     status: CaseStatus | '';
     patientId: string;
     identificationNumber: string;
+    opportunity: 'fuera' | 'dentro' | '';
 }
 
 const defaultFilters: CaseListFilters = {
@@ -33,6 +34,7 @@ const defaultFilters: CaseListFilters = {
     status: '',
     patientId: '',
     identificationNumber: '',
+    opportunity: '',
 };
 
 export function makeDefaultFilters(overrides?: Partial<CaseListFilters>): CaseListFilters {
@@ -52,6 +54,7 @@ function toCaseFilters(f: CaseListFilters): CaseFilters {
         status: f.status || undefined,
         patient_id: f.patientId.trim() || undefined,
         identification_number: f.identificationNumber.trim() || undefined,
+        opportunity: f.opportunity || undefined,
     };
 }
 

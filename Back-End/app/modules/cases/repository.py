@@ -3,7 +3,7 @@ import re
 from datetime import datetime, timedelta, UTC
 from typing import Any, Optional
 
-from app.core.business_days import calculate_opportunity_days
+from app.core.business_days import calculate_opportunity_days, get_business_days_cutoff
 from app.core.date_utils import format_iso_datetime
 
 from bson import ObjectId
@@ -354,6 +354,7 @@ class CaseRepository:
         doctor: Optional[str] = None,
         patient_id: Optional[str] = None,
         identification_number: Optional[str] = None,
+        opportunity: Optional[str] = None,
         sort_by: Optional[str] = None,
         sort_order: str = "desc",
         skip: int = 0,
@@ -382,13 +383,13 @@ class CaseRepository:
                 end = datetime.fromisoformat(created_at_to.replace("Z", "+00:00"))
                 end = end.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
                 q["$lt"] = end
-            query["date_info.0.created_at"] = q
+            and_conditions.append({"date_info.0.created_at": q})
 
         if entity and entity.strip():
-            query["entity.name"] = _contains_regex(entity.strip())
+            and_conditions.append({"entity.name": _contains_regex(entity.strip())})
 
         if assigned_pathologist and assigned_pathologist.strip():
-            query["assigned_pathologist.name"] = _contains_regex(assigned_pathologist.strip())
+            and_conditions.append({"assigned_pathologist.name": _contains_regex(assigned_pathologist.strip())})
 
         if pathologist_name and pathologist_name.strip():
             name = pathologist_name.strip()
@@ -400,13 +401,13 @@ class CaseRepository:
             })
 
         if priority and priority.strip():
-            query["priority"] = priority.strip().capitalize()
+            and_conditions.append({"priority": priority.strip().capitalize()})
 
         if state and state.strip():
-            query["state"] = state.strip()
+            and_conditions.append({"state": state.strip()})
 
         if doctor and doctor.strip():
-            query["requesting_physician"] = _contains_regex(doctor.strip())
+            and_conditions.append({"requesting_physician": _contains_regex(doctor.strip())})
 
         if test and test.strip():
             and_conditions.append({"samples.tests.test_code": test.strip()})
@@ -418,7 +419,55 @@ class CaseRepository:
                 pass
 
         if identification_number and identification_number.strip():
-            query["patient_info.identification_number"] = identification_number.strip()
+            and_conditions.append({"patient_info.identification_number": identification_number.strip()})
+
+        if opportunity and opportunity.strip():
+            opp_val = opportunity.strip().lower()
+            now = datetime.now(UTC)
+            
+            # Get cutoff dates for common max_opportunity_times
+            cutoff_5 = get_business_days_cutoff(now, 5)
+            cutoff_8 = get_business_days_cutoff(now, 8)
+            cutoff_12 = get_business_days_cutoff(now, 12)
+            
+            # Filter for in-progress cases outside opportunity
+            in_progress_fuera = {
+                "state": {"$nin": ["Completado", "Por entregar"]},
+                "$or": [
+                    {"opportunity_info.max_opportunity_time": 5, "date_info.0.created_at": {"$lt": cutoff_5}},
+                    {"opportunity_info.max_opportunity_time": 8, "date_info.0.created_at": {"$lt": cutoff_8}},
+                    {"opportunity_info.max_opportunity_time": 12, "date_info.0.created_at": {"$lt": cutoff_12}},
+                    {"opportunity_info.max_opportunity_time": {"$nin": [5, 8, 12]}, "date_info.0.created_at": {"$lt": cutoff_5}}
+                ]
+            }
+            
+            # Filter for in-progress cases inside opportunity
+            in_progress_dentro = {
+                "state": {"$nin": ["Completado", "Por entregar"]},
+                "$or": [
+                    {"opportunity_info.max_opportunity_time": 5, "date_info.0.created_at": {"$gte": cutoff_5}},
+                    {"opportunity_info.max_opportunity_time": 8, "date_info.0.created_at": {"$gte": cutoff_8}},
+                    {"opportunity_info.max_opportunity_time": 12, "date_info.0.created_at": {"$gte": cutoff_12}},
+                    {"opportunity_info.max_opportunity_time": {"$nin": [5, 8, 12]}, "date_info.0.created_at": {"$gte": cutoff_5}}
+                ]
+            }
+
+            if opp_val == "fuera":
+                and_conditions.append({
+                    "$or": [
+                        {"opportunity_info.was_timely": False},
+                        {"was_timely": False},
+                        in_progress_fuera
+                    ]
+                })
+            elif opp_val == "dentro":
+                and_conditions.append({
+                    "$or": [
+                        {"opportunity_info.was_timely": True},
+                        {"was_timely": True},
+                        in_progress_dentro
+                    ]
+                })
 
         if current_user:
             role = str(current_user.get("role", "")).lower()

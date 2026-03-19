@@ -150,7 +150,8 @@ function CasesListInner({ isRestrictedView, lockedPathologist, lockedIdentificat
         (!lockedPathologist && (!!filters.pathologist || !!filters.pathologistName)) ||
         !!filters.priority ||
         !!filters.test ||
-        !!filters.status;
+        !!filters.status ||
+        !!filters.opportunity;
 
     const noResultsMessage = hasActiveFilters
         ? 'No se encontraron casos con los filtros aplicados'

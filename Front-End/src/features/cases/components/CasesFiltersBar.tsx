@@ -28,6 +28,12 @@ interface CasesFiltersBarProps {
     onDeliverSelected?: () => void;
 }
 
+const OPPORTUNITY_OPTIONS = [
+    { value: '', label: 'Todos' },
+    { value: 'fuera', label: 'Fuera' },
+    { value: 'dentro', label: 'Dentro' },
+];
+
 const PRIORITY_OPTIONS = [
     { value: '', label: 'Todas' },
     { value: 'normal', label: 'Normal' },
@@ -124,6 +130,18 @@ export function CasesFiltersBar({
                                 type="date"
                                 value={localFilters.dateTo}
                                 onChange={e => handleLocalChange({ dateTo: e.target.value })}
+                            />
+                        </FormField>
+                        <FormField label="Oportunidad">
+                            <Select
+                                value={localFilters.opportunity}
+                                onChange={e =>
+                                    handleLocalChange({
+                                        opportunity: e.target.value as '' | 'fuera' | 'dentro'
+                                    })
+                                }
+                                options={OPPORTUNITY_OPTIONS}
+                                title="Para casos en proceso, el cálculo se realiza hasta el día de hoy"
                             />
                         </FormField>
                     </div>

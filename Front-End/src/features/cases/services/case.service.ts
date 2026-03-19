@@ -175,6 +175,7 @@ function buildCaseParams(filters?: CaseFilters): Record<string, string | number 
         doctor: filters?.doctor,
         patient_id: filters?.patient_id,
         identification_number: filters?.identification_number,
+        opportunity: filters?.opportunity,
         sort_by: filters?.sort_by,
         sort_order: filters?.sort_order,
     };

@@ -1,4 +1,4 @@
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 
 def get_easter_date(year):
     """Calculates Easter Sunday for a given year using the Butcher's algorithm."""
@@ -82,9 +82,6 @@ def calculate_opportunity_days(start_dt: datetime, end_dt: datetime) -> int:
     # Iterate through days
     temp_date = current_date
     while temp_date < end_date:
-        # Move to next day first? 
-        # Usually, if it arrives on Monday and finishes on Tuesday, it's 1 day.
-        # If it arrives on Monday and finishes on Monday, it's 0 days.
         temp_date += timedelta(days=1)
         
         # Check if it's a weekend (5=Saturday, 6=Sunday)
@@ -98,3 +95,26 @@ def calculate_opportunity_days(start_dt: datetime, end_dt: datetime) -> int:
         business_days += 1
             
     return business_days
+
+def get_business_days_cutoff(end_dt: datetime, max_days: int) -> datetime:
+    """
+    Calculates the earliest date 'D' such that the number of business days 
+    between 'D' and 'end_dt' is exactly 'max_days'.
+    Used to filter in-progress cases.
+    """
+    target_date = end_dt.date()
+    found_business_days = 0
+    
+    # Pre-calculate holidays for this year and previous (safety)
+    holidays = get_colombian_holidays(target_date.year)
+    holidays.update(get_colombian_holidays(target_date.year - 1))
+    
+    current = target_date
+    while found_business_days < max_days:
+        current -= timedelta(days=1)
+        
+        # Check if 'current' is a business day
+        if current.weekday() < 5 and current not in holidays:
+            found_business_days += 1
+            
+    return datetime(current.year, current.month, current.day, tzinfo=timezone.utc if end_dt.tzinfo else None)
