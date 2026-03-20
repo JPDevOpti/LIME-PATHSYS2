@@ -141,7 +141,6 @@ export function CasesFiltersBar({
                                     })
                                 }
                                 options={OPPORTUNITY_OPTIONS}
-                                title="Para casos en proceso, el cálculo se realiza hasta el día de hoy"
                             />
                         </FormField>
                     </div>
