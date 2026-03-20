@@ -787,7 +787,6 @@ class CaseRepository:
         try:
             oid = ObjectId(patient_id)
         except Exception:
-            print(f"[SYNC] Invalid patient_id: {patient_id}")
             return 0
         info = _patient_to_patient_info(patient)
 
@@ -804,8 +803,6 @@ class CaseRepository:
             if age is not None:
                 set_fields["patient_info.age_at_diagnosis"] = age
 
-        print(f"[SYNC] patient_id={patient_id}, birth_date={birth_date_raw}, set_fields keys={list(set_fields.keys())}")
-
         if not set_fields:
             return 0
 
@@ -815,15 +812,10 @@ class CaseRepository:
             {"patient_info.patient_id": patient_id},
         ]}
 
-        # Check how many cases match
-        match_count = self._coll.count_documents(patient_id_filter)
-        print(f"[SYNC] Cases matching patient_id={patient_id}: {match_count}")
-
         result = self._coll.update_many(
             patient_id_filter,
             {"$set": set_fields},
         )
-        print(f"[SYNC] Modified {result.modified_count} cases")
         return result.modified_count
 
     @staticmethod
