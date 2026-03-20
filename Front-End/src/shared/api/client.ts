@@ -64,7 +64,7 @@ function getAuthHeaders(): Record<string, string> {
 export function buildApiUrl(path: string, params?: Record<string, string | number | undefined>): string {
   if (!BASE_URL) {
     throw new Error(
-      "NEXT_PUBLIC_API_URL no está configurado. Crea Front-End/.env.local con NEXT_PUBLIC_API_URL=http://localhost:8001",
+      "NEXT_PUBLIC_API_URL no está configurado. Crea Front-End/.env.local con NEXT_PUBLIC_API_URL=http://localhost:8002",
     );
   }
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;

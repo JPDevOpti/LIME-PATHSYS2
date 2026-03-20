@@ -1,6 +1,6 @@
 import copy
 import re
-from datetime import datetime, timedelta, UTC
+from datetime import date, datetime, timedelta, UTC
 from typing import Any, Optional
 
 from app.core.business_days import calculate_opportunity_days, get_business_days_cutoff
@@ -787,24 +787,59 @@ class CaseRepository:
         try:
             oid = ObjectId(patient_id)
         except Exception:
+            print(f"[SYNC] Invalid patient_id: {patient_id}")
             return 0
         info = _patient_to_patient_info(patient)
-        
-        # We don't overwrite the whole patient_info object because it contains the frozen age and misses birth_date.
-        # So we only set specific fields.
+
         set_fields = {}
         for k, v in info.items():
-            if k not in ("birth_date", "age", "patient_id"):
-                set_fields[f"patient_info.{k}"] = v
-                
+            if k in ("age", "patient_id"):
+                continue
+            set_fields[f"patient_info.{k}"] = v
+
+        # Recalculate age_at_diagnosis from birth_date
+        birth_date_raw = patient.get("birth_date")
+        if birth_date_raw is not None:
+            age = self._calculate_age_from_birth(birth_date_raw)
+            if age is not None:
+                set_fields["patient_info.age_at_diagnosis"] = age
+
+        print(f"[SYNC] patient_id={patient_id}, birth_date={birth_date_raw}, set_fields keys={list(set_fields.keys())}")
+
         if not set_fields:
             return 0
-            
-        # We don't update date_info here to avoid complexity in update_many, 
-        # but we remove the redundant top-level updated_at.
-        
-        result = self._coll.update_many(
+
+        # patient_id may be stored as ObjectId or string depending on when the case was created
+        patient_id_filter = {"$or": [
             {"patient_info.patient_id": oid},
+            {"patient_info.patient_id": patient_id},
+        ]}
+
+        # Check how many cases match
+        match_count = self._coll.count_documents(patient_id_filter)
+        print(f"[SYNC] Cases matching patient_id={patient_id}: {match_count}")
+
+        result = self._coll.update_many(
+            patient_id_filter,
             {"$set": set_fields},
         )
+        print(f"[SYNC] Modified {result.modified_count} cases")
         return result.modified_count
+
+    @staticmethod
+    def _calculate_age_from_birth(birth_date_raw) -> int | None:
+        """Calcula edad en años completos a partir de la fecha de nacimiento."""
+        try:
+            if isinstance(birth_date_raw, datetime):
+                birth = birth_date_raw.date()
+            elif isinstance(birth_date_raw, date):
+                birth = birth_date_raw
+            elif isinstance(birth_date_raw, str) and birth_date_raw.strip():
+                birth = date.fromisoformat(str(birth_date_raw).strip()[:10])
+            else:
+                return None
+            today = date.today()
+            return (today.year - birth.year
+                    - ((today.month, today.day) < (birth.month, birth.day)))
+        except Exception:
+            return None

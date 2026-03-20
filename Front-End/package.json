@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "NODE_OPTIONS=--max-old-space-size=2048 next dev --webpack -p 3001",
-    "dev:turbo": "next dev -p 3001",
+    "dev": "NODE_OPTIONS=--max-old-space-size=2048 next dev --webpack -p 3002",
+    "dev:turbo": "next dev -p 3002",
     "build": "next build",
-    "start": "next start -p 3001",
+    "start": "next start -p 3002",
     "lint": "next lint --dir ./",
     "type-check": "tsc --noEmit"
   },

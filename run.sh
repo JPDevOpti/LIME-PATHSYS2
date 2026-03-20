@@ -69,7 +69,7 @@ write_backend_env() {
         echo "MONGODB_URI=$mongodb_uri"
         echo "DATABASE_NAME=$DATABASE_NAME"
         echo "ENVIRONMENT=development"
-        echo "CORS_ORIGINS=http://localhost:3001,http://127.0.0.1:3001"
+        echo "CORS_ORIGINS=http://localhost:3002,http://127.0.0.1:3002"
         if [ -n "$secret_key" ]; then
             echo "SECRET_KEY=$secret_key"
         fi
@@ -129,7 +129,7 @@ start_services() {
         local)
             backend_uri="$LOCAL_MONGODB_URI"
             write_backend_env "$backend_uri" "local"
-            write_frontend_env "http://localhost:8001"
+            write_frontend_env "http://localhost:8002"
             ;;
         atlas)
             load_atlas_config
@@ -141,7 +141,7 @@ start_services() {
             fi
             backend_uri="$ATLAS_MONGODB_URI"
             write_backend_env "$backend_uri" "atlas"
-            write_frontend_env "http://localhost:8001"
+            write_frontend_env "http://localhost:8002"
             ;;
         *)
             echo "Error: modo desconocido '$mode'"
@@ -149,19 +149,19 @@ start_services() {
             ;;
     esac
 
-    log "Iniciando Back-End en puerto 8001 (modo: $mode)"
+    log "Iniciando Back-End en puerto 8002 (modo: $mode)"
     # Todas las variables críticas se pasan explícitamente al proceso
     (cd "$BACK_DIR" && \
         MONGODB_URI="$backend_uri" \
         DATABASE_NAME="$DATABASE_NAME" \
         ENVIRONMENT=development \
-        CORS_ORIGINS="http://localhost:3001,http://127.0.0.1:3001,http://0.0.0.0:3001" \
+        CORS_ORIGINS="http://localhost:3002,http://127.0.0.1:3002,http://0.0.0.0:3002" \
         .venv/bin/python run.py 2>&1) &
     local backend_pid=$!
 
-    # Esperar hasta que el puerto 8001 esté activo (máx 15 seg)
+    # Esperar hasta que el puerto 8002 esté activo (máx 15 seg)
     local i=0
-    while ! lsof -ti:8001 >/dev/null 2>&1; do
+    while ! lsof -ti:8002 >/dev/null 2>&1; do
         i=$((i + 1))
         if [ "$i" -ge 30 ]; then
             echo "Error: el Back-End no levantó en 15 segundos. Revisa los logs."
@@ -171,10 +171,10 @@ start_services() {
     done
     log "Back-End listo (PID $backend_pid)"
 
-    log "Iniciando Front-End en puerto 3001"
+    log "Iniciando Front-End en puerto 3002"
     (cd "$FRONT_DIR" && npm run dev) &
 
-    log "Servicios activos → Front-End: http://localhost:3001 | Back-End: http://localhost:8001"
+    log "Servicios activos → Front-End: http://localhost:3002 | Back-End: http://localhost:8002"
 }
 
 wait_port_free() {
@@ -213,15 +213,14 @@ stop_services() {
     rm -f "$SCRIPT_DIR/.pathsys.pids" 2>/dev/null || true
 
     pkill -f "$BACK_DIR/.venv/bin/python run.py" 2>/dev/null || true
-    pkill -f "uvicorn.*8001" 2>/dev/null || true
+    pkill -f "uvicorn.*8002" 2>/dev/null || true
     pkill -f "$FRONT_DIR/node_modules/.bin/next dev" 2>/dev/null || true
     pkill -f "next dev" 2>/dev/null || true
-    pkill -f "node.*3001" 2>/dev/null || true
+    pkill -f "node.*3002" 2>/dev/null || true
 
     # Asegurar que los puertos queden completamente libres
-    wait_port_free 8001
-    wait_port_free 3001
-    wait_port_free 3000
+    wait_port_free 8002
+    wait_port_free 3002
 
     log "Servicios detenidos"
 }

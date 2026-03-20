@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     mongodb_uri: str = "mongodb://localhost:27017"
     database_name: str = "pathsys"
     api_host: str = "0.0.0.0"
-    api_port: int = 8001
+    api_port: int = 8002
 
     # JWT
     secret_key: str = ""
