@@ -21,7 +21,8 @@ const DOCUMENT_TYPE_OPTIONS = [
     { value: 'TI', label: 'Tarjeta de Identidad' },
     { value: 'CE', label: 'Cedula de Extranjeria' },
     { value: 'PA', label: 'Pasaporte' },
-    { value: 'RC', label: 'Registro Civil' }
+    { value: 'RC', label: 'Registro Civil' },
+    { value: 'PT', label: 'Permiso Temporal' }
 ];
 
 const TEST_TYPE_OPTIONS = [

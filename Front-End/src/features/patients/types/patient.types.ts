@@ -8,7 +8,8 @@ export type IdentificationType =
     | 'SC'
     | 'NIT'
     | 'CD'
-    | 'NN';
+    | 'NN'
+    | 'PT';
 
 export const IDENTIFICATION_TYPE_OPTIONS: { value: IdentificationType; label: string }[] = [
     { value: 'CC', label: 'Cédula de Ciudadanía' },
@@ -20,7 +21,8 @@ export const IDENTIFICATION_TYPE_OPTIONS: { value: IdentificationType; label: st
     { value: 'SC', label: 'Salvoconducto' },
     { value: 'NIT', label: 'NIT' },
     { value: 'CD', label: 'Carnet Diplomático' },
-    { value: 'NN', label: 'NN' }
+    { value: 'NN', label: 'NN' },
+    { value: 'PT', label: 'Permiso Temporal' }
 ];
 
 export type Gender = 'Masculino' | 'Femenino';

@@ -2,7 +2,7 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
 
-IdentificationTypeStr = Literal["CC", "TI", "RC", "PA", "CE", "DE", "SC", "NIT", "CD", "NN"]
+IdentificationTypeStr = Literal["CC", "TI", "RC", "PA", "CE", "DE", "SC", "NIT", "CD", "NN", "PT"]
 
 
 class AuditEntrySchema(BaseModel):
