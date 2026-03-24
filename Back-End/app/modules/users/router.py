@@ -96,19 +96,34 @@ def list_users(
     include_signature: bool = Query(False),
     service: UsersService = Depends(get_users_service),
 ):
+    # Proyección ligera para el listado general (evita firmas y datos pesados)
+    fields = [
+        "id", "name", "email", "role", "is_active", "created_at", 
+        "administrator_code", "pathologist_code", "resident_code", 
+        "auxiliar_code", "initials", "medical_license"
+    ] if not include_signature else None
+
+    # EXCLUSIÓN TOTAL: Este endpoint es para gestión de personal. 
+    # Los pacientes tienen su propio módulo y NUNCA deben aparecer aquí.
     return UserListResponse(**service.list_users(
         search=search, 
         role=role, 
         is_active=is_active, 
         skip=skip, 
         limit=limit,
-        include_signature=include_signature
+        include_signature=include_signature,
+        fields=fields,
+        exclude_role="paciente"
     ))
 
 
 @router.get("/{id}", response_model=UserResponse)
-def get_user(id: str, service: UsersService = Depends(get_users_service)):
-    return UserResponse(**service.get_by_id(id))
+def get_user(
+    id: str, 
+    include_signature: bool = Query(True),
+    service: UsersService = Depends(get_users_service)
+):
+    return UserResponse(**service.get_by_id(id, include_signature=include_signature))
 
 
 @router.post("", response_model=UserResponse, status_code=201)

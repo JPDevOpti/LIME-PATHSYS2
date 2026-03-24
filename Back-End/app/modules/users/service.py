@@ -47,6 +47,7 @@ class UsersService:
         limit: int = 100,
         include_signature: bool = True,
         fields: Optional[list[str]] = None,
+        exclude_role: Optional[str] = None,
     ) -> dict[str, Any]:
         data, total = self._repo.find_many(
             search=search, 
@@ -55,12 +56,13 @@ class UsersService:
             skip=skip, 
             limit=limit,
             include_signature=include_signature,
-            fields=fields
+            fields=fields,
+            exclude_role=exclude_role
         )
         return {"data": data, "total": total}
 
-    def get_by_id(self, user_id: str) -> dict[str, Any]:
-        user = self._repo.find_by_id(user_id)
+    def get_by_id(self, user_id: str, include_signature: bool = True) -> dict[str, Any]:
+        user = self._repo.find_by_id(user_id, include_signature=include_signature)
         if not user:
             raise not_found_exception("User", user_id)
         return user

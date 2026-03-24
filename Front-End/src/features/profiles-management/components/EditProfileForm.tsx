@@ -56,9 +56,10 @@ function fromProfile(p: Profile): EditProfileFormState {
 interface EditProfileFormProps {
     state: EditProfileFormState;
     onChange: (updates: Partial<EditProfileFormState>) => void;
+    loadingSignature?: boolean;
 }
 
-export function EditProfileForm({ state, onChange }: EditProfileFormProps) {
+export function EditProfileForm({ state, onChange, loadingSignature = false }: EditProfileFormProps) {
     const { role } = state;
 
     return (
@@ -175,10 +176,20 @@ export function EditProfileForm({ state, onChange }: EditProfileFormProps) {
             </div>
 
             {(role === 'patologo' || role === 'residente') && (
-                <SignatureManager
-                    currentUrl={state.signature || null}
-                    onChange={(base64) => onChange({ signature: base64 ?? '' })}
-                />
+                <div className="relative">
+                    {loadingSignature && (
+                        <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-[1px] flex flex-col items-center justify-center rounded-xl border border-dashed border-lime-300">
+                            <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-sm border border-lime-100">
+                                <div className="h-4 w-4 border-2 border-lime-600 border-t-transparent animate-spin rounded-full" />
+                                <span className="text-sm font-semibold text-lime-700">Cargando firma digital...</span>
+                            </div>
+                        </div>
+                    )}
+                    <SignatureManager
+                        currentUrl={state.signature || null}
+                        onChange={(base64) => onChange({ signature: base64 ?? '' })}
+                    />
+                </div>
             )}
 
             <label className="flex items-center gap-2">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { CheckCircle } from 'lucide-react';
 import { ProfilesFilters } from './ProfilesFilters';
 import { ProfilesTable } from './ProfilesTable';
@@ -19,17 +19,9 @@ const INITIAL_FILTERS: ProfileFilters = {
 
 const DEFAULT_PAGE_SIZE = 20;
 
-function formatDateStr(s?: string): string {
-    if (!s) return '';
-    try {
-        return new Date(s).toISOString().slice(0, 10);
-    } catch {
-        return s;
-    }
-}
-
 export function ProfilesList() {
     const [profiles, setProfiles] = useState<Profile[]>([]);
+    const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
     const [loadError, setLoadError] = useState<string | null>(null);
     const [showSuccessToast, setShowSuccessToast] = useState(false);
@@ -39,85 +31,46 @@ export function ProfilesList() {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [editProfile, setEditProfile] = useState<Profile | null>(null);
 
-    const loadProfiles = async () => {
+    const loadProfiles = useCallback(async () => {
         setLoading(true);
         setLoadError(null);
         try {
-            setProfiles([]);
-            await profilesService.listProgressive({
-                pageSize: 500,
-                concurrency: 4,
-                onChunk: (chunk) => {
-                    setProfiles((prev) => {
-                        const merged = prev.concat(chunk);
-                        const seen = new Set<string>();
-                        const out: Profile[] = [];
-                        for (const p of merged) {
-                            const id = (p.id || '').trim();
-                            if (!id) continue;
-                            if (seen.has(id)) continue;
-                            seen.add(id);
-                            out.push(p);
-                        }
-                        return out;
-                    });
-                },
+            const skip = (currentPage - 1) * itemsPerPage;
+            
+            // Mapeo de filtros de UI a parámetros de API
+            let isActive: boolean | undefined = undefined;
+            if (filters.status === 'activo') isActive = true;
+            else if (filters.status === 'inactivo') isActive = false;
+
+            const response = await profilesService.list({
+                skip,
+                limit: itemsPerPage,
+                search: filters.searchQuery,
+                role: filters.role,
+                is_active: isActive
             });
+
+            setProfiles(response.data);
+            setTotal(response.total);
         } catch (e) {
             const msg = e instanceof Error ? e.message : 'Error al cargar perfiles';
             setLoadError(msg);
             setProfiles([]);
+            setTotal(0);
         } finally {
             setLoading(false);
         }
-    };
+    }, [currentPage, itemsPerPage, filters]);
 
     useEffect(() => {
         loadProfiles();
-    }, []);
+    }, [loadProfiles]);
 
-    const filteredProfiles = useMemo(() => {
-        let result = profiles.filter((p) => p.role !== 'paciente');
-
-        const q = filters.searchQuery.trim().toLowerCase();
-        if (q) {
-            result = result.filter(
-                (p) =>
-                    p.name?.toLowerCase().includes(q) ||
-                    p.email?.toLowerCase().includes(q) ||
-                    p.code?.toLowerCase().includes(q)
-            );
-        }
-
-        if (filters.role) {
-            result = result.filter((p) => p.role === filters.role);
-        }
-
-        if (filters.dateFrom) {
-            result = result.filter((p) => formatDateStr(p.createdAt) >= filters.dateFrom);
-        }
-
-        if (filters.dateTo) {
-            result = result.filter((p) => formatDateStr(p.createdAt) <= filters.dateTo);
-        }
-
-        if (filters.status === 'activo') {
-            result = result.filter((p) => p.isActive !== false);
-        } else if (filters.status === 'inactivo') {
-            result = result.filter((p) => p.isActive === false);
-        }
-
-        return result;
-    }, [profiles, filters]);
-
-    const totalPages = Math.max(1, Math.ceil(filteredProfiles.length / itemsPerPage));
-    const paginatedProfiles = useMemo(() => {
-        const start = (currentPage - 1) * itemsPerPage;
-        return filteredProfiles.slice(start, start + itemsPerPage);
-    }, [filteredProfiles, currentPage, itemsPerPage]);
+    const totalPages = Math.max(1, Math.ceil(total / itemsPerPage));
 
     const handleSearch = () => {
         setCurrentPage(1);
+        loadProfiles();
     };
 
     const handleClear = () => {
@@ -190,8 +143,8 @@ export function ProfilesList() {
                     </div>
                 ) : (
                     <ProfilesTable
-                        profiles={paginatedProfiles}
-                        total={filteredProfiles.length}
+                        profiles={profiles}
+                        total={total}
                         currentPage={currentPage}
                         totalPages={totalPages}
                         itemsPerPage={itemsPerPage}
@@ -201,9 +154,9 @@ export function ProfilesList() {
                         onInactivate={handleInactivate}
                         onActivate={handleActivate}
                         noResultsMessage={
-                            profiles.length === 0
-                                ? 'No hay perfiles creados. Cree uno nuevo para comenzar.'
-                                : 'No se encontraron perfiles con los filtros aplicados.'
+                            total === 0
+                                ? 'No se encontraron perfiles con los filtros aplicados.'
+                                : 'Cargando perfiles...'
                         }
                     />
                 )}

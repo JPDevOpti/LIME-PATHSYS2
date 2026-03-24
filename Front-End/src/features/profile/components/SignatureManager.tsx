@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { BaseCard } from '@/shared/components/base';
 import { Upload, Trash2 } from 'lucide-react';
 import { clsx } from 'clsx';
@@ -36,6 +36,15 @@ export function SignatureManager({ currentUrl = '', onChange, onSaved, userId }:
     const [previewUrl, setPreviewUrl] = useState<string | null>(
         currentUrl && currentUrl.trim() !== '' ? currentUrl : null
     );
+
+    // Sincronizar estado interno si el prop cambia desde afuera (ej. carga en segundo plano)
+    useEffect(() => {
+        if (currentUrl && currentUrl.trim() !== '') {
+            setPreviewUrl(currentUrl);
+        } else if (currentUrl === null || currentUrl === '') {
+            setPreviewUrl(null);
+        }
+    }, [currentUrl]);
     const [isDragOver, setIsDragOver] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);

@@ -40,24 +40,48 @@ interface EditProfileModalProps {
 export function EditProfileModal({ profile, onClose, onSave }: EditProfileModalProps) {
     const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [loadingSignature, setLoadingSignature] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [state, setState] = useState<EditProfileFormState | null>(null);
 
     useEffect(() => {
         if (profile) {
+            // OPTIMIZACIÓN ULTRA: Seteamos el estado inicial con lo que ya tenemos del listado
+            // Esto hace que el modal abra INSTANTÁNEAMENTE con datos básicos.
+            setState(fromProfile(profile));
             setLoading(true);
             setError(null);
-            profilesService.get(profile.id)
+
+            // 1. Cargamos los detalles completos (observations, medical_license, etc) SIN la firma primero.
+            // Esto es muy rápido porque no viaja el Base64.
+            profilesService.get(profile.id, false)
                 .then((fullProfile) => {
                     if (fullProfile) {
                         setState(fromProfile(fullProfile));
-                    } else {
-                        setState(fromProfile(profile));
+                        
+                        // 2. Si es un rol clínico, cargamos la firma en SEGUNDO PLANO
+                        const role = String(fullProfile.role || '').toLowerCase();
+                        const isClinical = role.includes('patol') || role.includes('resid');
+                        
+                        if (isClinical) {
+                            setLoadingSignature(true);
+                            profilesService.get(profile.id, true)
+                                .then(withSig => {
+                                    // Verificamos que traiga algo que parezca una firma (base64 o URL)
+                                    if (withSig && typeof withSig.signature === 'string' && withSig.signature.length > 0) {
+                                        setState(prev => {
+                                            if (!prev) return null;
+                                            return { ...prev, signature: withSig.signature! };
+                                        });
+                                    }
+                                })
+                                .catch(err => console.error('Error loading signature:', err))
+                                .finally(() => setLoadingSignature(false));
+                        }
                     }
                 })
                 .catch((e) => {
                     console.error('Error fetching full profile:', e);
-                    setState(fromProfile(profile));
                 })
                 .finally(() => setLoading(false));
         } else {
@@ -128,13 +152,12 @@ export function EditProfileModal({ profile, onClose, onSave }: EditProfileModalP
                     </div>
                 )}
                 
-                {loading ? (
-                    <div className="flex flex-col items-center justify-center py-12 gap-3">
-                        <Loader2 className="h-8 w-8 animate-spin text-lime-600" />
-                        <p className="text-sm text-neutral-500 font-medium">Cargando datos completos del perfil...</p>
-                    </div>
-                ) : (
-                    state && <EditProfileForm state={state} onChange={handleChange} />
+                {state && (
+                    <EditProfileForm 
+                        state={state} 
+                        onChange={handleChange} 
+                        loadingSignature={loadingSignature}
+                    />
                 )}
             </div>
         </BaseModal>

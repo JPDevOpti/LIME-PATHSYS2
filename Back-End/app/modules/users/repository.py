@@ -27,6 +27,12 @@ class UsersRepository:
             self.collection.create_index("pathologist_code", name="idx_path_code")
             self.collection.create_index("resident_code", name="idx_res_code")
             self.collection.create_index("administrator_code", name="idx_admin_code")
+            
+            # Índice dedicado para el ordenamiento por nombre (crítico para la paginación)
+            self.collection.create_index("name", name="idx_user_name_sort")
+            
+            # Nuevo índice para soportar la exclusión de pacientes y filtrado por nombre de forma eficiente
+            self.collection.create_index([("role", 1), ("name", 1)], name="idx_role_name_perf")
         except Exception:
             pass
 
@@ -85,7 +91,8 @@ class UsersRepository:
         skip: int = 0,
         limit: int = 100,
         include_signature: bool = True,
-        fields: Optional[list[str]] = None
+        fields: Optional[list[str]] = None,
+        exclude_role: Optional[str] = None
     ) -> tuple[list[dict[str, Any]], int]:
         q: dict[str, Any] = {}
         if search and search.strip():
@@ -100,6 +107,8 @@ class UsersRepository:
                 {"visitante_code": {"$regex": s, "$options": "i"}},
                 {"auxiliar_code": {"$regex": s, "$options": "i"}},
             ]
+        
+        # Filtro de inclusión de rol
         if role:
             if role == "pathologist":
                 q["role"] = {"$in": ["pathologist", "patologo", "patólogo", "patóloga"]}
@@ -113,6 +122,36 @@ class UsersRepository:
                 q["role"] = {"$in": ["visitante", "billing"]}
             else:
                 q["role"] = role
+        
+        # Filtro de exclusión de rol
+        if exclude_role:
+            if exclude_role == "paciente":
+                # OPTIMIZACIÓN CRÍTICA: En lugar de $nin (que escanea), usamos $in con los roles de personal.
+                # Esto permite que MongoDB use el índice 'idx_role_name_perf' de forma mucho más eficiente.
+                staff_roles = [
+                    "administrator", "administrador", "admin",
+                    "pathologist", "patologo", "patólogo", "patóloga",
+                    "resident", "residente",
+                    "auxiliar", "recepcionista", "recepcion",
+                    "visitante", "billing"
+                ]
+                if "role" in q:
+                    # Si ya había un filtro de rol, nos aseguramos de no incluir paciente
+                    if isinstance(q["role"], dict) and "$in" in q["role"]:
+                        q["role"]["$in"] = [r for r in q["role"]["$in"] if r not in ["paciente", "patient", "PACIENTE"]]
+                    elif isinstance(q["role"], str) and q["role"] in ["paciente", "patient", "PACIENTE"]:
+                        q["role"] = {"$in": []} # Conflicto: se pide paciente pero se excluye
+                else:
+                    q["role"] = {"$in": staff_roles}
+            else:
+                # Caso general para otros roles
+                if "role" in q:
+                    if isinstance(q["role"], dict):
+                        q["role"].update({"$ne": exclude_role})
+                    else:
+                        q["role"] = {"$eq": q["role"], "$ne": exclude_role}
+                else:
+                    q["role"] = {"$ne": exclude_role}
 
         if is_active is True:
             # Optimización: si buscamos activos, preferimos { $ne: false } para incluir nulos 
@@ -135,12 +174,13 @@ class UsersRepository:
         data = [self._doc_to_dict(d) for d in cursor]
         return data, total
 
-    def find_by_id(self, user_id: str) -> Optional[dict[str, Any]]:
+    def find_by_id(self, user_id: str, include_signature: bool = True) -> Optional[dict[str, Any]]:
         try:
             oid = ObjectId(user_id)
         except Exception:
             return None
-        doc = self.collection.find_one({"_id": oid})
+        projection = None if include_signature else {"signature": 0}
+        doc = self.collection.find_one({"_id": oid}, projection)
         if not doc:
             return None
         return self._doc_to_dict(doc)
