@@ -155,6 +155,31 @@ class CaseService:
             raise not_found_exception("Case", id)
         return result
 
+    def update_patient_info(self, id: str, data: dict) -> dict:
+        """Actualiza la información del paciente incrustada en el caso."""
+        existing = self._repo.find_by_id(id)
+        if not existing:
+            raise not_found_exception("Case", id)
+            
+        # Calcular edad si viene birth_date
+        if "birth_date" in data:
+            data["age_at_diagnosis"] = self._calculate_age(data["birth_date"])
+            
+        # Asegurar full_name
+        parts = [
+            data.get("first_name", ""),
+            data.get("second_name") or "",
+            data.get("first_lastname", ""),
+            data.get("second_lastname") or "",
+        ]
+        if any(parts):
+            data["full_name"] = " ".join(p for p in parts if p).strip()
+
+        result = self._repo.update_patient_info(id, data)
+        if not result:
+            raise not_found_exception("Case", id)
+        return result
+
     def delete(self, id: str) -> None:
         existing = self._repo.find_by_id(id)
         if not existing:

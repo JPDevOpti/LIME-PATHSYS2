@@ -665,6 +665,31 @@ class CaseRepository:
         updated = self._coll.find_one({"_id": oid})
         return _doc_to_case(updated) if updated else None
 
+    def update_patient_info(self, id: str, patient_info: dict) -> Optional[dict]:
+        """Actualiza específicamente el bloque patient_info de un caso."""
+        try:
+            oid = ObjectId(id)
+        except Exception:
+            return None
+        
+        # Preparar campos con prefijo patient_info.
+        set_data = {}
+        for k, v in patient_info.items():
+            if k == "patient_id" and v:
+                try:
+                    set_data[f"patient_info.{k}"] = ObjectId(str(v))
+                except Exception:
+                    set_data[f"patient_info.{k}"] = v
+            else:
+                set_data[f"patient_info.{k}"] = v
+        
+        self._coll.update_one(
+            {"_id": oid},
+            {"$set": set_data}
+        )
+        doc = self._coll.find_one({"_id": oid})
+        return _doc_to_case(doc) if doc else None
+
     def delete(self, id: str) -> bool:
         try:
             oid = ObjectId(id)

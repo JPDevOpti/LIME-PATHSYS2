@@ -319,6 +319,15 @@ export const caseService = {
         return results;
     },
 
+    async updateCasePatient(caseId: string, patientData: Partial<Patient>): Promise<Case> {
+        const raw = await apiClient.put<Record<string, unknown>>(
+            `${API_BASE}/${caseId}/patient`,
+            patientData,
+            getUserHeaders()
+        );
+        return apiToCase(raw);
+    },
+
     async deleteCase(id: string): Promise<void> {
         await apiClient.delete(`${API_BASE}/${id}`);
     },

@@ -233,6 +233,17 @@ def update_case(
     )
 
 
+@router.put("/{id}/patient", response_model=CaseResponse)
+def update_case_patient(
+    id: str,
+    data: dict,
+    service: CaseService = Depends(get_case_service),
+    _: str = Depends(get_current_user_id),
+):
+    """Actualiza la información del paciente incrustada en un caso específico."""
+    return service.update_patient_info(id, data)
+
+
 @router.delete("/{id}", status_code=204)
 def delete_case(
     id: str,

@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useCurrentUser } from '@/features/auth/hooks/useCurrentUser';
 import { patientService } from '@/features/patients/services/patient.service';
+import { caseService } from '@/features/cases/services/case.service';
 import {
     Patient,
     CreatePatientRequest,
@@ -45,6 +47,7 @@ interface CaseEditPatientFormProps {
     onSuccess: (updatedPatient: Patient) => void;
     onClose: () => void;
     hideCrearCasoLink?: boolean;
+    caseId?: string;
 }
 
 export function CaseEditPatientForm({
@@ -53,8 +56,11 @@ export function CaseEditPatientForm({
     onLoadingChange,
     onSuccess,
     onClose,
-    hideCrearCasoLink = false
+    hideCrearCasoLink = false,
+    caseId
 }: CaseEditPatientFormProps) {
+    const searchParams = useSearchParams();
+    const effectiveCaseId = caseId ?? searchParams.get('id');
     const { email: userEmail } = useCurrentUser();
     const [formData, setFormData] = useState<CreatePatientRequest>({ ...INITIAL_FORM_DATA });
     const [isLoading, setIsLoading] = useState(false);
@@ -201,11 +207,18 @@ export function CaseEditPatientForm({
         setIsLoading(true);
         setError(null);
         try {
-            const savedPatient = await patientService.updatePatient(patient.id!, formData, userEmail);
-            setSuccessPatient(savedPatient);
-            setShowSuccessModal(true);
+            if (effectiveCaseId) {
+                const updatedCase = await caseService.updateCasePatient(effectiveCaseId, formData);
+                if (updatedCase.patient) {
+                    setSuccessPatient(updatedCase.patient);
+                    setShowSuccessModal(true);
+                }
+            } else {
+                const savedPatient = await patientService.updatePatient(patient.id!, formData, userEmail);
+                setSuccessPatient(savedPatient);
+                setShowSuccessModal(true);
+            }
         } catch (err: unknown) {
-            // No bloqueamos por duplicados localmente, permitimos que el backend decida o simplemente ignore el conflicto si ya permitimos duplicados.
             setError({ message: err instanceof Error ? err.message : 'Error al guardar paciente', type: 'submit' });
         } finally {
             setIsLoading(false);
