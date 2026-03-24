@@ -88,13 +88,13 @@ export const profilesService = {
         role?: string;
         is_active?: boolean;
     }): Promise<{ data: Profile[]; total: number }> {
-        const query: Record<string, string | number | boolean | undefined> = {
+        const query: Record<string, string | number | undefined> = {
             skip: params?.skip ?? 0,
             limit: params?.limit ?? 100,
         };
         if (params?.search?.trim()) query.search = params.search.trim();
         if (params?.role) query.role = params.role;
-        if (params?.is_active !== undefined) query.is_active = params.is_active;
+        if (params?.is_active !== undefined) query.is_active = String(params.is_active);
 
         const res = await apiClient.get<{ data: unknown[]; total: number }>('/api/v1/users', query);
         return {
@@ -106,7 +106,7 @@ export const profilesService = {
     async get(id: string, includeSignature = true): Promise<Profile | null> {
         try {
             const api = await apiClient.get<Record<string, unknown>>(`/api/v1/users/${id}`, {
-                include_signature: includeSignature
+                include_signature: String(includeSignature)
             });
             return mapApiToProfile(api);
         } catch {
