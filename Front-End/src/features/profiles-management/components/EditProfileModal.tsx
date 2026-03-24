@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react';
 import { BaseModal } from '@/shared/components/overlay/BaseModal';
 import { BaseButton } from '@/shared/components/base';
 import { EditProfileForm, fromProfile, type EditProfileFormState } from './EditProfileForm';
+import { profilesService } from '../services/profiles.service';
 import type { Profile, UpdateProfilePayload } from '../types/profile.types';
+import { Loader2 } from 'lucide-react';
 
 function buildPayload(state: EditProfileFormState): UpdateProfilePayload {
     const payload: UpdateProfilePayload = {
@@ -37,13 +39,27 @@ interface EditProfileModalProps {
 
 export function EditProfileModal({ profile, onClose, onSave }: EditProfileModalProps) {
     const [saving, setSaving] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [state, setState] = useState<EditProfileFormState | null>(null);
 
     useEffect(() => {
         if (profile) {
-            setState(fromProfile(profile));
+            setLoading(true);
             setError(null);
+            profilesService.get(profile.id)
+                .then((fullProfile) => {
+                    if (fullProfile) {
+                        setState(fromProfile(fullProfile));
+                    } else {
+                        setState(fromProfile(profile));
+                    }
+                })
+                .catch((e) => {
+                    console.error('Error fetching full profile:', e);
+                    setState(fromProfile(profile));
+                })
+                .finally(() => setLoading(false));
         } else {
             setState(null);
         }
@@ -78,9 +94,9 @@ export function EditProfileModal({ profile, onClose, onSave }: EditProfileModalP
         }
     };
 
-    if (!profile || !state) return null;
+    if (!profile) return null;
 
-    const isValid = state.name.trim().length > 0;
+    const isValid = state ? state.name.trim().length > 0 : false;
 
     return (
         <BaseModal
@@ -97,7 +113,7 @@ export function EditProfileModal({ profile, onClose, onSave }: EditProfileModalP
                         variant="primary"
                         size="sm"
                         onClick={handleSubmit}
-                        disabled={!isValid || saving}
+                        disabled={!isValid || saving || loading}
                         loading={saving}
                     >
                         Guardar
@@ -111,7 +127,15 @@ export function EditProfileModal({ profile, onClose, onSave }: EditProfileModalP
                         {error}
                     </div>
                 )}
-                <EditProfileForm state={state} onChange={handleChange} />
+                
+                {loading ? (
+                    <div className="flex flex-col items-center justify-center py-12 gap-3">
+                        <Loader2 className="h-8 w-8 animate-spin text-lime-600" />
+                        <p className="text-sm text-neutral-500 font-medium">Cargando datos completos del perfil...</p>
+                    </div>
+                ) : (
+                    state && <EditProfileForm state={state} onChange={handleChange} />
+                )}
             </div>
         </BaseModal>
     );
