@@ -205,6 +205,7 @@ export function CaseEditPatientForm({
             setSuccessPatient(savedPatient);
             setShowSuccessModal(true);
         } catch (err: unknown) {
+            // No bloqueamos por duplicados localmente, permitimos que el backend decida o simplemente ignore el conflicto si ya permitimos duplicados.
             setError({ message: err instanceof Error ? err.message : 'Error al guardar paciente', type: 'submit' });
         } finally {
             setIsLoading(false);

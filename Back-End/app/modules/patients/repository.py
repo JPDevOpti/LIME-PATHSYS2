@@ -60,7 +60,14 @@ class PatientRepository:
 
     def _ensure_indexes(self) -> None:
         self._coll.create_index("patient_code", unique=True)
-        self._coll.create_index([("identification_type", 1), ("identification_number", 1)], unique=True)
+        # Transición: Eliminar el índice único anterior por nombre si existe
+        # para permitir duplicados por requerimiento específico.
+        index_name = "identification_type_1_identification_number_1"
+        try:
+            self._coll.drop_index(index_name)
+        except Exception:
+            pass
+        self._coll.create_index([("identification_type", 1), ("identification_number", 1)], name=index_name)
         self._coll.create_index("created_at")
 
     def find_many(
@@ -167,10 +174,7 @@ class PatientRepository:
         data["audit_info"] = [
             {"action": "created", "user_email": user_email, "timestamp": now}
         ]
-        try:
-            result = self._coll.insert_one(data)
-        except DuplicateKeyError:
-            raise conflict_exception("Ya existe un paciente con ese tipo y número de identificación.")
+        result = self._coll.insert_one(data)
         doc = self._coll.find_one({"_id": result.inserted_id})
         return _doc_to_patient(doc)
 
@@ -200,13 +204,10 @@ class PatientRepository:
                 data["full_name"] = " ".join(p for p in [fn, sn, fl, sl] if p).strip()
         user_email = updated_by_email or "system"
         audit_entry = {"action": "updated", "user_email": user_email, "timestamp": now}
-        try:
-            self._coll.update_one(
-                {"_id": oid},
-                {"$set": data, "$push": {"audit_info": audit_entry}},
-            )
-        except DuplicateKeyError:
-            raise conflict_exception("Ya existe un paciente con ese tipo y número de identificación.")
+        self._coll.update_one(
+            {"_id": oid},
+            {"$set": data, "$push": {"audit_info": audit_entry}},
+        )
         doc = self._coll.find_one({"_id": oid})
         return _doc_to_patient(doc) if doc else None
 
