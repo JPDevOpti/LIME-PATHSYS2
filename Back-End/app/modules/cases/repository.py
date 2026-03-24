@@ -322,11 +322,34 @@ class CaseRepository:
         return result.get("seq", 1) if result else 1
 
     def _ensure_indexes(self) -> None:
+        # Básicos y búsquedas rápidas
         self._coll.create_index("case_code", unique=True)
         self._coll.create_index("date_info.0.created_at")
+        self._coll.create_index("date_info.0.signed_at")
         self._coll.create_index("state")
         self._coll.create_index("patient_info.patient_id")
+        self._coll.create_index("entity.name")
+        self._coll.create_index("assigned_pathologist.name")
+        
+        # Índices compuestos para listados y dashboards (Created + State)
         self._coll.create_index([("date_info.0.created_at", -1), ("state", 1)])
+        
+        # Índices para reportes de oportunidad (Statistics)
+        # NOTA: No se pueden indexar date_info y opportunity_info en el mismo índice compuesto 
+        # porque ambos son arrays (CannotIndexParallelArrays).
+        self._coll.create_index([
+            ("date_info.0.created_at", 1), 
+            ("state", 1)
+        ], name="idx_stats_date_state")
+        
+        self._coll.create_index("opportunity_info.0.was_timely", name="idx_opportunity_timely")
+        
+        # Índices para reportes de patólogos y facturación
+        self._coll.create_index([("assigned_pathologist.name", 1), ("date_info.0.signed_at", 1)])
+        
+        # Otros filtros comunes en reportes
+        self._coll.create_index("patient_info.care_type")
+        self._coll.create_index("samples.tests.test_code")
 
     _SORT_FIELDS = {
         "case_code": "case_code",

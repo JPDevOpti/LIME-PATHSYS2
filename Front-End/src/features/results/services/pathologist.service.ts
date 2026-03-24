@@ -1,6 +1,7 @@
 import { apiClient } from '@/shared/api/client';
 
-const FETCH_TIMEOUT_MS = 15000;
+const FETCH_TIMEOUT_MS = 30000;
+const CACHE_DURATION_MS = 60000; // 1 minuto de cache
 
 function fetchWithTimeout<T>(fn: () => Promise<T>, timeoutMs: number): Promise<T> {
     return Promise.race([
@@ -29,19 +30,55 @@ function mapApiToPathologist(raw: Record<string, unknown>): PathologistForAssign
     };
 }
 
+let pathologistsCache: { data: PathologistForAssignment[]; timestamp: number } | null = null;
+let pendingRequest: Promise<PathologistForAssignment[]> | null = null;
+
 export const pathologistService = {
     async listPathologists(search?: string, includeInactive = false): Promise<PathologistForAssignment[]> {
-        const params: Record<string, string | number | undefined> = { skip: 0, limit: 500 };
-        if (search?.trim()) params.search = search.trim();
-        if (!includeInactive) params.is_active = 'true';
-        const res = await fetchWithTimeout(
-            () =>
-                apiClient.get<{ data: unknown[]; total: number }>(
-                    '/api/v1/pathologists',
-                    params
-                ),
-            FETCH_TIMEOUT_MS
-        );
-        return (res.data || []).map((d) => mapApiToPathologist(d as Record<string, unknown>));
+        // Solo cachear si no hay búsqueda y no se incluyen inactivos (el caso más común)
+        const isDefaultQuery = !search?.trim() && !includeInactive;
+        
+        if (isDefaultQuery && pathologistsCache && (Date.now() - pathologistsCache.timestamp < CACHE_DURATION_MS)) {
+            return pathologistsCache.data;
+        }
+
+        if (isDefaultQuery && pendingRequest) {
+            return pendingRequest;
+        }
+
+        const fetchFn = async () => {
+            const params: Record<string, string | number | undefined> = { skip: 0, limit: 500 };
+            if (search?.trim()) params.search = search.trim();
+            if (!includeInactive) params.is_active = 'true';
+            
+            const res = await fetchWithTimeout(
+                () =>
+                    apiClient.get<{ data: unknown[]; total: number }>(
+                        '/api/v1/pathologists',
+                        params
+                    ),
+                FETCH_TIMEOUT_MS
+            );
+            
+            const data = (res.data || []).map((d) => mapApiToPathologist(d as Record<string, unknown>));
+            
+            if (isDefaultQuery) {
+                pathologistsCache = { data, timestamp: Date.now() };
+                pendingRequest = null;
+            }
+            
+            return data;
+        };
+
+        if (isDefaultQuery) {
+            pendingRequest = fetchFn();
+            return pendingRequest;
+        }
+
+        return fetchFn();
     },
+    
+    clearCache() {
+        pathologistsCache = null;
+    }
 };

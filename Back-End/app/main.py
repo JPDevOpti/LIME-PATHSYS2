@@ -16,6 +16,7 @@ from app.modules.entities import entities_router
 from app.modules.tests import tests_router
 from app.modules.users import users_router
 from app.modules.users.router import pathologists_router
+from app.modules.users.repository import UsersRepository
 from app.modules.diseases import diseases_router
 from app.modules.unread_cases import unread_cases_router
 from app.modules.support.router import router as support_router
@@ -35,6 +36,7 @@ from app.modules.billing.router import billing_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     db = get_db()
+    UsersRepository(db)._ensure_indexes()
     PatientRepository(db)._ensure_indexes()
     CaseRepository(db)._ensure_indexes()
     EntitiesRepository(db)._ensure_indexes()

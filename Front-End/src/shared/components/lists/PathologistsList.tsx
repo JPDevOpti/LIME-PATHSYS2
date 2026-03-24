@@ -60,8 +60,9 @@ export function PathologistsCombobox({
                     }))
                 );
             })
-            .catch(() => {
+            .catch((err) => {
                 if (cancelled) return;
+                console.error('Error loading pathologists:', err);
                 setApiOptions([]);
             })
             .finally(() => {

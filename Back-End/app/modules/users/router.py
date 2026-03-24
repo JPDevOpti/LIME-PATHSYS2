@@ -31,11 +31,19 @@ def list_pathologists(
     is_active: bool | None = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
+    include_signature: bool = Query(False),
     service: UsersService = Depends(get_users_service),
 ):
     """Lista patólogos para asignación. Requiere autenticación."""
+    fields = ["id", "name", "email", "medical_license", "is_active", "role", "pathologist_code", "initials"] if not include_signature else None
     return UserListResponse(**service.list_users(
-        search=search, role="pathologist", is_active=is_active, skip=skip, limit=limit
+        search=search, 
+        role="pathologist", 
+        is_active=is_active, 
+        skip=skip, 
+        limit=limit,
+        include_signature=include_signature,
+        fields=fields
     ))
 
 
@@ -45,11 +53,19 @@ def list_residents(
     is_active: bool | None = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
+    include_signature: bool = Query(False),
     service: UsersService = Depends(get_users_service),
 ):
     """Lista residentes para asignación. Requiere autenticación."""
+    fields = ["id", "name", "email", "resident_code", "is_active", "role", "initials"] if not include_signature else None
     return UserListResponse(**service.list_users(
-        search=search, role="resident", is_active=is_active, skip=skip, limit=limit
+        search=search, 
+        role="resident", 
+        is_active=is_active, 
+        skip=skip, 
+        limit=limit,
+        include_signature=include_signature,
+        fields=fields
     ))
 
 
@@ -77,9 +93,17 @@ def list_users(
     is_active: bool | None = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
+    include_signature: bool = Query(False),
     service: UsersService = Depends(get_users_service),
 ):
-    return UserListResponse(**service.list_users(search=search, role=role, is_active=is_active, skip=skip, limit=limit))
+    return UserListResponse(**service.list_users(
+        search=search, 
+        role=role, 
+        is_active=is_active, 
+        skip=skip, 
+        limit=limit,
+        include_signature=include_signature
+    ))
 
 
 @router.get("/{id}", response_model=UserResponse)

@@ -45,9 +45,17 @@ class UsersService:
         is_active: Optional[bool] = None,
         skip: int = 0,
         limit: int = 100,
+        include_signature: bool = True,
+        fields: Optional[list[str]] = None,
     ) -> dict[str, Any]:
         data, total = self._repo.find_many(
-            search=search, role=role, is_active=is_active, skip=skip, limit=limit
+            search=search, 
+            role=role, 
+            is_active=is_active, 
+            skip=skip, 
+            limit=limit,
+            include_signature=include_signature,
+            fields=fields
         )
         return {"data": data, "total": total}
 

@@ -13,6 +13,23 @@ class UsersRepository:
     def __init__(self, db: Database) -> None:
         self.collection = db.get_collection("users")
 
+    def _ensure_indexes(self) -> None:
+        try:
+            # Index para búsquedas y listados filtrados por rol y actividad, ordenados por nombre
+            self.collection.create_index(
+                [("role", 1), ("is_active", 1), ("name", 1)], 
+                name="idx_role_active_name"
+            )
+            # Index para búsquedas por email.
+            self.collection.create_index("email", unique=True, name="idx_user_email")
+            
+            # Índices para los códigos por rol
+            self.collection.create_index("pathologist_code", name="idx_path_code")
+            self.collection.create_index("resident_code", name="idx_res_code")
+            self.collection.create_index("administrator_code", name="idx_admin_code")
+        except Exception:
+            pass
+
     def _doc_to_dict(self, doc: dict[str, Any]) -> dict[str, Any]:
         out: dict[str, Any] = {
             "id": str(doc.get("_id", "")),
@@ -20,9 +37,12 @@ class UsersRepository:
             "email": doc.get("email"),
             "role": doc.get("role", ""),
             "is_active": doc.get("is_active", True),
-            "created_at": format_iso_datetime(doc.get("created_at")),
-            "updated_at": format_iso_datetime(doc.get("updated_at")),
         }
+        if "created_at" in doc:
+            out["created_at"] = format_iso_datetime(doc.get("created_at"))
+        if "updated_at" in doc:
+            out["updated_at"] = format_iso_datetime(doc.get("updated_at"))
+            
         code = (
             doc.get("administrator_code")
             or doc.get("pathologist_code")
@@ -31,12 +51,19 @@ class UsersRepository:
             or doc.get("visitante_code")
             or doc.get("auxiliar_code")
         )
-        out["code"] = code
-        out["document"] = doc.get("document")
-        out["initials"] = doc.get("initials")
-        out["medical_license"] = doc.get("medical_license")
-        out["observations"] = doc.get("observations")
-        out["signature"] = doc.get("signature", "")
+        if code or any(f in doc for f in ["administrator_code", "pathologist_code", "resident_code", "billing_code", "visitante_code", "auxiliar_code"]):
+            out["code"] = code
+            
+        if "document" in doc: out["document"] = doc.get("document")
+        if "initials" in doc: out["initials"] = doc.get("initials")
+        if "medical_license" in doc: out["medical_license"] = doc.get("medical_license")
+        if "observations" in doc: out["observations"] = doc.get("observations")
+        if "signature" in doc: out["signature"] = doc.get("signature", "")
+        elif "id" in out and "signature" not in doc:
+            # Si no esta en el doc (por proyeccion), no lo incluimos o lo ponemos vacio
+            # Pero UserResponse lo requiere segun el esquema si no es opcional
+            # En schemas.py es Optional[str] = None, asi que podemos omitirlo
+            pass
         return out
 
     def _role_code_field(self, role: str) -> str:
@@ -57,6 +84,8 @@ class UsersRepository:
         is_active: Optional[bool] = None,
         skip: int = 0,
         limit: int = 100,
+        include_signature: bool = True,
+        fields: Optional[list[str]] = None
     ) -> tuple[list[dict[str, Any]], int]:
         q: dict[str, Any] = {}
         if search and search.strip():
@@ -72,15 +101,37 @@ class UsersRepository:
                 {"auxiliar_code": {"$regex": s, "$options": "i"}},
             ]
         if role:
-            if role == "visitante":
+            if role == "pathologist":
+                q["role"] = {"$in": ["pathologist", "patologo", "patólogo", "patóloga"]}
+            elif role == "resident":
+                q["role"] = {"$in": ["resident", "residente"]}
+            elif role == "administrator":
+                q["role"] = {"$in": ["administrator", "administrador", "admin"]}
+            elif role == "auxiliar":
+                q["role"] = {"$in": ["auxiliar", "recepcionista", "recepcion"]}
+            elif role == "visitante":
                 q["role"] = {"$in": ["visitante", "billing"]}
             else:
                 q["role"] = role
-        if is_active is not None:
-            q["is_active"] = is_active
+
+        if is_active is True:
+            # Optimización: si buscamos activos, preferimos { $ne: false } para incluir nulos 
+            # pero si sabemos que todos tienen el campo, is_active: True es más rápido.
+            # Por ahora mantenemos $ne: false por seguridad, pero limitamos campos.
+            q["is_active"] = {"$ne": False}
+        elif is_active is False:
+            q["is_active"] = False
+
+        if fields:
+            projection = {f: 1 for f in fields}
+            if "id" in projection:
+                projection["_id"] = 1
+                del projection["id"]
+        else:
+            projection = None if include_signature else {"signature": 0}
 
         total = self.collection.count_documents(q)
-        cursor = self.collection.find(q).sort("name", 1).skip(skip).limit(limit)
+        cursor = self.collection.find(q, projection).sort("name", 1).skip(skip).limit(limit)
         data = [self._doc_to_dict(d) for d in cursor]
         return data, total
 
