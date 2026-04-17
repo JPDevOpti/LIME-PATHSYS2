@@ -104,8 +104,8 @@ export function CaseForm(props: CaseFormCreateProps | CaseFormEditProps) {
     useEffect(() => {
         const allTests = formData.samples.flatMap(s => s.tests);
         const times = allTests.map(t => t.time || 0).filter(t => t > 0);
-        const maxTime = times.length > 0 ? Math.max(...times) : 0;
-
+        if (times.length === 0) return;
+        const maxTime = Math.max(...times);
         if (formData.max_opportunity_time !== maxTime) {
             setFormData(prev => ({ ...prev, max_opportunity_time: maxTime }));
         }

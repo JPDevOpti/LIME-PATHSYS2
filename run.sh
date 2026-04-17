@@ -7,7 +7,7 @@ cd "$SCRIPT_DIR"
 FRONT_DIR="$SCRIPT_DIR/Front-End"
 BACK_DIR="$SCRIPT_DIR/Back-End"
 ENV_FILE="$BACK_DIR/.env"
-RUNNER_ENV_FILE="$SCRIPT_DIR/.pathsys.runner.env"
+RUNNER_ENV_FILE="$SCRIPT_DIR/.env"
 
 LOCAL_MONGODB_URI="mongodb://localhost:27017"
 DATABASE_NAME="pathsys"
@@ -207,6 +207,53 @@ wait_port_free() {
     done
 }
 
+clone_db() {
+    load_atlas_config
+
+    if [ -z "$ATLAS_MONGODB_URI" ]; then
+        echo "Error: ATLAS_MONGODB_URI no está configurado."
+        echo "Defínelo en .pathsys.runner.env o como variable de entorno:"
+        echo "  ATLAS_MONGODB_URI='mongodb+srv://user:pass@cluster.mongodb.net/' $0 clone-db"
+        exit 1
+    fi
+
+    if ! command -v mongodump >/dev/null 2>&1 || ! command -v mongorestore >/dev/null 2>&1; then
+        echo "Error: mongodump/mongorestore no están instalados."
+        echo "  Arch Linux: sudo pacman -S mongodb-tools"
+        exit 1
+    fi
+
+    log "================================================================"
+    log "ADVERTENCIA: La base de datos local '$DATABASE_NAME' será SOBRESCRITA."
+    log "La base de datos remota (Atlas) NO será modificada (solo lectura)."
+    log "================================================================"
+    read -rp "[PATHSYS] ¿Confirmas la clonación de Atlas → local? (y/N): " confirm
+    if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+        log "Operación cancelada."
+        exit 0
+    fi
+
+    local tmp_dir
+    tmp_dir=$(mktemp -d)
+
+    log "1/3 Descargando dump desde Atlas..."
+    mongodump --uri="$ATLAS_MONGODB_URI" --db="$DATABASE_NAME" --out="$tmp_dir"
+
+    if [ ! -d "$tmp_dir/$DATABASE_NAME" ]; then
+        echo "Error: el dump falló o la base de datos remota está vacía."
+        rm -rf "$tmp_dir"
+        exit 1
+    fi
+
+    log "2/3 Restaurando en local (mongodb://localhost:27017)..."
+    mongorestore --uri="$LOCAL_MONGODB_URI" --db="$DATABASE_NAME" --drop "$tmp_dir/$DATABASE_NAME"
+
+    log "3/3 Limpiando archivos temporales..."
+    rm -rf "$tmp_dir"
+
+    log "Clonacion completada. '$DATABASE_NAME' local es ahora copia 1:1 de Atlas."
+}
+
 stop_services() {
     log "Deteniendo servicios..."
 
@@ -234,10 +281,11 @@ Usage:
 
 Commands:
     setup   Install dependencies only (Front-End + Back-End)
-    local   Run app with local MongoDB (mongodb://localhost:27017, DB: pathsys)
-    atlas   Run app with MongoDB Atlas (requires ATLAS_MONGODB_URI)
-    stop    Stop Front-End and Back-End services
-    help    Show this help message
+    local     Run app with local MongoDB (mongodb://localhost:27017, DB: pathsys)
+    atlas     Run app with MongoDB Atlas (requires ATLAS_MONGODB_URI)
+    clone-db  Copy Atlas database to local MongoDB (mirror 1:1, overwrites local)
+    stop      Stop Front-End and Back-End services
+    help      Show this help message
 
 Examples:
     $0 setup
@@ -261,6 +309,9 @@ case "${1:-help}" in
         ;;
     atlas)
         start_services "atlas"
+        ;;
+    clone-db)
+        clone_db
         ;;
     stop)
         stop_services

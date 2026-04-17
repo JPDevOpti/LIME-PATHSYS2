@@ -20,9 +20,6 @@ const nextConfig = {
       },
     ],
   },
-  typescript: {
-    tsconfigPath: './tsconfig.json',
-  },
 };
 
 export default nextConfig;
