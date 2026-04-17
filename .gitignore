@@ -75,6 +75,9 @@ out/
 # =========================
 # Project specific
 # =========================
+# Script local: aquí va DEFAULT_ATLAS_MONGODB_URI (Atlas); no subir al repo. Plantilla: run.example.sh
+run.sh
+
 # Uploaded/generated files from legacy migration tools
 Import_old_database/antiguo-back/uploads/
 

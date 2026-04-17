@@ -67,7 +67,7 @@ export function buildApiUrl(
 ): string {
   if (!BASE_URL) {
     throw new Error(
-      "NEXT_PUBLIC_API_URL no está configurado. Crea Front-End/.env.local con NEXT_PUBLIC_API_URL=http://localhost:8002",
+      "NEXT_PUBLIC_API_URL no está configurado. Crea Front-End/.env con NEXT_PUBLIC_API_URL=http://localhost:8002",
     );
   }
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;

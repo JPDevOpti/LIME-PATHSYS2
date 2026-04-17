@@ -10,31 +10,63 @@ Uso:
     python fix_max_opportunity_time.py              # actualiza cambios reales
     python fix_max_opportunity_time.py --dry-run    # solo muestra qué cambiaría
     python fix_max_opportunity_time.py --state "Completado"  # filtra por estado
-    MONGO_URI=mongodb+srv://juanpablorestrepo2020:HHa1Vk7EjHJAXRbT@cluster0.myvykk4.mongodb.net/ python fix_max_opportunity_time.py
+
+Local:
+    MONGO_URI=mongodb://localhost:27017/pathsys python scripts/fix_max_opportunity_time.py
+
+Atlas (la URI suele terminar en / sin nombre de BD; usa --database o MONGODB_DB):
+    MONGODB_URI='mongodb+srv://USUARIO:CONTRASEÑA@cluster0.xxxxx.mongodb.net/' \\
+        MONGODB_DB=pathsys python scripts/fix_max_opportunity_time.py --dry-run
+
+    # o con nombre de BD en la URI:
+    MONGODB_URI='mongodb+srv://USUARIO:CONTRASEÑA@cluster0.xxxxx.mongodb.net/pathsys' \\
+        python scripts/fix_max_opportunity_time.py
 """
 
+from __future__ import annotations
+
+import argparse
 import os
 import sys
-import argparse
-from datetime import datetime, timezone
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from pymongo import MongoClient
 
-MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/lime_pathsys2")
-DB_NAME = MONGO_URI.split("/")[-1].split("?")[0] if "/" in MONGO_URI else "lime_pathsys2"
 
-if "mongodb+srv" in MONGO_URI or "atlas" in MONGO_URI.lower():
-    print("ERROR: Este script solo está permitido en MongoDB local. No usar con Atlas.")
-    sys.exit(1)
+def resolve_mongo_uri(cli_uri: str | None) -> str:
+    return (
+        (cli_uri or "").strip()
+        or os.environ.get("MONGO_URI", "").strip()
+        or os.environ.get("MONGODB_URI", "").strip()
+        or "mongodb://localhost:27017/pathsys"
+    )
 
-SIGNED_STATES = {"Completado", "Por entregar"}
+
+def resolve_database_name(uri: str, cli_database: str | None) -> str:
+    if cli_database and cli_database.strip():
+        return cli_database.strip()
+    env_db = (os.environ.get("MONGODB_DB") or os.environ.get("DATABASE_NAME") or "").strip()
+    if env_db:
+        return env_db
+    without_query = uri.split("?", 1)[0].rstrip("/")
+    if "@" in without_query:
+        after_host = without_query.split("@", 1)[1]
+        if "/" in after_host:
+            segment = after_host.split("/", 1)[1].strip("/")
+            if segment:
+                return segment.split("/")[0]
+    return "pathsys"
 
 
-def get_db():
-    client = MongoClient(MONGO_URI)
-    return client[DB_NAME]
+def get_db(uri: str, db_name: str):
+    kwargs: dict = {}
+    if "mongodb+srv" in uri or "mongodb://" in uri:
+        kwargs["serverSelectionTimeoutMS"] = int(
+            os.environ.get("MONGODB_SERVER_SELECTION_TIMEOUT_MS", "30000")
+        )
+    client = MongoClient(uri, **kwargs)
+    return client[db_name]
 
 
 def load_test_times(db) -> dict[str, float]:
@@ -68,36 +100,10 @@ def calc_max_from_samples(samples: list, test_times: dict[str, float]) -> float 
     return max_time
 
 
-def parse_dt(value) -> datetime | None:
-    if value is None:
-        return None
-    if isinstance(value, datetime):
-        return value
-    if isinstance(value, str):
-        try:
-            return datetime.fromisoformat(value.replace("Z", "+00:00"))
-        except ValueError:
-            return None
-    return None
-
-
-def get_signed_at(doc: dict) -> datetime | None:
-    date_info = (doc.get("date_info") or [{}])[0]
-    for key in ("signed_at", "delivered_at", "update_at"):
-        dt = parse_dt(date_info.get(key))
-        if dt:
-            return dt
-    for audit in reversed(doc.get("audit_info", [])):
-        if audit.get("action") == "signed":
-            dt = parse_dt(audit.get("timestamp"))
-            if dt:
-                return dt
-    return None
-
-
-def run(dry_run: bool, state_filter: str | None):
-    db = get_db()
+def run(dry_run: bool, state_filter: str | None, uri: str, db_name: str):
+    db = get_db(uri, db_name)
     test_times = load_test_times(db)
+    print(f"Base de datos: {db_name}")
     print(f"Tests con tiempo cargados: {len(test_times)}")
 
     query = {"state": state_filter} if state_filter else {}
@@ -109,7 +115,8 @@ def run(dry_run: bool, state_filter: str | None):
     no_tests = 0
     errors = 0
 
-    for doc in db.cases.find(query, no_cursor_timeout=True):
+    # Sin no_cursor_timeout: Atlas M0/M2 no lo permite en algunos tiers.
+    for doc in db.cases.find(query):
         case_id = doc["_id"]
         case_code = doc.get("case_code", str(case_id))
         state = doc.get("state", "")
@@ -173,6 +180,27 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Recalcula max_opportunity_time desde el maestro de pruebas.")
     parser.add_argument("--dry-run", action="store_true", help="Solo muestra cambios sin escribir.")
     parser.add_argument("--state", type=str, default=None, help="Filtrar por estado (ej: 'Completado').")
+    parser.add_argument(
+        "--uri",
+        type=str,
+        default=None,
+        help="URI MongoDB (por defecto MONGO_URI o MONGODB_URI).",
+    )
+    parser.add_argument(
+        "--database",
+        "-d",
+        type=str,
+        default=None,
+        help="Nombre de la base (por defecto pathsys o MONGODB_DB / DATABASE_NAME; obligatorio si la URI termina en /).",
+    )
     args = parser.parse_args()
 
-    run(dry_run=args.dry_run, state_filter=args.state)
+    mongo_uri = resolve_mongo_uri(args.uri)
+    database_name = resolve_database_name(mongo_uri, args.database)
+
+    run(
+        dry_run=args.dry_run,
+        state_filter=args.state,
+        uri=mongo_uri,
+        db_name=database_name,
+    )

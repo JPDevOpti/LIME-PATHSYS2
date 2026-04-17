@@ -11,8 +11,8 @@ Ejemplos:
     # Local
     python scripts/import_cieo_from_csv.py
 
-    # Atlas
-    python scripts/import_cieo_from_csv.py --dest-url "mongodb+srv://juanpablorestrepo2020:HHa1Vk7EjHJAXRbT@cluster0.myvykk4.mongodb.net/" --dest-db pathsys
+    # Atlas (usa tu URI desde Atlas → Connect; no commitear credenciales)
+    python scripts/import_cieo_from_csv.py --dest-url "mongodb+srv://USUARIO:CONTRASEÑA@cluster0.xxxxx.mongodb.net/" --dest-db pathsys
 """
 
 import argparse

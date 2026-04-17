@@ -1,15 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { ElementType, ReactNode } from 'react';
 import Link from 'next/link';
-import { Case, getDateFromDateInfo } from '../types/case.types';
+import { getDateFromDateInfo, type Case } from '../types/case.types';
 import { caseService } from '../services/case.service';
 import { AssignPathologistModal } from '@/features/results/components';
-import { BODY_REGION_OPTIONS, TEST_OPTIONS } from '../data/case-options';
+import { BODY_REGION_OPTIONS } from '../data/case-options';
 import { SuccessModal } from '@/shared/components/overlay/SuccessModal';
 import { CloseButton } from '@/shared/components/ui/buttons';
 import { BaseCard } from '@/shared/components/base/BaseCard';
-import { FileText, User, Phone, MapPin, Building2, FlaskConical, UserRoundPen, History, ShieldCheck, Microscope, ZoomIn, ChevronLeft, ChevronRight, X as XIcon, Image, NotebookPen, Clock } from 'lucide-react';
+import { FileText, User, Phone, MapPin, Building2, FlaskConical, UserRoundPen, History, ShieldCheck, Microscope, ZoomIn, ChevronLeft, ChevronRight, X as XIcon, Image as ImageIcon, NotebookPen, Clock } from 'lucide-react';
 import { formatAge } from '@/shared/utils/formatAge';
 import { getElapsedDays, getMaxOpportunityTime, getWasTimely } from '@/shared/utils/dateUtils';
 import { sanitizeHtml } from '@/shared/utils/sanitizeHtml';
@@ -20,7 +21,8 @@ interface CaseDetailsModalProps {
     visible: boolean;
     caseData: Case | null;
     onClose: () => void;
-    onCaseUpdated?: (caseData: Case) => void;
+    // eslint-disable-next-line no-unused-vars -- firma del callback
+    onCaseUpdated?: (updatedCase: Case) => void;
 }
 
 const priorityLabels: Record<string, string> = {
@@ -80,9 +82,9 @@ const PatientSection = ({
     sectionTitle,
     children
 }: {
-    icon: React.ElementType;
+    icon: ElementType;
     sectionTitle: string;
-    children: React.ReactNode;
+    children: ReactNode;
 }) => (
     <BaseCard variant="muted" padding="md" className="bg-white">
         <div className="space-y-3">
@@ -100,26 +102,61 @@ const PatientSection = ({
 export function CaseDetailsModal({ visible, caseData, onClose, onCaseUpdated }: CaseDetailsModalProps) {
     const { isPatologo, isAdmin } = usePermissions();
     const [previousCases, setPreviousCases] = useState<Case[]>([]);
+    const [previousCasesForCaseId, setPreviousCasesForCaseId] = useState<string | null>(null);
     const [showAssignPathologistModal, setShowAssignPathologistModal] = useState(false);
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
     const [showNoteModal, setShowNoteModal] = useState(false);
-    const diagImages = caseData?.result?.diagnosis_images ?? [];
 
-    const lightboxPrev = () => setLightboxIndex(i => (i! > 0 ? i! - 1 : diagImages.length - 1));
-    const lightboxNext = () => setLightboxIndex(i => (i! < diagImages.length - 1 ? i! + 1 : 0));
+    const diagImages = useMemo(
+        () => caseData?.result?.diagnosis_images ?? [],
+        [caseData?.result?.diagnosis_images]
+    );
+
+    const lightboxPrev = useCallback(() => {
+        setLightboxIndex(i => (i !== null && i > 0 ? i - 1 : diagImages.length - 1));
+    }, [diagImages.length]);
+
+    const lightboxNext = useCallback(() => {
+        setLightboxIndex(i =>
+            i !== null && i < diagImages.length - 1 ? i + 1 : 0
+        );
+    }, [diagImages.length]);
 
     useEffect(() => {
-        if (!visible || !caseData?.patient?.id) {
-            setPreviousCases([]);
-            return;
-        }
-        caseService.getCasesByPatientId(caseData.patient.id).then(data => {
-            const others = data.filter(c => c.id !== caseData.id);
-            setPreviousCases(others);
-        }).catch(() => setPreviousCases([]));
+        if (!visible || !caseData?.patient?.id) return;
+
+        const patientId = caseData.patient.id;
+        const currentCaseId = caseData.id;
+        let cancelled = false;
+
+        caseService
+            .getCasesByPatientId(patientId)
+            .then(data => {
+                if (cancelled) return;
+                const others = data.filter(c => c.id !== currentCaseId);
+                setPreviousCases(others);
+                setPreviousCasesForCaseId(currentCaseId);
+            })
+            .catch(() => {
+                if (!cancelled) {
+                    setPreviousCases([]);
+                    setPreviousCasesForCaseId(currentCaseId);
+                }
+            });
+
+        return () => {
+            cancelled = true;
+        };
     }, [visible, caseData?.id, caseData?.patient?.id]);
 
     if (!caseData) return null;
+
+    const displayedPreviousCases =
+        visible &&
+        caseData.patient?.id &&
+        previousCasesForCaseId === caseData.id
+            ? previousCases
+            : [];
 
     const patient = caseData.patient;
     const hasAdditionalTestsRequest = Boolean(caseData.complementary_tests && caseData.complementary_tests.length > 0);
@@ -167,9 +204,9 @@ export function CaseDetailsModal({ visible, caseData, onClose, onCaseUpdated }: 
                             <button
                                 type="button"
                                 onClick={() => setShowNoteModal(true)}
-                                className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-white bg-amber-500 hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-400 transition-colors"
+                                className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-neutral-300 bg-white text-neutral-800 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 transition-colors"
                             >
-                                <NotebookPen className="w-4 h-4" />
+                                <NotebookPen className="w-4 h-4 text-neutral-600" />
                                 Agregar nota
                             </button>
                         )}
@@ -177,9 +214,9 @@ export function CaseDetailsModal({ visible, caseData, onClose, onCaseUpdated }: 
                             <Link
                                 href={caseData.id ? `/cases/edit?id=${encodeURIComponent(caseData.id)}` : '#'}
                                 onClick={onClose}
-                                className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                                className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-neutral-300 bg-white text-neutral-800 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 transition-colors"
                             >
-                                <UserRoundPen className="w-4 h-4" />
+                                <UserRoundPen className="w-4 h-4 text-neutral-600" />
                                 Editar
                             </Link>
                         )}
@@ -503,18 +540,31 @@ export function CaseDetailsModal({ visible, caseData, onClose, onCaseUpdated }: 
                             <BaseCard variant="muted" padding="md" className="bg-white">
                                 <div className="space-y-3">
                                     <div className="flex items-center gap-2 pb-2">
-                                        <Image className="w-4 h-4 text-emerald-600" />
+                                        <ImageIcon className="w-4 h-4 text-emerald-600" />
                                         <h4 className="text-sm font-semibold text-neutral-700">
                                             Imágenes del diagnóstico ({diagImages.length})
                                         </h4>
                                     </div>
                                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                                         {diagImages.map((src, i) => (
-                                            <div key={i} className="relative group aspect-square cursor-pointer" onClick={() => setLightboxIndex(i)}>
+                                            <div
+                                                key={i}
+                                                role="button"
+                                                tabIndex={0}
+                                                className="relative group aspect-square cursor-pointer"
+                                                onClick={() => setLightboxIndex(i)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' || e.key === ' ') {
+                                                        e.preventDefault();
+                                                        setLightboxIndex(i);
+                                                    }
+                                                }}
+                                                aria-label={`Ampliar imagen ${i + 1} de ${diagImages.length}`}
+                                            >
                                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                                 <img
                                                     src={src}
-                                                    alt={`Imagen ${i + 1}`}
+                                                    alt=""
                                                     className="w-full h-full object-cover rounded-xl border border-neutral-200 transition-transform group-hover:scale-[1.02]"
                                                 />
                                                 <div className="absolute inset-0 rounded-xl bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
@@ -538,10 +588,11 @@ export function CaseDetailsModal({ visible, caseData, onClose, onCaseUpdated }: 
                             >
                                 <button
                                     type="button"
+                                    aria-label="Cerrar vista ampliada"
                                     className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
                                     onClick={() => setLightboxIndex(null)}
                                 >
-                                    <XIcon className="w-5 h-5" />
+                                    <XIcon className="w-5 h-5" aria-hidden />
                                 </button>
                                 <span className="absolute top-5 left-1/2 -translate-x-1/2 text-white/70 text-sm font-medium">
                                     {lightboxIndex + 1} / {diagImages.length}
@@ -549,10 +600,11 @@ export function CaseDetailsModal({ visible, caseData, onClose, onCaseUpdated }: 
                                 {diagImages.length > 1 && (
                                     <button
                                         type="button"
+                                        aria-label="Imagen anterior"
                                         className="absolute left-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
                                         onClick={(e) => { e.stopPropagation(); lightboxPrev(); }}
                                     >
-                                        <ChevronLeft className="w-6 h-6" />
+                                        <ChevronLeft className="w-6 h-6" aria-hidden />
                                     </button>
                                 )}
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -565,10 +617,11 @@ export function CaseDetailsModal({ visible, caseData, onClose, onCaseUpdated }: 
                                 {diagImages.length > 1 && (
                                     <button
                                         type="button"
+                                        aria-label="Imagen siguiente"
                                         className="absolute right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
                                         onClick={(e) => { e.stopPropagation(); lightboxNext(); }}
                                     >
-                                        <ChevronRight className="w-6 h-6" />
+                                        <ChevronRight className="w-6 h-6" aria-hidden />
                                     </button>
                                 )}
                             </div>
@@ -648,7 +701,7 @@ export function CaseDetailsModal({ visible, caseData, onClose, onCaseUpdated }: 
                                     <History className="w-5 h-5 text-lime-brand-600" />
                                     <h4 className="text-sm font-semibold text-neutral-700">Casos anteriores del paciente</h4>
                                 </div>
-                                {previousCases.length === 0 ? (
+                                {displayedPreviousCases.length === 0 ? (
                                     <p className="text-sm text-neutral-500">No hay casos anteriores</p>
                                 ) : (
                                     <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
@@ -662,7 +715,7 @@ export function CaseDetailsModal({ visible, caseData, onClose, onCaseUpdated }: 
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {previousCases.map(c => (
+                                                {displayedPreviousCases.map(c => (
                                                     <tr key={c.id} className="border-b border-neutral-100 last:border-0 hover:bg-neutral-50/80">
                                                         <td className="py-3 px-4 font-medium text-neutral-900">{c.case_code}</td>
                                                         <td className="py-3 px-4 text-neutral-700">{formatDateTime(getDateFromDateInfo(c.date_info, 'created_at')) ?? '-'}</td>
@@ -746,12 +799,13 @@ export function CaseDetailsModal({ visible, caseData, onClose, onCaseUpdated }: 
                                                 <button
                                                     type="button"
                                                     title="Eliminar nota"
+                                                    aria-label="Eliminar nota"
                                                     onClick={async () => {
                                                         if (!caseData.id) return;
                                                         const updated = await caseService.deleteNote(caseData.id, idx);
                                                         onCaseUpdated?.(updated);
                                                     }}
-                                                    className="shrink-0 mt-0.5 w-6 h-6 flex items-center justify-center rounded-full text-neutral-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                                    className="shrink-0 mt-0.5 w-6 h-6 flex items-center justify-center rounded-full text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors"
                                                 >
                                                     <XIcon className="w-3.5 h-3.5" />
                                                 </button>

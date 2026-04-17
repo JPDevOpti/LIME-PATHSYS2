@@ -10,6 +10,8 @@ from slowapi.util import get_remote_address
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 
+from pymongo.errors import OperationFailure
+
 from app.database import get_db
 from app.modules.auth import auth_router
 from app.modules.cases import router as cases_router
@@ -37,13 +39,23 @@ from app.modules.billing.router import billing_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     db = get_db()
-    UsersRepository(db)._ensure_indexes()
-    PatientRepository(db)._ensure_indexes()
-    CaseRepository(db)._ensure_indexes()
-    EntitiesRepository(db)._ensure_indexes()
-    TestsRepository(db)._ensure_indexes()
-    UnreadCasesRepository(db)._ensure_indexes()
-    SupportRepository(db)._ensure_indexes()
+    try:
+        UsersRepository(db)._ensure_indexes()
+        PatientRepository(db)._ensure_indexes()
+        CaseRepository(db)._ensure_indexes()
+        EntitiesRepository(db)._ensure_indexes()
+        TestsRepository(db)._ensure_indexes()
+        UnreadCasesRepository(db)._ensure_indexes()
+        SupportRepository(db)._ensure_indexes()
+    except OperationFailure as e:
+        if getattr(e, "code", None) == 8000 or "bad auth" in str(e).lower():
+            raise RuntimeError(
+                "MongoDB rechazó las credenciales (bad auth). Revisa usuario y contraseña en "
+                "Back-End/.env (MONGODB_URI). En Atlas: Database Access y contraseña codificada en la URI "
+                "si tiene @ : / ? # $ …; vuelve a generar la cadena en Connect → Drivers. "
+                "Si la contraseña tiene $, no exportes la URI a mano en el shell: usa ./run.sh atlas."
+            ) from e
+        raise
     yield
 
 
