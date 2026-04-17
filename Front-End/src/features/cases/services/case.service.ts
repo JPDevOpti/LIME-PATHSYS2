@@ -158,20 +158,35 @@ function toUpdateBody(data: UpdateCaseRequest): Record<string, unknown> {
     if (data.status) {
         body.state = data.status;
     }
+    if (data.delivered_to !== undefined) {
+        body.delivered_to = data.delivered_to;
+    }
     return body;
 }
 
-function buildCaseParams(filters?: CaseFilters): Record<string, string | number | undefined> {
+export interface DeliveredCasePayload {
+    caseId: string;
+    samples: SampleInfo[];
+    max_opportunity_time: number;
+}
+
+function buildCaseParams(filters?: CaseFilters): Record<string, string | number | boolean | string[] | undefined> {
     return {
         search: filters?.search,
         created_at_from: filters?.created_at_from,
         created_at_to: filters?.created_at_to,
+        entity_names: filters?.entity_names?.length ? filters.entity_names : undefined,
+        assigned_pathologist_names: filters?.assigned_pathologist_names?.length
+            ? filters.assigned_pathologist_names
+            : undefined,
         entity: filters?.entity,
         assigned_pathologist: filters?.assigned_pathologist,
         pathologist_name: filters?.pathologist_name,
         priority: filters?.priority,
         test: filters?.test,
-        state: filters?.status,
+        test_codes: filters?.test_codes?.length ? filters.test_codes : undefined,
+        states: filters?.states?.length ? filters.states : undefined,
+        state: filters?.states?.length ? undefined : filters?.status,
         doctor: filters?.doctor,
         patient_id: filters?.patient_id,
         identification_number: filters?.identification_number,
@@ -296,23 +311,32 @@ export const caseService = {
         return apiToCase(raw);
     },
 
-    async markCasesDelivered(
-        caseEdits: { caseId: string; tests?: unknown[] }[],
-        deliveredTo: string
-    ): Promise<Case[]> {
+    async markCasesDelivered(items: DeliveredCasePayload[], deliveredTo: string): Promise<Case[]> {
         const headers = getUserHeaders();
         const BATCH_SIZE = 10;
         const results: Case[] = [];
-        for (let i = 0; i < caseEdits.length; i += BATCH_SIZE) {
-            const batch = caseEdits.slice(i, i + BATCH_SIZE);
+        for (let i = 0; i < items.length; i += BATCH_SIZE) {
+            const batch = items.slice(i, i + BATCH_SIZE);
             const batchResults = await Promise.all(
-                batch.map(edit =>
-                    apiClient.put<Record<string, unknown>>(
-                        `${API_BASE}/${edit.caseId}`,
-                        { state: 'Completado', delivered_to: deliveredTo },
-                        headers
-                    ).then(apiToCase)
-                )
+                batch.map((edit) => {
+                    const body: Record<string, unknown> = {
+                        state: 'Completado',
+                        delivered_to: deliveredTo,
+                        samples: edit.samples.map((s) => ({
+                            body_region: s.body_region,
+                            tests: (s.tests || []).map((t: TestInfo) => ({
+                                id: t.id || undefined,
+                                test_code: t.test_code,
+                                name: t.name,
+                                quantity: t.quantity ?? 1,
+                            })),
+                        })),
+                        max_opportunity_time: edit.max_opportunity_time,
+                    };
+                    return apiClient
+                        .put<Record<string, unknown>>(`${API_BASE}/${edit.caseId}`, body, headers)
+                        .then(apiToCase);
+                })
             );
             results.push(...batchResults);
         }

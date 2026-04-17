@@ -5,6 +5,7 @@ import type {
     PathologistPerformance,
     OpportunitySummaryStats,
     TestStats,
+    TestsReportSummaryStats,
 } from '../types/statistics.types';
 import type {
     EntityStats,
@@ -38,7 +39,7 @@ interface BackendEntitiesReport {
 
 interface BackendTestsReport {
     tests: TestStats[];
-    summary: { total: number; ambulatorios: number; hospitalizados: number } | null;
+    summary: TestsReportSummaryStats | null;
 }
 
 interface BackendPathologistEntities {
@@ -61,7 +62,12 @@ export const statisticsService = {
         if (entity) params.entity = entity;
         const data = await apiClient.get<BackendOpportunityReport>(`${BASE}/opportunity`, params);
         return {
-            tests: data.tests,
+            tests: data.tests.map((t) => ({
+                ...t,
+                totalProcedures:
+                    t.totalProcedures ??
+                    (t.withinOpportunity ?? 0) + (t.outOfOpportunity ?? 0),
+            })),
             pathologists: data.pathologists,
             monthlyPct: data.monthlyPct ?? undefined,
             monthlyCases: data.monthlyCases ?? undefined,
@@ -92,7 +98,7 @@ export const statisticsService = {
         month: number,
         year: number,
         entity?: string,
-    ): Promise<{ tests: TestStats[]; summary?: { total: number; ambulatorios: number; hospitalizados: number } }> {
+    ): Promise<{ tests: TestStats[]; summary?: TestsReportSummaryStats }> {
         const params: Record<string, string | number | undefined> = { month, year };
         if (entity) params.entity = entity;
         const data = await apiClient.get<BackendTestsReport>(`${BASE}/tests`, params);

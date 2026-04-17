@@ -5,7 +5,10 @@ import './globals.css';
 import { AuthProvider } from '@/features/auth/context/AuthContext';
 import { AuthLayout } from '@/features/auth/components/AuthLayout';
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, '');
+
 export const metadata: Metadata = {
+  ...(siteUrl ? { metadataBase: new URL(siteUrl) } : {}),
   title: 'PathSys',
   description: 'Sistema de gestión de patología',
   icons: {

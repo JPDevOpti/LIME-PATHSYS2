@@ -6,6 +6,7 @@ from pydantic import BaseModel
 class OpportunityTestStat(BaseModel):
     code: str
     name: str
+    totalProcedures: int
     withinOpportunity: int
     outOfOpportunity: int
     averageDays: float | None = None
@@ -95,6 +96,7 @@ class TestsReportSummary(BaseModel):
     total: int
     ambulatorios: int
     hospitalizados: int
+    casos_completados_periodo: int
 
 
 class TestsReportResponse(BaseModel):

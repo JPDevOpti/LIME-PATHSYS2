@@ -61,7 +61,10 @@ function getAuthHeaders(): Record<string, string> {
   return { Authorization: `Bearer ${token}` };
 }
 
-export function buildApiUrl(path: string, params?: Record<string, string | number | undefined>): string {
+export function buildApiUrl(
+  path: string,
+  params?: Record<string, string | number | boolean | string[] | undefined>
+): string {
   if (!BASE_URL) {
     throw new Error(
       "NEXT_PUBLIC_API_URL no está configurado. Crea Front-End/.env.local con NEXT_PUBLIC_API_URL=http://localhost:8002",
@@ -72,7 +75,15 @@ export function buildApiUrl(path: string, params?: Record<string, string | numbe
   if (params) {
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([k, v]) => {
-      if (v !== undefined && v !== "") searchParams.set(k, String(v));
+      if (v === undefined || v === "") return;
+      if (Array.isArray(v)) {
+        if (v.length === 0) return;
+        v.forEach(item => {
+          if (item !== undefined && item !== "") searchParams.append(k, String(item));
+        });
+      } else {
+        searchParams.append(k, String(v));
+      }
     });
     const qs = searchParams.toString();
     if (qs) url += `?${qs}`;
@@ -134,7 +145,7 @@ async function handleResponse<T>(response: Response, responseType?: string): Pro
 export const apiClient = {
   async get<T>(
     path: string,
-    params?: Record<string, string | number | undefined>,
+    params?: Record<string, string | number | boolean | string[] | undefined>,
     extraHeaders?: { responseType?: string; suppressErrorLog?: boolean } & Record<string, string | boolean | undefined>,
   ): Promise<T> {
     const url = buildApiUrl(path, params);

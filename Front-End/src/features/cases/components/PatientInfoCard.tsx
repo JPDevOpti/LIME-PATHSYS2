@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Patient } from '@/features/patients/types/patient.types';
 import { Case, getDateFromDateInfo } from '@/features/cases/types/case.types';
 import { caseService } from '@/features/cases/services/case.service';
-import { EditPatientModal } from './EditPatientModal';
+import { CaseEditPatientModal } from './CaseEditPatientModal';
 import { CaseDetailsModal } from './CaseDetailsModal';
 import { BaseCard } from '@/shared/components/base/BaseCard';
 import { User, FileText, Phone, MapPin, Building2, ClipboardList, UserRoundPen } from 'lucide-react';
@@ -237,7 +237,7 @@ export function PatientInfoCard({
             </div>
 
             {editable && (
-                <EditPatientModal
+                <CaseEditPatientModal
                     isOpen={showEditModal}
                     onClose={() => setShowEditModal(false)}
                     patient={patient}

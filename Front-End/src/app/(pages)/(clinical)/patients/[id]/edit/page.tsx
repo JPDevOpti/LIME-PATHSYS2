@@ -1,4 +1,4 @@
-import { EditPatientPageContent } from '@/app/(pages)/(clinical)/patients/edit/EditPatientPageContent';
+import { EditPatientPageContent } from '@/features/patients/components/EditPatientPageContent';
 
 export const dynamicParams = false;
 

@@ -12,7 +12,7 @@ Ejemplos:
     python scripts/import_cieo_from_csv.py
 
     # Atlas
-    python scripts/import_cieo_from_csv.py --dest-url "mongodb+srv://user:pass@cluster.mongodb.net" --dest-db pathsys
+    python scripts/import_cieo_from_csv.py --dest-url "mongodb+srv://juanpablorestrepo2020:HHa1Vk7EjHJAXRbT@cluster0.myvykk4.mongodb.net/" --dest-db pathsys
 """
 
 import argparse

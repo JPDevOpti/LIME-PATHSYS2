@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { BaseCard } from '@/shared/components/base';
 import { PathologistReportFilters } from './PathologistReportFilters';
-import { PathologistsPerformancePanel } from '../PathologistsPerformancePanel';
+import { PathologistsPerformancePanel } from './PathologistsPerformancePanel';
 import { PathologistDetailTable } from './PathologistDetailTable';
 import { PathologistDetailsModal } from './PathologistDetailsModal';
 import { statisticsService } from '../../services/statistics.service';

@@ -10,7 +10,7 @@ Uso:
     python fix_max_opportunity_time.py              # actualiza cambios reales
     python fix_max_opportunity_time.py --dry-run    # solo muestra qué cambiaría
     python fix_max_opportunity_time.py --state "Completado"  # filtra por estado
-    MONGO_URI=mongodb+srv://... python fix_max_opportunity_time.py
+    MONGO_URI=mongodb+srv://juanpablorestrepo2020:HHa1Vk7EjHJAXRbT@cluster0.myvykk4.mongodb.net/ python fix_max_opportunity_time.py
 """
 
 import os

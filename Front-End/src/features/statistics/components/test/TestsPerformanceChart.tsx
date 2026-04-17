@@ -27,7 +27,7 @@ export function TestsPerformanceChart({ datos }: TestsPerformanceChartProps) {
                 <div>
                     <h3 className="text-lg font-semibold text-neutral-900">Rendimiento por prueba</h3>
                     <p className="text-sm text-neutral-500">
-                        Distribución de ambulatorios y hospitalizados por tipo de prueba.
+                        Unidades de cada prueba (quantity y líneas en muestras), por tipo de atención.
                     </p>
                 </div>
             </div>
@@ -45,7 +45,7 @@ export function TestsPerformanceChart({ datos }: TestsPerformanceChartProps) {
                             ]}
                             height="100%"
                             showLegend={true}
-                            tooltipFormatter={(v) => `${v} casos`}
+                            tooltipFormatter={(v) => `${v} unidades`}
                         />
                     </div>
                 )}

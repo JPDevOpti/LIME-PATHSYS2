@@ -12,7 +12,8 @@ import { Case, SampleInfo } from '@/features/cases/types/case.types';
 import { PageTitleCard } from '@/shared/components/ui/page-title';
 import { BaseCard, BaseButton } from '@/shared/components/base';
 import { Search, FileCheck, ClipboardList, SaveAll } from 'lucide-react';
-import { ClearButton } from '@/shared/components/ui/buttons';
+import { ClearButton, PrintPdfButton } from '@/shared/components/ui/buttons';
+import { openCasePdf as openCasePdfInNewTab } from '@/shared/utils/pdf';
 import { Toast } from '@/shared/components/ui/Toast';
 import type { ResultEditorSection, ResultSections, CIE10Diagnosis, CIEODiagnosis, ComplementaryTest } from '@/features/results/types/results.types';
 
@@ -43,6 +44,11 @@ export default function SignResultsPage() {
     const [tooltipVisible, setTooltipVisible] = useState(false);
     const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
     const signBtnRef = useRef<HTMLDivElement>(null);
+
+    const handleOpenCasePdf = () => {
+        if (!caseData?.id) return;
+        openCasePdfInNewTab(caseData.id);
+    };
     const [showValidation, setShowValidation] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [successVariant, setSuccessVariant] = useState<'progress' | 'signed'>('signed');
@@ -381,6 +387,12 @@ export default function SignResultsPage() {
                                     >
                                         Crear solicitud de pruebas adicionales
                                     </BaseButton>
+                                    <PrintPdfButton
+                                        size="sm"
+                                        text="Ver PDF"
+                                        onClick={handleOpenCasePdf}
+                                        disabled={!caseData?.id || signing}
+                                    />
                                     <BaseButton
                                         size="sm"
                                         onClick={handleSaveProgress}

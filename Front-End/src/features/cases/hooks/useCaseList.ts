@@ -11,12 +11,21 @@ export interface CaseListFilters {
     search: string;
     dateFrom: string;
     dateTo: string;
-    entity: string;
-    pathologist: string;
-    pathologistName: string;
+    /** true = sin filtro por entidad (Todos marcado). */
+    entityTodosAll: boolean;
+    /** Nombres de entidad en OR cuando `entityTodosAll` es false y hay selección. */
+    entityIncludedNames: string[];
+    pathologistTodosAll: boolean;
+    pathologistIncludedNames: string[];
     priority: CasePriority | '';
-    test: string;
-    status: CaseStatus | '';
+    /** true = sin filtro por prueba (Todos). */
+    testTodosAll: boolean;
+    /** Códigos de prueba en OR cuando `testTodosAll` es false y hay selección. */
+    testIncludedCodes: string[];
+    /** true = sin filtro por estado (Todos). */
+    statusTodosAll: boolean;
+    /** Estados en OR cuando `statusTodosAll` es false y hay selección. */
+    statusIncluded: CaseStatus[];
     patientId: string;
     identificationNumber: string;
     opportunity: 'fuera' | 'dentro' | '';
@@ -26,12 +35,15 @@ const defaultFilters: CaseListFilters = {
     search: '',
     dateFrom: '',
     dateTo: '',
-    entity: '',
-    pathologist: '',
-    pathologistName: '',
+    entityTodosAll: true,
+    entityIncludedNames: [],
+    pathologistTodosAll: true,
+    pathologistIncludedNames: [],
     priority: '',
-    test: '',
-    status: '',
+    testTodosAll: true,
+    testIncludedCodes: [],
+    statusTodosAll: true,
+    statusIncluded: [],
     patientId: '',
     identificationNumber: '',
     opportunity: '',
@@ -42,16 +54,30 @@ export function makeDefaultFilters(overrides?: Partial<CaseListFilters>): CaseLi
 }
 
 function toCaseFilters(f: CaseListFilters): CaseFilters {
+    const df = f.dateFrom?.trim();
+    const dt = f.dateTo?.trim();
+    const entityNames =
+        !f.entityTodosAll && f.entityIncludedNames.length > 0 ? f.entityIncludedNames : undefined;
+    const pathNames =
+        !f.pathologistTodosAll && f.pathologistIncludedNames.length > 0
+            ? f.pathologistIncludedNames
+            : undefined;
+    const testCodes =
+        !f.testTodosAll && f.testIncludedCodes.length > 0
+            ? f.testIncludedCodes.map(c => c.trim()).filter(Boolean)
+            : undefined;
+    const states =
+        !f.statusTodosAll && f.statusIncluded.length > 0 ? [...f.statusIncluded] : undefined;
     return {
         search: f.search.trim() || undefined,
-        created_at_from: f.dateFrom ? `${f.dateFrom}T00:00:00.000Z` : undefined,
-        created_at_to: f.dateTo ? `${f.dateTo}T23:59:59.999Z` : undefined,
-        entity: f.entity.trim() || undefined,
-        assigned_pathologist: f.pathologist.trim() || undefined,
-        pathologist_name: f.pathologistName.trim() || undefined,
+        // Solo YYYY-MM-DD: el API usa día civil en Colombia (America/Bogota) y convierte a UTC para Mongo
+        created_at_from: df || undefined,
+        created_at_to: dt || undefined,
+        entity_names: entityNames,
+        assigned_pathologist_names: pathNames,
         priority: f.priority || undefined,
-        test: f.test.trim() || undefined,
-        status: f.status || undefined,
+        test_codes: testCodes,
+        ...(states ? { states } : {}),
         patient_id: f.patientId.trim() || undefined,
         identification_number: f.identificationNumber.trim() || undefined,
         opportunity: f.opportunity || undefined,

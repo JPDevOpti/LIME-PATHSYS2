@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { caseService } from '@/features/cases/services/case.service';
+import { isAlmaMaterCaseByEntity } from '@/features/cases/utils/isAlmaMaterCaseByEntity';
 import { Case, getDateFromDateInfo } from '@/features/cases/types/case.types';
 
 export interface CancerFilters {
@@ -49,19 +50,6 @@ export interface RpcaRecord {
   responsable_digitacion: string;
   fecha_digitacion: string;
   primario_multiple: string;
-}
-
-function normalizeText(value?: string): string {
-  return (value ?? '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim();
-}
-
-function isHamaEntity(value?: string): boolean {
-  const normalized = normalizeText(value);
-  return normalized === 'hama' || normalized.includes('alma mater') || normalized.includes('hama');
 }
 
 // ── Mappers ────────────────────────────────────────────────────────────────────
@@ -221,11 +209,8 @@ export function useCancerReport() {
         return true;
       });
 
-      const withoutHama = byDate.filter(c => {
-        const entityName = c.entity?.name ?? c.patient?.entity_info?.entity_name;
-        const entityCode = c.patient?.entity_info?.entity_code ?? c.patient?.entity_info?.code;
-        return !isHamaEntity(entityName) && !isHamaEntity(entityCode);
-      });
+      // Misma regla que backend/dashboard: solo `case.entity`, no patient_info.entity_info.
+      const withoutHama = byDate.filter(c => !isAlmaMaterCaseByEntity(c));
 
       const withCieo = withoutHama.filter(c => c.result?.cieo_diagnosis?.code);
 

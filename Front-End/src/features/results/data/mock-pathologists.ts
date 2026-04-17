@@ -2,8 +2,8 @@
 export {
     getPathologists,
     PATHOLOGIST_OPTIONS
-} from '@/shared/components/lists/data/mock-pathologists';
-export type { Pathologist } from '@/shared/components/lists/data/mock-pathologists';
+} from '@/shared/data/mock-pathologists';
+export type { Pathologist } from '@/shared/data/mock-pathologists';
 
 import { PATHOLOGIST_OPTIONS } from '@/shared/components/lists';
 

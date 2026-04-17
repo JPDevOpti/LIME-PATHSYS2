@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 import { BaseButton } from '@/shared/components/base';
-import { exportJsonToExcel } from '@/shared/lib/exportExcel';
+import { exportJsonToExcel } from '@/shared/utils/exportExcel';
 import type { TestStats } from '../../types/statistics.types';
 
 interface TestsDetailTableProps {
@@ -120,6 +120,10 @@ export function TestsDetailTable({ datos }: TestsDetailTableProps) {
                     </tfoot>
                 </table>
             </div>
+            <p className="text-xs text-neutral-500 mt-2">
+                El pie suma unidades de prueba (quantity y repeticiones entre muestras). Un mismo caso puede
+                aportar a varias filas si tiene varios códigos de prueba.
+            </p>
         </div>
     );
 }

@@ -1,23 +1,28 @@
-from datetime import datetime, timezone
-
 from pymongo.database import Database
+
+from app.core.alma_mater_exclusion import nor_list_completed_not_alma_mater
+from app.core.date_utils import colombia_calendar_month_range_utc
 
 
 def _month_range(year: int, month: int):
-    """Retorna (start_dt, end_dt) en UTC para el mes dado (extremo superior exclusivo)."""
-    start = datetime(year, month, 1, 0, 0, 0, tzinfo=timezone.utc)
-    if month == 12:
-        end = datetime(year + 1, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
-    else:
-        end = datetime(year, month + 1, 1, 0, 0, 0, tzinfo=timezone.utc)
-    return start, end
+    """Mes civil en Colombia; instantes UTC para Mongo (extremo superior exclusivo)."""
+    return colombia_calendar_month_range_utc(year, month)
 
 
 class BillingRepository:
     def __init__(self, db: Database):
         self.db = db
         self.cases = db["cases"]
+        self.entities = db["entities"]
         self.users = db["users"]
+
+    def _match_cohort_same_as_opportunity(self, start, end) -> dict:
+        """Misma cohorte que estadísticas / oportunidad general: inicio en el mes, completado, sin catálogo Alma Máter."""
+        return {
+            "date_info.0.created_at": {"$gte": start, "$lt": end},
+            "state": "Completado",
+            "$nor": nor_list_completed_not_alma_mater(self.entities),
+        }
 
     def get_pathologists_billing_report(self, year: int, month: int) -> dict:
         start, end = _month_range(year, month)
@@ -61,26 +66,34 @@ class BillingRepository:
             code = t.get("test_code")
             if not code:
                 continue
+            code_key = str(code).strip()
             aggs = {
                 agg["entity_name"]: agg.get("price", 0)
                 for agg in t.get("agreements", [])
                 if agg.get("entity_name")
             }
-            tests_map[code] = {"base_price": t.get("price", 0), "agreements": aggs}
-            tests_names[code] = t.get("name", code)
+            tests_map[code_key] = {"base_price": t.get("price", 0), "agreements": aggs}
+            tests_names[code_key] = t.get("name", code)
 
-        # 2. Pipeline: contar pruebas por caso y entidad
+        # 2. Pipeline: misma lógica que informe oportunidad (quantity con ifNull, excl. Alma Máter)
+        cohort = self._match_cohort_same_as_opportunity(start, end)
         pipeline = [
-            {"$match": {"date_info.0.created_at": {"$gte": start, "$lt": end}}},
+            {"$match": cohort},
             {"$unwind": "$samples"},
             {"$unwind": "$samples.tests"},
+            {"$addFields": {"_line_qty": {"$ifNull": ["$samples.tests.quantity", 1]}}},
+            {
+                "$match": {
+                    "$expr": {"$ne": [{"$toString": {"$ifNull": ["$samples.tests.test_code", ""]}}, ""]},
+                }
+            },
             {
                 "$group": {
                     "_id": {
-                        "test_code": "$samples.tests.test_code",
+                        "test_code": {"$toString": {"$ifNull": ["$samples.tests.test_code", ""]}},
                         "entity": "$entity.name",
                     },
-                    "count": {"$sum": "$samples.tests.quantity"},
+                    "count": {"$sum": "$_line_qty"},
                 }
             },
         ]
@@ -95,7 +108,7 @@ class BillingRepository:
             if not isinstance(item, dict) or not isinstance(item.get("_id"), dict):
                 continue
 
-            test_code = item["_id"].get("test_code")
+            test_code = str(item["_id"].get("test_code") or "").strip()
             if not test_code:
                 continue
 
@@ -145,20 +158,29 @@ class BillingRepository:
         }
         test_name = test_doc.get("name", test_code)
 
+        cohort = self._match_cohort_same_as_opportunity(start, end)
+        code_variants: list = [test_code]
+        if str(test_code).isdigit():
+            try:
+                code_variants.append(int(test_code))
+            except ValueError:
+                pass
+
         pipeline = [
             {
                 "$match": {
-                    "date_info.0.created_at": {"$gte": start, "$lt": end},
-                    "samples.tests.test_code": test_code,
+                    **cohort,
+                    "samples.tests.test_code": {"$in": code_variants},
                 }
             },
             {"$unwind": "$samples"},
             {"$unwind": "$samples.tests"},
-            {"$match": {"samples.tests.test_code": test_code}},
+            {"$match": {"samples.tests.test_code": {"$in": code_variants}}},
+            {"$addFields": {"_line_qty": {"$ifNull": ["$samples.tests.quantity", 1]}}},
             {
                 "$group": {
                     "_id": "$entity.name",
-                    "cantidad": {"$sum": "$samples.tests.quantity"},
+                    "cantidad": {"$sum": "$_line_qty"},
                 }
             },
         ]

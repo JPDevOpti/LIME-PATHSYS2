@@ -1,6 +1,6 @@
-export { OpportunityStatsCard } from './OpportunityStatsCard';
-export { OpportunityReport } from './OpportunityReport';
-export { OpportunityReportFilters } from './OpportunityReportFilters';
-export { OpportunitySummary } from './OpportunitySummary';
-export { PathologistsPerformancePanel } from './PathologistsPerformancePanel';
-export { TestsOpportunityPanel } from './TestsOpportunityPanel';
+export { OpportunityStatsCard } from './opportunity/OpportunityStatsCard';
+export { OpportunityReport } from './opportunity/OpportunityReport';
+export { OpportunityReportFilters } from './opportunity/OpportunityReportFilters';
+export { OpportunitySummary } from './opportunity/OpportunitySummary';
+export { PathologistsPerformancePanel } from './pathologist/PathologistsPerformancePanel';
+export { TestsOpportunityPanel } from './test/TestsOpportunityPanel';

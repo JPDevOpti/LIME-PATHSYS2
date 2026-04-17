@@ -1,9 +1,11 @@
+from typing import Any
+
 from fastapi import APIRouter, Depends, Query
 
 from app.database import get_db
 from app.modules.auth.dependencies import get_current_user
 
-from .schemas import DashboardMetrics, MonthlyCasesData, OpportunityStats, UrgentCase
+from .schemas import DashboardMetrics, MonthlyCasesData, UrgentCase
 from .service import DashboardService
 
 router = APIRouter()
@@ -47,7 +49,7 @@ def get_monthly_cases(
 @router.get("/urgent-cases", response_model=list[UrgentCase])
 def get_urgent_cases(
     pathologist_name: str | None = Query(None),
-    limit: int = Query(10, ge=1, le=50),
+    limit: int = Query(50, ge=1, le=200),
     service: DashboardService = Depends(get_dashboard_service),
     current_user: dict = Depends(get_current_user),
 ):
@@ -56,12 +58,14 @@ def get_urgent_cases(
     )
 
 
-@router.get("/opportunity-stats", response_model=OpportunityStats)
+@router.get("/opportunity-stats")
 def get_opportunity_stats(
     pathologist_name: str | None = Query(None),
     service: DashboardService = Depends(get_dashboard_service),
     current_user: dict = Depends(get_current_user),
-):
+) -> dict[str, Any]:
+    # Sin response_model Pydantic: el repo ya devuelve todas las claves (p. ej. total_casos_periodo)
+    # y no se pierden si el modelo OpenAPI del despliegue va desfasado.
     return service.get_opportunity_stats(
         _resolve_pathologist(pathologist_name, current_user)
     )

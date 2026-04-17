@@ -14,7 +14,7 @@ class DashboardService:
         return self.repository.get_monthly_cases_data(pathologist_name)
 
     def get_urgent_cases(
-        self, pathologist_name: str = None, limit: int = 10
+        self, pathologist_name: str = None, limit: int = 50
     ) -> list[dict]:
         return self.repository.get_urgent_cases(pathologist_name, limit)
 

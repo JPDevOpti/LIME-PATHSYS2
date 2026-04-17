@@ -1,9 +1,10 @@
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional
 from app.core.date_utils import format_iso_datetime
 
 from bson import ObjectId
 from pymongo.collection import Collection
+from pymongo.cursor import Cursor
 from pymongo.database import Database
 
 

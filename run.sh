@@ -9,22 +9,17 @@ BACK_DIR="$SCRIPT_DIR/Back-End"
 ENV_FILE="$BACK_DIR/.env"
 RUNNER_ENV_FILE="$SCRIPT_DIR/.env"
 
-LOCAL_MONGODB_URI="mongodb://localhost:27017"
-DATABASE_NAME="pathsys"
+LOCAL_MONGODB_URI="mongodb://mongo:27017"
+DATABASE_NAME="${DATABASE_NAME:-pathsys}"
+FRONTEND_API_URL="${NEXT_PUBLIC_API_URL:-http://localhost:8002}"
+SECRET_KEY_DEFAULT="dev-secret-key-please-change-in-prod-32-chars-min"
+COMPOSE_BASE_FILE="docker-compose.yml"
+COMPOSE_DEV_FILE="docker-compose.dev.yml"
 
 ATLAS_MONGODB_URI="${ATLAS_MONGODB_URI:-}"
 
-
 log() {
     echo "[PATHSYS] $*"
-}
-
-load_atlas_config() {
-    if [ -f "$RUNNER_ENV_FILE" ]; then
-        if [ -z "$ATLAS_MONGODB_URI" ]; then
-            ATLAS_MONGODB_URI="$(grep -E '^ATLAS_MONGODB_URI=' "$RUNNER_ENV_FILE" | tail -n 1 | cut -d '=' -f 2- || true)"
-        fi
-    fi
 }
 
 require_dir() {
@@ -36,43 +31,90 @@ require_dir() {
     fi
 }
 
-ensure_backend_venv() {
-    local venv_dir="$BACK_DIR/.venv"
-    local venv_python="$venv_dir/bin/python"
+require_cmd() {
+    local cmd="$1"
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        echo "Error: comando requerido no encontrado: $cmd"
+        exit 1
+    fi
+}
 
-    if [ ! -d "$venv_dir" ] || [ ! -x "$venv_python" ]; then
-        rm -rf "$venv_dir"
-        python3 -m venv "$venv_dir"
+require_docker() {
+    require_cmd docker
+    if ! docker info >/dev/null 2>&1; then
+        echo "Error: Docker no está disponible. Inicia el daemon y vuelve a intentar."
+        exit 1
+    fi
+    if ! docker compose version >/dev/null 2>&1; then
+        echo "Error: docker compose no está disponible."
+        exit 1
+    fi
+}
+
+compose_cmd() {
+    docker compose -f "$COMPOSE_BASE_FILE" -f "$COMPOSE_DEV_FILE" "$@"
+}
+
+cleanup_legacy_named_containers() {
+    local legacy_containers=("pathsys-mongo" "pathsys-backend" "pathsys-frontend")
+    local c
+
+    for c in "${legacy_containers[@]}"; do
+        if docker ps -a --format '{{.Names}}' | rg -x "$c" >/dev/null 2>&1; then
+            log "Removiendo contenedor legacy en conflicto: $c"
+            docker rm -f "$c" >/dev/null 2>&1 || true
+        fi
+    done
+}
+
+free_port_if_busy() {
+    local port="$1"
+    local pids=""
+
+    if command -v ss >/dev/null 2>&1; then
+        pids="$(ss -ltnp "sport = :$port" 2>/dev/null | awk -F 'pid=' 'NR>1 {split($2,a,","); if (a[1] ~ /^[0-9]+$/) print a[1]}' | sort -u | xargs || true)"
     fi
 
-    if ! "$venv_python" -c "import sys; print(sys.executable)" >/dev/null 2>&1; then
-        log "Detected broken virtualenv, recreating..."
-        rm -rf "$venv_dir"
-        python3 -m venv "$venv_dir"
+    if [ -z "$pids" ] && command -v lsof >/dev/null 2>&1; then
+        pids="$(lsof -ti:"$port" 2>/dev/null | xargs || true)"
+    fi
+
+    if [ -z "$pids" ]; then
+        return 0
+    fi
+
+    log "Liberando puerto $port (PID(s): $pids)"
+    kill -TERM $pids >/dev/null 2>&1 || true
+    sleep 1
+    kill -KILL $pids >/dev/null 2>&1 || true
+}
+
+free_required_ports() {
+    free_port_if_busy 8002
+    free_port_if_busy 3002
+    free_port_if_busy 27017
+}
+
+load_atlas_config() {
+    if [ -f "$RUNNER_ENV_FILE" ] && [ -z "$ATLAS_MONGODB_URI" ]; then
+        ATLAS_MONGODB_URI="$(grep -E '^ATLAS_MONGODB_URI=' "$RUNNER_ENV_FILE" | tail -n 1 | cut -d '=' -f 2- || true)"
     fi
 }
 
 write_backend_env() {
     local mongodb_uri="$1"
     local mode="$2"
-
-    mkdir -p "$BACK_DIR"
-
-    # Preservar SECRET_KEY si ya existe (no sobreescribir un secreto configurado)
-    local secret_key=""
-    if [ -f "$ENV_FILE" ]; then
-        secret_key="$(grep -E '^SECRET_KEY=' "$ENV_FILE" | tail -n 1 | cut -d'=' -f2- || true)"
-    fi
+    local secret_key="${SECRET_KEY:-$SECRET_KEY_DEFAULT}"
 
     {
         echo "# Generado por run.sh - modo: $mode"
         echo "MONGODB_URI=$mongodb_uri"
         echo "DATABASE_NAME=$DATABASE_NAME"
         echo "ENVIRONMENT=development"
-        echo "CORS_ORIGINS=http://localhost:3002,http://127.0.0.1:3002"
-        if [ -n "$secret_key" ]; then
-            echo "SECRET_KEY=$secret_key"
-        fi
+        echo "API_HOST=0.0.0.0"
+        echo "API_PORT=8002"
+        echo "CORS_ORIGINS=http://localhost:3002,http://127.0.0.1:3002,http://0.0.0.0:3002"
+        echo "SECRET_KEY=$secret_key"
     } > "$ENV_FILE"
 
     log "Back-End .env escrito (modo: $mode, DB: $DATABASE_NAME)"
@@ -89,59 +131,82 @@ write_frontend_env() {
     log "Front-End .env.local escrito: NEXT_PUBLIC_API_URL=$api_url"
 }
 
-setup() {
-    log "Installing dependencies..."
+compose_up() {
+    local mode="$1"
+    local mongodb_uri="$2"
+    local build_flag="$3"
 
-    if [ -d "$FRONT_DIR" ]; then
-        log "Installing Front-End dependencies"
-        (cd "$FRONT_DIR" && npm install)
-    else
-        log "Front-End directory not found, skipping"
+    local compose_args=()
+    if [ "$build_flag" = "1" ]; then
+        compose_args+=(--build)
     fi
 
-    if [ -d "$BACK_DIR" ]; then
-        log "Installing Back-End dependencies"
-        ensure_backend_venv
-        "$BACK_DIR/.venv/bin/python" -m pip install --upgrade pip -q
-        "$BACK_DIR/.venv/bin/python" -m pip install -r "$BACK_DIR/requirements.txt" -q
+    if [ "$mode" = "atlas" ]; then
+        MONGODB_URI="$mongodb_uri" DATABASE_NAME="$DATABASE_NAME" NEXT_PUBLIC_API_URL="$FRONTEND_API_URL" \
+            compose_cmd up -d "${compose_args[@]}" backend frontend
     else
-        log "Back-End directory not found, skipping"
+        MONGODB_URI="$mongodb_uri" DATABASE_NAME="$DATABASE_NAME" NEXT_PUBLIC_API_URL="$FRONTEND_API_URL" \
+            compose_cmd up -d "${compose_args[@]}" mongo backend frontend
     fi
-
-    log "Setup complete"
 }
 
+stream_service_logs() {
+    local mode="$1"
+
+    log "Mostrando logs en vivo (Ctrl+C para salir de la vista de logs)."
+    log "Para detener servicios usa: ./run.sh stop"
+
+    if [ "$mode" = "atlas" ]; then
+        compose_cmd logs -f --tail=100 backend frontend
+    else
+        compose_cmd logs -f --tail=100 mongo backend frontend
+    fi
+}
+
+setup() {
+    require_dir "$BACK_DIR" "Back-End"
+    require_dir "$FRONT_DIR" "Front-End"
+    require_docker
+
+    log "Preparando imágenes Docker..."
+    compose_cmd pull mongo || true
+    compose_cmd build backend frontend
+    log "Setup completo"
+}
 
 start_services() {
     local mode="$1"
+    local backend_uri=""
 
     require_dir "$BACK_DIR" "Back-End"
     require_dir "$FRONT_DIR" "Front-End"
+    require_docker
 
-    # Siempre detener servicios previos y esperar a que los puertos queden libres
+    cleanup_legacy_named_containers
     stop_services
-
-    ensure_backend_venv
-
-    local backend_uri=""
+    free_required_ports
 
     case "$mode" in
         local)
             backend_uri="$LOCAL_MONGODB_URI"
             write_backend_env "$backend_uri" "local"
-            write_frontend_env "http://localhost:8002"
+            write_frontend_env "$FRONTEND_API_URL"
+            log "Iniciando stack Docker (modo: local)"
+            compose_up "local" "$backend_uri" "1"
             ;;
         atlas)
             load_atlas_config
             if [ -z "$ATLAS_MONGODB_URI" ]; then
                 echo "Error: ATLAS_MONGODB_URI no está configurado."
-                echo "Defínelo en .pathsys.runner.env o como variable de entorno:"
-                echo "  ATLAS_MONGODB_URI='mongodb+srv://user:pass@cluster.mongodb.net/' $0 atlas"
+                echo "Defínelo en .env o como variable de entorno:"
+                echo "  ATLAS_MONGODB_URI='mongodb+srv://juanpablorestrepo2020:HHa1Vk7EjHJAXRbT@cluster0.myvykk4.mongodb.net/' $0 atlas"
                 exit 1
             fi
             backend_uri="$ATLAS_MONGODB_URI"
             write_backend_env "$backend_uri" "atlas"
-            write_frontend_env "http://localhost:8002"
+            write_frontend_env "$FRONTEND_API_URL"
+            log "Iniciando stack Docker (modo: atlas)"
+            compose_up "atlas" "$backend_uri" "1"
             ;;
         *)
             echo "Error: modo desconocido '$mode'"
@@ -149,77 +214,18 @@ start_services() {
             ;;
     esac
 
-    log "Iniciando Back-End en puerto 8002 (modo: $mode)"
-    # Todas las variables críticas se pasan explícitamente al proceso
-    (cd "$BACK_DIR" && \
-        MONGODB_URI="$backend_uri" \
-        DATABASE_NAME="$DATABASE_NAME" \
-        ENVIRONMENT=development \
-        CORS_ORIGINS="http://localhost:3002,http://127.0.0.1:3002,http://0.0.0.0:3002" \
-        .venv/bin/python run.py 2>&1) &
-    local backend_pid=$!
-
-    # Esperar hasta que el puerto 8002 esté activo (máx 15 seg)
-    local i=0
-    while ! lsof -ti:8002 >/dev/null 2>&1; do
-        i=$((i + 1))
-        if [ "$i" -ge 30 ]; then
-            echo "Error: el Back-End no levantó en 15 segundos. Revisa los logs."
-            exit 1
-        fi
-        sleep 0.5
-    done
-    log "Back-End listo (PID $backend_pid)"
-
-    log "Iniciando Front-End en puerto 3002"
-    (cd "$FRONT_DIR" && npm run dev) &
-
     log "Servicios activos → Front-End: http://localhost:3002 | Back-End: http://localhost:8002"
-}
-
-wait_port_free() {
-    local port="$1"
-    log "Liberando puerto $port..."
-    
-    # Fuerza matar cualquier proceso en el puerto inmediatamente
-    fuser -k -9 "$port/tcp" 2>/dev/null || true
-    lsof -ti:"$port" | xargs kill -9 2>/dev/null || true
-    
-    local attempts=20
-    local i=0
-    while lsof -ti:"$port" >/dev/null 2>&1 || ss -lptn "sport = :$port" 2>/dev/null | grep -q ":$port "; do
-        i=$((i + 1))
-        
-        if [ "$i" -eq 10 ]; then
-            log "Advertencia: el puerto $port sigue ocupado. Intentando con sudo (puede pedir contraseña)..."
-            sudo fuser -k -9 "$port/tcp" 2>/dev/null || true
-            sudo lsof -ti:"$port" | xargs sudo kill -9 2>/dev/null || true
-        fi
-
-        if [ "$i" -ge "$attempts" ]; then
-            log "Advertencia: no se pudo confirmar la liberación del puerto $port."
-            return
-        fi
-        
-        fuser -k -9 "$port/tcp" 2>/dev/null || true
-        lsof -ti:"$port" | xargs kill -9 2>/dev/null || true
-        sleep 0.5
-    done
+    stream_service_logs "$mode"
 }
 
 clone_db() {
     load_atlas_config
+    require_docker
 
     if [ -z "$ATLAS_MONGODB_URI" ]; then
         echo "Error: ATLAS_MONGODB_URI no está configurado."
-        echo "Defínelo en .pathsys.runner.env o como variable de entorno:"
-        echo "  ATLAS_MONGODB_URI='mongodb+srv://user:pass@cluster.mongodb.net/' $0 clone-db"
-        exit 1
-    fi
-
-    if ! command -v mongodump >/dev/null 2>&1 || ! command -v mongorestore >/dev/null 2>&1; then
-        echo "Error: mongodump/mongorestore no están instalados."
-        echo "  Arch Linux: sudo pacman -S mongodb-tools"
+        echo "Defínelo en .env o como variable de entorno:"
+        echo "  ATLAS_MONGODB_URI='mongodb+srv://juanpablorestrepo2020:HHa1Vk7EjHJAXRbT@cluster0.myvykk4.mongodb.net/' $0 clone-db"
         exit 1
     fi
 
@@ -233,42 +239,30 @@ clone_db() {
         exit 0
     fi
 
-    local tmp_dir
-    tmp_dir=$(mktemp -d)
+    log "Asegurando MongoDB local en Docker..."
+    compose_cmd up -d mongo
 
-    log "1/3 Descargando dump desde Atlas..."
-    mongodump --uri="$ATLAS_MONGODB_URI" --db="$DATABASE_NAME" --out="$tmp_dir"
-
-    if [ ! -d "$tmp_dir/$DATABASE_NAME" ]; then
-        echo "Error: el dump falló o la base de datos remota está vacía."
-        rm -rf "$tmp_dir"
-        exit 1
-    fi
-
-    log "2/3 Restaurando en local (mongodb://localhost:27017)..."
-    mongorestore --uri="$LOCAL_MONGODB_URI" --db="$DATABASE_NAME" --drop "$tmp_dir/$DATABASE_NAME"
-
-    log "3/3 Limpiando archivos temporales..."
-    rm -rf "$tmp_dir"
+    log "Clonando Atlas -> Mongo local Docker..."
+    docker run --rm mongo:7 sh -lc "mongodump --uri='$ATLAS_MONGODB_URI' --db='$DATABASE_NAME' --archive" \
+        | compose_cmd exec -T mongo sh -lc "mongorestore --uri='mongodb://localhost:27017' --db='$DATABASE_NAME' --drop --archive"
 
     log "Clonacion completada. '$DATABASE_NAME' local es ahora copia 1:1 de Atlas."
 }
 
 stop_services() {
-    log "Deteniendo servicios..."
+    if ! command -v docker >/dev/null 2>&1; then
+        log "Docker no está instalado. No hay servicios Docker para detener."
+        return 0
+    fi
 
-    rm -f "$SCRIPT_DIR/.pathsys.pids" 2>/dev/null || true
+    if ! docker info >/dev/null 2>&1; then
+        log "Docker daemon no está activo. No hay servicios Docker para detener."
+        return 0
+    fi
 
-    pkill -f "$BACK_DIR/.venv/bin/python run.py" 2>/dev/null || true
-    pkill -f "uvicorn.*8002" 2>/dev/null || true
-    pkill -f "$FRONT_DIR/node_modules/.bin/next dev" 2>/dev/null || true
-    pkill -f "next dev" 2>/dev/null || true
-    pkill -f "node.*3002" 2>/dev/null || true
-
-    # Asegurar que los puertos queden completamente libres
-    wait_port_free 8002
-    wait_port_free 3002
-
+    log "Deteniendo servicios Docker..."
+    compose_cmd down --remove-orphans >/dev/null 2>&1 || true
+    cleanup_legacy_named_containers
     log "Servicios detenidos"
 }
 
@@ -280,11 +274,11 @@ Usage:
     $0 <command>
 
 Commands:
-    setup   Install dependencies only (Front-End + Back-End)
-    local     Run app with local MongoDB (mongodb://localhost:27017, DB: pathsys)
+    setup     Build de imágenes Docker (Front-End + Back-End)
+    local     Run app with local MongoDB Docker (DB: pathsys)
     atlas     Run app with MongoDB Atlas (requires ATLAS_MONGODB_URI)
-    clone-db  Copy Atlas database to local MongoDB (mirror 1:1, overwrites local)
-    stop      Stop Front-End and Back-End services
+    clone-db  Copy Atlas database to local MongoDB Docker (mirror 1:1, overwrites local)
+    stop      Stop Front-End, Back-End and MongoDB Docker services
     help      Show this help message
 
 Examples:
@@ -293,10 +287,10 @@ Examples:
     $0 help
 
 Atlas example:
-  ATLAS_MONGODB_URI='mongodb+srv://user:pass@cluster.mongodb.net/' $0 atlas
+  ATLAS_MONGODB_URI='mongodb+srv://juanpablorestrepo2020:HHa1Vk7EjHJAXRbT@cluster0.myvykk4.mongodb.net/' $0 atlas
 
-You can also define this in .pathsys.runner.env:
-    ATLAS_MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/
+You can also define this in .env:
+    ATLAS_MONGODB_URI=mongodb+srv://juanpablorestrepo2020:HHa1Vk7EjHJAXRbT@cluster0.myvykk4.mongodb.net/
 EOF
 }
 

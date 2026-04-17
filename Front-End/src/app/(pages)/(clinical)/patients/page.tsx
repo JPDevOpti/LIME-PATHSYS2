@@ -7,7 +7,7 @@ import { PatientsTable } from '@/features/patients/components/PatientsTable';
 import { PatientDetailsModal } from '@/features/patients/components/PatientDetailsModal';
 import { usePatientList } from '@/features/patients/hooks/usePatientList';
 import type { Patient } from '@/features/patients/types/patient.types';
-import { exportPatientsToExcel } from '@/shared/utils/excelExport';
+import { exportPatientsToExcel } from '@/features/patients/utils/exportPatients';
 
 const COLUMNS = [
     { key: 'patient_code' as const, label: 'Código', class: 'w-[10%]' },

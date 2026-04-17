@@ -46,6 +46,7 @@ export interface CreateCaseRequest {
 
 export interface UpdateCaseRequest extends Omit<CreateCaseRequest, 'patientId'> {
     status?: CaseStatus;
+    delivered_to?: string;
 }
 
 export type CaseSortKey =
@@ -64,12 +65,19 @@ export interface CaseFilters {
     search?: string;
     created_at_from?: string;
     created_at_to?: string;
+    /** Nombres de entidad (OR). Requiere no usar `entity` suelto. */
+    entity_names?: string[];
+    assigned_pathologist_names?: string[];
     entity?: string;
     assigned_pathologist?: string;
     pathologist_name?: string;
     priority?: CasePriority | '';
     test?: string;
+    /** Códigos de prueba (OR sobre `samples.tests.test_code`). */
+    test_codes?: string[];
     status?: CaseStatus | '';
+    /** Varios estados (OR). Si viene, tiene prioridad sobre `status` suelto. */
+    states?: CaseStatus[];
     doctor?: string;
     patient_id?: string;
     identification_number?: string;
@@ -91,6 +99,8 @@ export interface AuditEntry {
     user_name: string;
     user_email: string;
     timestamp: string;
+    /** Líneas en español con cambios concretos (solo en ediciones). */
+    details?: string[];
 }
 
 export type DateEntryAction = 'created_at' | 'update_at' | 'transcribed_at' | 'signed_at' | 'delivered_at';

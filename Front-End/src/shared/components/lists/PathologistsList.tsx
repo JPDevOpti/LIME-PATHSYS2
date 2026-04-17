@@ -40,7 +40,7 @@ export function PathologistsCombobox({
     name,
     id,
     required,
-    options: optionsProp
+    options: optionsProp,
 }: PathologistsComboboxProps) {
     const [apiOptions, setApiOptions] = useState<ComboboxOption[]>([]);
     const [loading, setLoading] = useState(!optionsProp);

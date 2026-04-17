@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Combobox } from '@/shared/components/ui/form/Combobox';
-import { BODY_REGION_OPTIONS } from './data/mock-body-regions';
+import { BODY_REGION_OPTIONS } from '@/shared/data/mock-body-regions';
 import type { ComboboxOption } from '@/shared/components/ui/form/Combobox';
 import { Input } from '@/shared/components/ui/form';
 
@@ -95,6 +95,7 @@ export function BodyRegionCombobox({
                     required={required}
                     noResultsActionLabel="Agregar otro (especificar)"
                     onNoResultsAction={handleAddOther}
+                    accentInsensitiveSearch
                 />
             </div>
 

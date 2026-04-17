@@ -1,7 +1,7 @@
 'use client';
 
 import { Combobox } from '@/shared/components/ui/form/Combobox';
-import { COUNTRY_OPTIONS } from './data/mock-countries';
+import { COUNTRY_OPTIONS } from '@/shared/data/mock-countries';
 import type { ComboboxOption } from '@/shared/components/ui/form/Combobox';
 
 interface CountryComboboxProps {

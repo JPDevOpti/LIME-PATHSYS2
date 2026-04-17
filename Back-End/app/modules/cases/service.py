@@ -4,6 +4,7 @@ from typing import Any, Optional
 from fastapi import HTTPException
 
 from app.core.exceptions import not_found_exception
+from app.modules.cases.audit_changes import describe_case_edit_details, describe_patient_info_changes
 from app.modules.cases.repository import CaseRepository
 from app.modules.cases.schemas import CaseCreate, CaseTranscriptionUpdate, CaseUpdate
 from app.modules.patients.repository import PatientRepository
@@ -20,11 +21,15 @@ class CaseService:
         created_at_from: Optional[str] = None,
         created_at_to: Optional[str] = None,
         entity: Optional[str] = None,
+        entity_names: Optional[list[str]] = None,
         assigned_pathologist: Optional[str] = None,
         pathologist_name: Optional[str] = None,
+        assigned_pathologist_names: Optional[list[str]] = None,
         priority: Optional[str] = None,
         test: Optional[str] = None,
+        test_codes: Optional[list[str]] = None,
         state: Optional[str] = None,
+        states: Optional[list[str]] = None,
         doctor: Optional[str] = None,
         patient_id: Optional[str] = None,
         identification_number: Optional[str] = None,
@@ -40,11 +45,15 @@ class CaseService:
             created_at_from=created_at_from,
             created_at_to=created_at_to,
             entity=entity,
+            entity_names=entity_names,
             assigned_pathologist=assigned_pathologist,
             pathologist_name=pathologist_name,
+            assigned_pathologist_names=assigned_pathologist_names,
             priority=priority,
             test=test,
+            test_codes=test_codes,
             state=state,
+            states=states,
             doctor=doctor,
             patient_id=patient_id,
             identification_number=identification_number,
@@ -150,32 +159,59 @@ class CaseService:
         )
         is_delivery = payload.get("state") == "Completado" and not already_delivered
         audit_action = "delivered" if is_delivery else "edited"
-        result = self._repo.update(id, payload, updated_by_email=updated_by_email, updated_by_name=updated_by_name, audit_action=audit_action)
+        audit_change_details = (
+            describe_case_edit_details(existing, payload) if audit_action == "edited" else None
+        )
+        result = self._repo.update(
+            id,
+            payload,
+            updated_by_email=updated_by_email,
+            updated_by_name=updated_by_name,
+            audit_action=audit_action,
+            audit_change_details=audit_change_details,
+        )
         if not result:
             raise not_found_exception("Case", id)
         return result
 
-    def update_patient_info(self, id: str, data: dict) -> dict:
+    def update_patient_info(
+        self,
+        id: str,
+        data: dict,
+        updated_by_email: str | None = None,
+        updated_by_name: str | None = None,
+    ) -> dict:
         """Actualiza la información del paciente incrustada en el caso."""
         existing = self._repo.find_by_id(id)
         if not existing:
             raise not_found_exception("Case", id)
-            
-        # Calcular edad si viene birth_date
-        if "birth_date" in data:
-            data["age_at_diagnosis"] = self._calculate_age(data["birth_date"])
-            
-        # Asegurar full_name
+
+        old_pi = existing.get("patient_info") or {}
+        data_to_save = dict(data)
+
+        if "birth_date" in data_to_save:
+            data_to_save["age_at_diagnosis"] = self._calculate_age(data_to_save["birth_date"])
+
         parts = [
-            data.get("first_name", ""),
-            data.get("second_name") or "",
-            data.get("first_lastname", ""),
-            data.get("second_lastname") or "",
+            data_to_save.get("first_name", ""),
+            data_to_save.get("second_name") or "",
+            data_to_save.get("first_lastname", ""),
+            data_to_save.get("second_lastname") or "",
         ]
         if any(parts):
-            data["full_name"] = " ".join(p for p in parts if p).strip()
+            data_to_save["full_name"] = " ".join(p for p in parts if p).strip()
 
-        result = self._repo.update_patient_info(id, data)
+        audit_change_details = describe_patient_info_changes(old_pi, data_to_save)
+        if not audit_change_details:
+            audit_change_details = None
+
+        result = self._repo.update_patient_info(
+            id,
+            data_to_save,
+            updated_by_email=updated_by_email,
+            updated_by_name=updated_by_name,
+            audit_change_details=audit_change_details,
+        )
         if not result:
             raise not_found_exception("Case", id)
         return result

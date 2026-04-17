@@ -26,7 +26,7 @@ export function EntitiesCombobox({
     disabled = false,
     error,
     name,
-    required
+    required,
 }: EntitiesComboboxProps) {
     const [options, setOptions] = useState<ComboboxOption[]>([]);
     const [entityIdMap, setEntityIdMap] = useState<Record<string, string>>({});

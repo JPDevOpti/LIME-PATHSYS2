@@ -9,7 +9,7 @@ import { NewUnreadCaseModal } from './NewUnreadCaseModal';
 import { DeliveryInfoModal } from './DeliveryInfoModal';
 import { BatchMarkDeliveredModal } from './BatchMarkDeliveredModal';
 import { unreadCasesService } from '../services/unread-cases.service';
-import { exportJsonToExcel } from '@/shared/lib/exportExcel';
+import { exportJsonToExcel } from '@/shared/utils/exportExcel';
 import type {
     UnreadCase,
     UnreadCaseFilters,

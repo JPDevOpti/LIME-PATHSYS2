@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, PackageCheck, FlaskConical, ChevronDown, ChevronUp, Loader2, Trash2, Plus, Search } from 'lucide-react';
-import type { Case } from '../types/case.types';
+import type { Case, SampleInfo } from '../types/case.types';
 import { labTestsService } from '@/features/test-management/services/lab-tests.service';
 import type { LabTest } from '@/features/test-management/types/lab-tests.types';
+import type { DeliveredCasePayload } from '../services/case.service';
 
 interface TestEdit {
     code: string;
@@ -21,15 +22,59 @@ interface CaseEdit {
     patientName: string;
     tests: TestEdit[];
     expanded: boolean;
+    /** Máximo previo (solo lectura, tomado del caso) */
+    previousMaxDays: string;
+    /** Texto del input: máximo nuevo (por defecto según catálogo de pruebas) */
+    newMaxDays: string;
+    newMaxManual: boolean;
 }
 
 interface MarkDeliveredModalProps {
     isOpen: boolean;
     cases: Case[];
     onClose: () => void;
-    onConfirm: (deliveredTo: string, caseEdits: { caseId: string; tests: TestEdit[] }[]) => Promise<void>;
+    onConfirm: (deliveredTo: string, items: DeliveredCasePayload[]) => Promise<void>;
 }
 
+function computeSuggestedMaxFromEdits(tests: TestEdit[], catalog: LabTest[]): number | null {
+    const map = new Map(catalog.map((t) => [t.test_code.toUpperCase(), t.time]));
+    let max: number | null = null;
+    for (const e of tests) {
+        const t = map.get(e.code.toUpperCase());
+        if (t != null && t > 0) {
+            max = max === null ? t : Math.max(max, t);
+        }
+    }
+    return max;
+}
+
+function buildDeliverySamples(original: Case, edits: TestEdit[]): SampleInfo[] {
+    const region = original.samples?.[0]?.body_region ?? '';
+    const tests: SampleInfo['tests'] = edits.map((e) => ({
+        id: '',
+        test_code: e.code,
+        name: e.name,
+        quantity: e.quantity,
+    }));
+    return [{ body_region: region, tests }];
+}
+
+function parseOpportunityDaysInput(s: string): number | null {
+    const t = s.trim();
+    if (!t) return null;
+    const v = parseFloat(t.replace(',', '.'));
+    return Number.isFinite(v) ? v : null;
+}
+
+/** Solo hay “cambio” si ambos valores son numéricos y difieren (muestra campos y envía registro anterior). */
+function opportunityMaxTimesDiffer(previousMaxDays: string, newMaxDays: string): boolean {
+    const p = parseOpportunityDaysInput(previousMaxDays);
+    const n = parseOpportunityDaysInput(newMaxDays);
+    if (p === null || n === null) return false;
+    return Math.abs(p - n) > 1e-4;
+}
+
+/** Máximo guardado en el caso; si no hay, cadena vacía (el UI puede mostrar referencia de catálogo). */
 function buildCaseEdits(cases: Case[]): CaseEdit[] {
     return cases.map(c => {
         const tests: TestEdit[] = [];
@@ -45,8 +90,29 @@ function buildCaseEdits(cases: Case[]): CaseEdit[] {
                 }
             });
         });
-        return { caseId: c.id, caseCode: c.case_code, patientName: c.patient?.full_name ?? '', tests, expanded: cases.length === 1 };
+        const prevRaw = c.opportunity_info?.[0]?.max_opportunity_time;
+        const previousMaxDays =
+            prevRaw !== undefined && prevRaw !== null && String(prevRaw).trim() !== '' && Number.isFinite(Number(prevRaw))
+                ? String(Number(prevRaw))
+                : '';
+        return {
+            caseId: c.id,
+            caseCode: c.case_code,
+            patientName: c.patient?.full_name ?? '',
+            tests,
+            expanded: cases.length === 1,
+            previousMaxDays,
+            newMaxDays: '',
+            newMaxManual: false,
+        };
     });
+}
+
+/** Valor mostrado como «anterior»: el del caso o, si falta, el máximo según catálogo de las pruebas listadas. */
+function previousMaxForDisplay(ce: CaseEdit, catalog: LabTest[]): string {
+    if (ce.previousMaxDays !== '') return ce.previousMaxDays;
+    const sug = computeSuggestedMaxFromEdits(ce.tests, catalog);
+    return sug != null && Number.isFinite(sug) ? String(sug) : '';
 }
 
 interface TestAdderProps {
@@ -197,36 +263,71 @@ export function MarkDeliveredModal({ isOpen, cases, onClose, onConfirm }: MarkDe
         }
     }, [isOpen, cases]);
 
+    useEffect(() => {
+        if (!isOpen || allTests.length === 0) return;
+        setCaseEdits((prev) =>
+            prev.map((ce) => {
+                if (ce.newMaxManual) return ce;
+                const auto = computeSuggestedMaxFromEdits(ce.tests, allTests);
+                return {
+                    ...ce,
+                    newMaxDays: auto != null && Number.isFinite(auto) ? String(auto) : '',
+                };
+            })
+        );
+    }, [isOpen, allTests]);
+
     if (!isOpen) return null;
 
     const toggleExpanded = (idx: number) => {
         setCaseEdits(prev => prev.map((ce, i) => i === idx ? { ...ce, expanded: !ce.expanded } : ce));
     };
 
+    const recomputeNewMax = (tests: TestEdit[]) => {
+        const auto = computeSuggestedMaxFromEdits(tests, allTests);
+        return auto != null && Number.isFinite(auto) ? String(auto) : '';
+    };
+
     const updateQuantity = (caseIdx: number, testIdx: number, value: number) => {
-        setCaseEdits(prev =>
-            prev.map((ce, ci) => ci !== caseIdx ? ce : {
-                ...ce,
-                tests: ce.tests.map((t, ti) => ti !== testIdx ? t : { ...t, quantity: Math.max(1, value) })
+        setCaseEdits((prev) =>
+            prev.map((ce, ci) => {
+                if (ci !== caseIdx) return ce;
+                const tests = ce.tests.map((t, ti) =>
+                    ti !== testIdx ? t : { ...t, quantity: Math.max(1, value) }
+                );
+                return { ...ce, tests, newMaxDays: recomputeNewMax(tests), newMaxManual: false };
             })
         );
     };
 
     const removeTest = (caseIdx: number, testIdx: number) => {
-        setCaseEdits(prev =>
-            prev.map((ce, ci) => ci !== caseIdx ? ce : {
-                ...ce,
-                tests: ce.tests.filter((_, ti) => ti !== testIdx)
+        setCaseEdits((prev) =>
+            prev.map((ce, ci) => {
+                if (ci !== caseIdx) return ce;
+                const tests = ce.tests.filter((_, ti) => ti !== testIdx);
+                return { ...ce, tests, newMaxDays: recomputeNewMax(tests), newMaxManual: false };
             })
         );
     };
 
     const addTest = (caseIdx: number, code: string, name: string, quantity: number) => {
-        setCaseEdits(prev =>
-            prev.map((ce, ci) => ci !== caseIdx ? ce : {
-                ...ce,
-                tests: [...ce.tests, { code, name, quantity, sampleIndex: 0, testIndex: ce.tests.length }]
+        setCaseEdits((prev) =>
+            prev.map((ce, ci) => {
+                if (ci !== caseIdx) return ce;
+                const tests = [
+                    ...ce.tests,
+                    { code, name, quantity, sampleIndex: 0, testIndex: ce.tests.length },
+                ];
+                return { ...ce, tests, newMaxDays: recomputeNewMax(tests), newMaxManual: false };
             })
+        );
+    };
+
+    const setNewMaxDays = (caseIdx: number, value: string) => {
+        setCaseEdits((prev) =>
+            prev.map((ce, i) =>
+                i === caseIdx ? { ...ce, newMaxDays: value, newMaxManual: true } : ce
+            )
         );
     };
 
@@ -235,12 +336,38 @@ export function MarkDeliveredModal({ isOpen, cases, onClose, onConfirm }: MarkDe
             setError('El campo "Entregado a" es obligatorio');
             return;
         }
+        const items: DeliveredCasePayload[] = [];
+        for (const ce of caseEdits) {
+            const original = cases.find((c) => c.id === ce.caseId);
+            if (!original) continue;
+            if (ce.tests.length === 0) {
+                setError(`El caso ${ce.caseCode} debe tener al menos una prueba.`);
+                return;
+            }
+            const newN = parseFloat(String(ce.newMaxDays).replace(',', '.'));
+            if (!Number.isFinite(newN) || newN < 0) {
+                setError(
+                    `Indique un tiempo máximo nuevo válido (días) para el caso ${ce.caseCode}.`
+                );
+                return;
+            }
+            items.push({
+                caseId: ce.caseId,
+                samples: buildDeliverySamples(original, ce.tests),
+                max_opportunity_time: newN,
+            });
+        }
+        if (items.length === 0) {
+            setError('No hay casos válidos para entregar.');
+            return;
+        }
         setIsLoading(true);
         setError(null);
         try {
-            await onConfirm(deliveredTo.trim(), caseEdits.map(ce => ({ caseId: ce.caseId, tests: ce.tests })));
+            await onConfirm(deliveredTo.trim(), items);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error al marcar como entregado');
+        } finally {
             setIsLoading(false);
         }
     };
@@ -253,8 +380,13 @@ export function MarkDeliveredModal({ isOpen, cases, onClose, onConfirm }: MarkDe
                         <PackageCheck className="w-5 h-5 text-green-600" />
                         <h2 className="text-lg font-semibold text-gray-900">Marcar como entregado</h2>
                     </div>
-                    <button type="button" onClick={onClose} disabled={isLoading}
-                        className="p-1.5 rounded-md hover:bg-gray-100 text-gray-500 disabled:opacity-50">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        disabled={isLoading}
+                        title="Cerrar"
+                        className="p-1.5 rounded-md hover:bg-gray-100 text-gray-500 disabled:opacity-50"
+                    >
                         <X className="w-5 h-5" />
                     </button>
                 </div>
@@ -280,11 +412,14 @@ export function MarkDeliveredModal({ isOpen, cases, onClose, onConfirm }: MarkDe
                             Casos a entregar ({caseEdits.length})
                         </p>
                         <div className="space-y-2">
-                            {caseEdits.map((ce, cIdx) => (
+                            {caseEdits.map((ce, cIdx) => {
+                                const prevDisplay = previousMaxForDisplay(ce, allTests);
+                                return (
                                 <div key={ce.caseId} className="border border-gray-200 rounded-lg overflow-hidden">
                                     <button
                                         type="button"
                                         onClick={() => toggleExpanded(cIdx)}
+                                        title={ce.expanded ? 'Contraer detalle del caso' : 'Expandir detalle del caso'}
                                         className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 text-left"
                                     >
                                         <div className="flex items-center gap-3">
@@ -316,13 +451,15 @@ export function MarkDeliveredModal({ isOpen, cases, onClose, onConfirm }: MarkDe
                                                                 <span className="text-xs text-gray-600 truncate">{t.name}</span>
                                                             </div>
                                                             <div className="flex items-center gap-2 flex-shrink-0">
-                                                                <label className="text-xs text-gray-500">Cant.:</label>
+                                                                <label className="text-xs text-gray-500" htmlFor={`qty-${ce.caseId}-${tIdx}`}>Cant.:</label>
                                                                 <input
+                                                                    id={`qty-${ce.caseId}-${tIdx}`}
                                                                     type="number"
                                                                     min={1}
                                                                     value={t.quantity}
                                                                     onChange={e => updateQuantity(cIdx, tIdx, parseInt(e.target.value) || 1)}
                                                                     disabled={isLoading}
+                                                                    aria-label={`Cantidad para prueba ${t.code}`}
                                                                     className="w-16 rounded border border-gray-300 px-2 py-0.5 text-sm text-center text-gray-800 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:bg-gray-50"
                                                                 />
                                                                 <button
@@ -346,10 +483,53 @@ export function MarkDeliveredModal({ isOpen, cases, onClose, onConfirm }: MarkDe
                                                 onAdd={(code, name, qty) => addTest(cIdx, code, name, qty)}
                                                 disabled={isLoading}
                                             />
+
+                                            {opportunityMaxTimesDiffer(prevDisplay, ce.newMaxDays) && (
+                                                <div className="mt-3 pt-3 border-t border-dashed border-gray-200 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                    <div>
+                                                        <p className="text-xs font-medium text-gray-600 mb-1">
+                                                            Tiempo máximo anterior (días)
+                                                        </p>
+                                                        <div
+                                                            className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm text-gray-800"
+                                                            aria-label={`Tiempo máximo anterior: ${prevDisplay || 'sin dato'} días`}
+                                                        >
+                                                            {prevDisplay !== '' ? prevDisplay : '—'}
+                                                        </div>
+                                                        <p className="text-[11px] text-gray-400 mt-0.5">
+                                                            {ce.previousMaxDays !== ''
+                                                                ? 'Valor registrado en el caso antes de esta entrega.'
+                                                                : 'El caso no tenía máximo guardado; se muestra el máximo según el catálogo de las pruebas listadas.'}
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <label
+                                                            className="block text-xs font-medium text-gray-600 mb-1"
+                                                            htmlFor={`delivered-new-max-${ce.caseId}`}
+                                                        >
+                                                            Tiempo máximo nuevo (días)
+                                                        </label>
+                                                        <input
+                                                            id={`delivered-new-max-${ce.caseId}`}
+                                                            type="number"
+                                                            min={0}
+                                                            step="0.01"
+                                                            value={ce.newMaxDays}
+                                                            onChange={(e) => setNewMaxDays(cIdx, e.target.value)}
+                                                            disabled={isLoading}
+                                                            className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:bg-gray-50"
+                                                        />
+                                                        <p className="text-[11px] text-gray-400 mt-0.5">
+                                                            Por defecto según las pruebas listadas; editable.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>
-                            ))}
+                            );
+                            })}
                         </div>
                     </div>
 

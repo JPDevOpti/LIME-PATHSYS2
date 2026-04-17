@@ -53,8 +53,11 @@ class UnreadCasesService:
         return case
 
     def _generate_case_code(self) -> str:
-        from datetime import datetime, timezone
-        year = datetime.now(timezone.utc).year
+        from datetime import datetime
+
+        from app.core.date_utils import COLOMBIA_TZ
+
+        year = datetime.now(COLOMBIA_TZ).year
         seq = self._repo._get_next_sequence_for_year(year)
         return f"UR{year}-{str(seq).zfill(5)}"
 

@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { ChevronRightIcon, DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 import { BaseButton } from '@/shared/components/base';
-import { exportJsonToExcel } from '@/shared/lib/exportExcel';
+import { exportJsonToExcel } from '@/shared/utils/exportExcel';
 import type { EntityStats } from '../../types/entities.types';
 
 interface EntitiesDetailTableProps {

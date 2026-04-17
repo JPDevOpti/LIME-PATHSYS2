@@ -1,8 +1,14 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any, List
 
 from pymongo.collection import Collection
 from pymongo.database import Database
+
+from app.core.alma_mater_exclusion import (
+    match_active_entities_visible_in_filters,
+    nor_list_completed_not_alma_mater,
+)
+from app.core.date_utils import colombia_calendar_month_range_utc
 
 
 MESES = {
@@ -13,13 +19,25 @@ MESES = {
 
 
 def _month_range(year: int, month: int) -> tuple[datetime, datetime]:
-    """Retorna (start_dt, end_dt) en UTC para el mes dado (extremo superior exclusivo)."""
-    start = datetime(year, month, 1, 0, 0, 0, tzinfo=timezone.utc)
-    if month == 12:
-        end = datetime(year + 1, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
-    else:
-        end = datetime(year, month + 1, 1, 0, 0, 0, tzinfo=timezone.utc)
-    return start, end
+    """Mes civil en Colombia; instantes UTC (extremo superior exclusivo)."""
+    return colombia_calendar_month_range_utc(year, month)
+
+
+# Peso por línea: mismo criterio que facturación (billing): sumar `samples.tests.quantity` tal cual.
+# Si el campo no existe (legado), se cuenta 1 unidad por línea.
+_LINE_QTY: dict[str, Any] = {"$ifNull": ["$samples.tests.quantity", 1]}
+
+# Una fila por elemento en samples.tests; el total es la suma de quantity (varias muestras = varias líneas).
+_UNWIND_SAMPLES_TESTS_WITH_QTY: list[dict[str, Any]] = [
+    {"$unwind": "$samples"},
+    {"$unwind": "$samples.tests"},
+    {"$addFields": {"_line_qty": _LINE_QTY}},
+    {
+        "$match": {
+            "$expr": {"$ne": [{"$toString": {"$ifNull": ["$samples.tests.test_code", ""]}}, ""]},
+        }
+    },
+]
 
 
 class StatisticsRepository:
@@ -29,23 +47,7 @@ class StatisticsRepository:
         self.entities_col: Collection = db["entities"]
 
     def _hama_exclusion(self) -> dict[str, Any]:
-        entity_name_pattern = "h[aá]ma|alma\\s*m[aá]ter|alma\\s*m[aá]ter\\s*de\\s*antioquia"
-        entity_code_pattern = "^HAMA(?:[-_].*)?$"
-        return {
-            "$nor": [
-                {"patient_info.entity_info.entity_code": {"$regex": entity_code_pattern, "$options": "i"}},
-                {"patient_info.entity_info.code": {"$regex": entity_code_pattern, "$options": "i"}},
-                {"patient_info.entity_code": {"$regex": entity_code_pattern, "$options": "i"}},
-                {"entity_code": {"$regex": entity_code_pattern, "$options": "i"}},
-                {"entity.name": {"$regex": entity_name_pattern, "$options": "i"}},
-                {"entity": {"$regex": entity_name_pattern, "$options": "i"}},
-                {"patient_info.entity_info.entity_name": {"$regex": entity_name_pattern, "$options": "i"}},
-                {"patient_info.entity_info.name": {"$regex": entity_name_pattern, "$options": "i"}},
-                {"patient_info.entity_name": {"$regex": entity_name_pattern, "$options": "i"}},
-                {"patient_info.entity": {"$regex": entity_name_pattern, "$options": "i"}},
-                {"institution": {"$regex": entity_name_pattern, "$options": "i"}},
-            ]
-        }
+        return {"$nor": nor_list_completed_not_alma_mater(self.entities_col)}
 
     # ── helpers ────────────────────────────────────────────────────────────────
 
@@ -167,6 +169,7 @@ class StatisticsRepository:
             monthly_patients.append(m_patients)
 
         # ── Por prueba ─────────────────────────────────────────────────────────
+        # Total de unidades de prueba: suma de quantity por línea (y líneas repetidas entre muestras).
         test_pipeline = [
             {"$match": match},
             {"$addFields": {
@@ -174,20 +177,49 @@ class StatisticsRepository:
                 "opp_time": {"$arrayElemAt": ["$opportunity_info.opportunity_time", 0]},
                 "opp_max_time": {"$arrayElemAt": ["$opportunity_info.max_opportunity_time", 0]},
             }},
-            {"$unwind": "$samples"},
-            {"$unwind": "$samples.tests"},
+            *_UNWIND_SAMPLES_TESTS_WITH_QTY,
             {
                 "$group": {
-                    "_id": "$samples.tests.test_code",
+                    "_id": {"$toString": {"$ifNull": ["$samples.tests.test_code", ""]}},
                     "name": {"$first": "$samples.tests.name"},
+                    "totalProcedures": {"$sum": "$_line_qty"},
                     "within": {
-                        "$sum": {"$cond": [{"$eq": ["$opp_was_timely", True]}, 1, 0]}
+                        "$sum": {
+                            "$cond": [
+                                {"$eq": ["$opp_was_timely", True]},
+                                "$_line_qty",
+                                0,
+                            ]
+                        }
                     },
                     "out": {
-                        "$sum": {"$cond": [{"$eq": ["$opp_was_timely", False]}, 1, 0]}
+                        "$sum": {
+                            "$cond": [
+                                {"$eq": ["$opp_was_timely", False]},
+                                "$_line_qty",
+                                0,
+                            ]
+                        }
                     },
-                    "avg_time": {"$avg": "$opp_time"},
-                    "opp_time_days": {"$first": "$opp_max_time"},
+                    "_avg_num": {
+                        "$sum": {
+                            "$cond": [
+                                {"$ne": ["$opp_time", None]},
+                                {"$multiply": ["$_line_qty", "$opp_time"]},
+                                0,
+                            ]
+                        }
+                    },
+                    "_avg_den": {
+                        "$sum": {
+                            "$cond": [
+                                {"$ne": ["$opp_time", None]},
+                                "$_line_qty",
+                                0,
+                            ]
+                        }
+                    },
+                    "opp_time_days": {"$max": "$opp_max_time"},
                 }
             },
             {"$sort": {"within": -1}},
@@ -196,12 +228,16 @@ class StatisticsRepository:
         tests_out = []
         for t in tests_raw:
             code = t["_id"] or ""
+            avg_den = float(t.get("_avg_den") or 0)
+            avg_num = float(t.get("_avg_num") or 0)
+            avg_days = round(avg_num / avg_den, 1) if avg_den > 0 else None
             tests_out.append({
                 "code": code,
                 "name": t.get("name") or test_names.get(code, code),
-                "withinOpportunity": t["within"],
-                "outOfOpportunity": t["out"],
-                "averageDays": round(t["avg_time"], 1) if t.get("avg_time") is not None else None,
+                "totalProcedures": int(t.get("totalProcedures") or 0),
+                "withinOpportunity": int(t.get("within") or 0),
+                "outOfOpportunity": int(t.get("out") or 0),
+                "averageDays": avg_days,
                 "opportunityTimeDays": t.get("opp_time_days"),
             })
 
@@ -286,17 +322,9 @@ class StatisticsRepository:
             nombre = r["_id"] or "Sin entidad"
             aggregated_by_name[nombre] = r
 
-        # Catálogo de entidades activas (todas, aunque no tengan casos), excluyendo HAMA/Alma Máter
-        entity_name_pattern = "h[aá]ma|alma\\s*m[aá]ter|alma\\s*m[aá]ter\\s*de\\s*antioquia"
-        entity_code_pattern = "^HAMA(?:[-_].*)?$"
+        # Catálogo de entidades activas (todas, aunque no tengan casos), excl. 003/HAMA; Renales* conservada
         entities_cursor = self.entities_col.find(
-            {
-                "is_active": True,
-                "$nor": [
-                    {"code": {"$regex": entity_code_pattern, "$options": "i"}},
-                    {"name": {"$regex": entity_name_pattern, "$options": "i"}},
-                ],
-            },
+            match_active_entities_visible_in_filters(),
             {"name": 1, "code": 1},
         )
 
@@ -367,13 +395,12 @@ class StatisticsRepository:
 
         test_pipeline = [
             {"$match": match},
-            {"$unwind": "$samples"},
-            {"$unwind": "$samples.tests"},
+            *_UNWIND_SAMPLES_TESTS_WITH_QTY,
             {
                 "$group": {
-                    "_id": "$samples.tests.test_code",
+                    "_id": {"$toString": {"$ifNull": ["$samples.tests.test_code", ""]}},
                     "name": {"$first": "$samples.tests.name"},
-                    "total": {"$sum": 1},
+                    "total": {"$sum": "$_line_qty"},
                 }
             },
             {"$sort": {"total": -1}},
@@ -422,25 +449,37 @@ class StatisticsRepository:
         month: int,
         entity_name: str | None = None,
     ) -> dict[str, Any]:
-        # Pruebas: todos los casos del mes (completados o no) — volumen de solicitudes
-        match = self._base_match(year, month, entity_name, completed_only=False, exclude_hama=True)
+        # Misma cohorte que oportunidad; totales = suma de quantity por línea (repeticiones entre muestras incluidas).
+        match = self._base_match(year, month, entity_name, completed_only=True, exclude_hama=True)
         test_names = self._test_name_map()
+        cohort_cases = self.cases.count_documents(match)
 
         pipeline = [
             {"$match": match},
-            {"$unwind": "$samples"},
-            {"$unwind": "$samples.tests"},
+            *_UNWIND_SAMPLES_TESTS_WITH_QTY,
             {
                 "$group": {
-                    "_id": "$samples.tests.test_code",
+                    "_id": {"$toString": {"$ifNull": ["$samples.tests.test_code", ""]}},
                     "name": {"$first": "$samples.tests.name"},
                     "ambulatorios": {
-                        "$sum": {"$cond": [{"$eq": ["$patient_info.care_type", "Ambulatorio"]}, 1, 0]}
+                        "$sum": {
+                            "$cond": [
+                                {"$eq": ["$patient_info.care_type", "Ambulatorio"]},
+                                "$_line_qty",
+                                0,
+                            ]
+                        }
                     },
                     "hospitalizados": {
-                        "$sum": {"$cond": [{"$eq": ["$patient_info.care_type", "Hospitalizado"]}, 1, 0]}
+                        "$sum": {
+                            "$cond": [
+                                {"$eq": ["$patient_info.care_type", "Hospitalizado"]},
+                                "$_line_qty",
+                                0,
+                            ]
+                        }
                     },
-                    "total": {"$sum": 1},
+                    "total": {"$sum": "$_line_qty"},
                 }
             },
             {"$sort": {"total": -1}},
@@ -468,6 +507,7 @@ class StatisticsRepository:
                 "total": total_all,
                 "ambulatorios": total_amb,
                 "hospitalizados": total_hosp,
+                "casos_completados_periodo": cohort_cases,
             },
         }
 
@@ -538,17 +578,8 @@ class StatisticsRepository:
         ]
 
     def get_available_entities(self) -> List[str]:
-        """Devuelve los nombres únicos de entidades activas, excluyendo HAMA/Alma Máter."""
-        entity_name_pattern = "h[aá]ma|alma\\s*m[aá]ter|alma\\s*m[aá]ter\\s*de\\s*antioquia"
-        entity_code_pattern = "^HAMA(?:[-_].*)?$"
-        query: dict[str, Any] = {
-            "is_active": True,
-            "$nor": [
-                {"code": {"$regex": entity_code_pattern, "$options": "i"}},
-                {"name": {"$regex": entity_name_pattern, "$options": "i"}},
-            ],
-        }
-        raw = self.entities_col.find(query, {"name": 1})
+        """Devuelve los nombres únicos de entidades activas, excluyendo 003/HAMA (no línea Renales*)."""
+        raw = self.entities_col.find(match_active_entities_visible_in_filters(), {"name": 1})
         names = {doc.get("name") for doc in raw if doc.get("name")}
         return sorted(names)
 
@@ -567,13 +598,12 @@ class StatisticsRepository:
         test_names = self._test_name_map()
         pipeline = [
             {"$match": match},
-            {"$unwind": "$samples"},
-            {"$unwind": "$samples.tests"},
+            *_UNWIND_SAMPLES_TESTS_WITH_QTY,
             {
                 "$group": {
-                    "_id": "$samples.tests.test_code",
+                    "_id": {"$toString": {"$ifNull": ["$samples.tests.test_code", ""]}},
                     "name": {"$first": "$samples.tests.name"},
-                    "total": {"$sum": 1},
+                    "total": {"$sum": "$_line_qty"},
                 }
             },
             {"$sort": {"total": -1}},

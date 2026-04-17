@@ -1,4 +1,4 @@
-import { EditCasePageContent } from '@/app/(pages)/(clinical)/cases/edit/EditCasePageContent';
+import { EditCasePageContent } from '@/features/cases/components/EditCasePageContent';
 
 export const dynamicParams = false;
 

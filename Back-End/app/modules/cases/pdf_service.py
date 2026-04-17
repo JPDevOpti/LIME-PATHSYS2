@@ -35,7 +35,15 @@ class CasePdfService:
     def __init__(self, case_service: CaseService, db: Database):
         self.case_service = case_service
         self.db = db
-        self._repo_root = Path(__file__).resolve().parents[4]
+        # Raíz del backend (monorepo: carpeta Back-End; Docker: /app). Evitar parents[4] en
+        # imagen solo-Back-End: apunta al raíz del FS y no existe Front-End/public.
+        self._back_end_root = Path(__file__).resolve().parents[3]
+        parent = self._back_end_root.parent
+        self._repo_root = (
+            parent
+            if (parent / "Front-End").is_dir()
+            else self._back_end_root
+        )
         templates_dir = Path(__file__).parent / "templates"
         self.jinja_env = Environment(
             loader=FileSystemLoader(str(templates_dir)),
@@ -124,9 +132,12 @@ class CasePdfService:
         return normalized.strip("_-")
 
     def _build_header_context(self) -> dict[str, str]:
-        public_dir = self._repo_root / "Front-End" / "public"
+        # Prioridad: asset junto al template (Docker); si no, monorepo Front-End/public.
+        banner_path = Path(__file__).resolve().parent / "static" / "Logos-PDF.png"
+        if not banner_path.exists():
+            banner_path = self._repo_root / "Front-End" / "public" / "Logos-PDF.png"
 
-        unified_banner = self._file_to_data_uri(public_dir / "Logos-PDF.png")
+        unified_banner = self._file_to_data_uri(banner_path)
 
         return {
             "document_code": "F-025-LIME",

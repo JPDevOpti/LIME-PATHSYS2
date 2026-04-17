@@ -4,7 +4,7 @@ from datetime import date, datetime, timedelta, UTC
 from typing import Any, Optional
 
 from app.core.business_days import calculate_opportunity_days, get_business_days_cutoff
-from app.core.date_utils import format_iso_datetime
+from app.core.date_utils import format_iso_datetime, mongo_created_at_range_from_strings
 
 from bson import ObjectId
 from pymongo.collection import Collection
@@ -43,6 +43,43 @@ def _update_opportunity_info(opp_info: list, field: str, value: Any) -> list:
         opp_info.append({})
     opp_info[0][field] = value
     return opp_info
+
+
+def _strip_legacy_opportunity_extras(opp_info: list) -> None:
+    """Quita claves obsoletas; solo persistimos opportunity_time, max_opportunity_time, was_timely."""
+    if opp_info and len(opp_info) > 0 and isinstance(opp_info[0], dict):
+        opp_info[0].pop("previous_max_opportunity_time", None)
+
+
+def _parse_mongo_datetime(value: Any) -> datetime | None:
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value
+    if isinstance(value, date) and not isinstance(value, datetime):
+        return datetime(value.year, value.month, value.day)
+    s = str(value).strip()
+    if not s:
+        return None
+    try:
+        return datetime.fromisoformat(s.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def _derive_opportunity_elapsed_days(doc: dict | None) -> float | None:
+    """Días hábiles transcurridos si falta opportunity_time (p. ej. legacy); creación → firma o entrega."""
+    if not doc:
+        return None
+    date_info = doc.get("date_info") or []
+    if not date_info or not isinstance(date_info[0], dict):
+        return None
+    di0 = date_info[0]
+    start = _parse_mongo_datetime(di0.get("created_at"))
+    end = _parse_mongo_datetime(di0.get("signed_at")) or _parse_mongo_datetime(di0.get("delivered_at"))
+    if not start or not end:
+        return None
+    return float(calculate_opportunity_days(start, end))
 
 
 def _convert_ts(ts: Any) -> str:
@@ -106,6 +143,8 @@ def _doc_to_case(doc: dict) -> dict:
         opp = out["opportunity_info"][0]
         opp["opportunity_time"] = _round_decimal(opp.get("opportunity_time"))
         opp["max_opportunity_time"] = _round_decimal(opp.get("max_opportunity_time"))
+        # Legacy: no exponer campo antiguo en la API
+        opp.pop("previous_max_opportunity_time", None)
     else:
         # Compatibilidad con documentos viejos o campos en raiz
         opp_time = out.get("opportunity_time")
@@ -196,6 +235,53 @@ class CaseRepository:
         self._coll: Collection = db[self.COLLECTION]
         self._counters: Collection = db[self.COUNTERS_COLLECTION]
         self._users: Collection = db["users"]
+        self._tests: Collection = db["tests"]
+
+    @staticmethod
+    def _collect_test_codes_upper_from_samples(samples: list) -> list[str]:
+        codes: set[str] = set()
+        for sample in samples or []:
+            for t in sample.get("tests", []) or []:
+                if not isinstance(t, dict):
+                    continue
+                code = str(t.get("test_code") or t.get("id") or "").strip()
+                if code:
+                    codes.add(code.upper())
+        return list(codes)
+
+    def _load_test_times_map(self, codes: list[str]) -> dict[str, float]:
+        if not codes:
+            return {}
+        out: dict[str, float] = {}
+        for doc in self._tests.find({"test_code": {"$in": codes}}, {"test_code": 1, "time": 1}):
+            code = str(doc.get("test_code") or "").strip().upper()
+            tim = doc.get("time")
+            if not code or tim is None:
+                continue
+            try:
+                t = float(tim)
+                if t > 0:
+                    out[code] = t
+            except (TypeError, ValueError):
+                pass
+        return out
+
+    def _calc_max_opportunity_from_samples(self, samples: list) -> float | None:
+        """Máximo tiempo de oportunidad según el maestro de pruebas (mismo criterio que fix_max_opportunity_time)."""
+        codes = self._collect_test_codes_upper_from_samples(samples)
+        if not codes:
+            return None
+        test_times = self._load_test_times_map(codes)
+        max_time: float | None = None
+        for sample in samples or []:
+            for t in sample.get("tests", []) or []:
+                if not isinstance(t, dict):
+                    continue
+                code = str(t.get("test_code") or t.get("id") or "").strip().upper()
+                t_time = test_times.get(code)
+                if t_time is not None:
+                    max_time = max(max_time, t_time) if max_time is not None else t_time
+        return max_time
 
     def _find_user_for_pathologist_ref(self, ref: dict[str, Any]) -> Optional[dict[str, Any]]:
         projection = {"_id": 1, "name": 1, "pathologist_code": 1, "document": 1, "medical_license": 1}
@@ -369,11 +455,15 @@ class CaseRepository:
         created_at_from: Optional[str] = None,
         created_at_to: Optional[str] = None,
         entity: Optional[str] = None,
+        entity_names: Optional[list[str]] = None,
         assigned_pathologist: Optional[str] = None,
         pathologist_name: Optional[str] = None,
+        assigned_pathologist_names: Optional[list[str]] = None,
         priority: Optional[str] = None,
         test: Optional[str] = None,
+        test_codes: Optional[list[str]] = None,
         state: Optional[str] = None,
+        states: Optional[list[str]] = None,
         doctor: Optional[str] = None,
         patient_id: Optional[str] = None,
         identification_number: Optional[str] = None,
@@ -399,40 +489,57 @@ class CaseRepository:
             })
 
         if created_at_from or created_at_to:
-            q: dict[str, Any] = {}
-            if created_at_from:
-                q["$gte"] = datetime.fromisoformat(created_at_from.replace("Z", "+00:00"))
-            if created_at_to:
-                end = datetime.fromisoformat(created_at_to.replace("Z", "+00:00"))
-                end = end.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
-                q["$lt"] = end
-            and_conditions.append({"date_info.0.created_at": q})
+            cr = mongo_created_at_range_from_strings(created_at_from, created_at_to)
+            if cr:
+                and_conditions.append({"date_info.0.created_at": cr})
 
-        if entity and entity.strip():
+        ens = [x.strip() for x in (entity_names or []) if isinstance(x, str) and x.strip()]
+        if ens:
+            and_conditions.append({"$or": [{"entity.name": _contains_regex(n)} for n in ens]})
+        elif entity and entity.strip():
             and_conditions.append({"entity.name": _contains_regex(entity.strip())})
 
-        if assigned_pathologist and assigned_pathologist.strip():
-            and_conditions.append({"assigned_pathologist.name": _contains_regex(assigned_pathologist.strip())})
-
-        if pathologist_name and pathologist_name.strip():
-            name = pathologist_name.strip()
+        apn_list = [
+            x.strip() for x in (assigned_pathologist_names or []) if isinstance(x, str) and x.strip()
+        ]
+        if apn_list:
             and_conditions.append({
-                "$or": [
-                    {"assigned_pathologist.name": _contains_regex(name)},
-                    {"assistant_pathologists.name": _contains_regex(name)},
-                ]
+                "$or": [{"assigned_pathologist.name": _contains_regex(n)} for n in apn_list]
             })
+        else:
+            ap = assigned_pathologist.strip() if assigned_pathologist else ""
+            pn = pathologist_name.strip() if pathologist_name else ""
+            if ap:
+                and_conditions.append({"assigned_pathologist.name": _contains_regex(ap)})
+            if pn:
+                rx_pn = _contains_regex(pn)
+                and_conditions.append({
+                    "$or": [
+                        {"assigned_pathologist.name": rx_pn},
+                        {"assistant_pathologists.name": rx_pn},
+                    ]
+                })
 
         if priority and priority.strip():
             and_conditions.append({"priority": priority.strip().capitalize()})
 
-        if state and state.strip():
+        st_list = [x.strip() for x in (states or []) if isinstance(x, str) and x.strip()]
+        if st_list:
+            and_conditions.append({"state": {"$in": st_list}})
+        elif state and state.strip():
             and_conditions.append({"state": state.strip()})
 
         if doctor and doctor.strip():
             and_conditions.append({"requesting_physician": _contains_regex(doctor.strip())})
 
-        if test and test.strip():
+        tc_list = [
+            x.strip() for x in (test_codes or []) if isinstance(x, str) and x.strip()
+        ]
+        if tc_list:
+            and_conditions.append({
+                "$or": [{"samples.tests.test_code": code} for code in tc_list]
+            })
+        elif test and test.strip():
             and_conditions.append({"samples.tests.test_code": test.strip()})
 
         if patient_id and patient_id.strip():
@@ -546,7 +653,18 @@ class CaseRepository:
         user_name = created_by_name or user_email
         data["audit_info"] = [{"action": "created", "user_name": user_name, "user_email": user_email, "timestamp": now}]
         data["date_info"] = [{"created_at": now, "update_at": now}]
-        if data.get("max_opportunity_time") is not None:
+        recalc_max: float | None = None
+        if data.get("samples"):
+            recalc_max = self._calc_max_opportunity_from_samples(data["samples"])
+        if recalc_max is not None:
+            max_opp = _round_decimal(recalc_max)
+            data.pop("max_opportunity_time", None)
+            data["opportunity_info"] = [{
+                "max_opportunity_time": max_opp,
+                "opportunity_time": None,
+                "was_timely": None
+            }]
+        elif data.get("max_opportunity_time") is not None:
             max_opp = _round_decimal(data.pop("max_opportunity_time"))
             data["opportunity_info"] = [{
                 "max_opportunity_time": max_opp,
@@ -578,7 +696,15 @@ class CaseRepository:
                 continue
         raise RuntimeError(f"No se pudo generar un case_code único para el año {year} tras varios intentos")
 
-    def update(self, id: str, data: dict, updated_by_email: str | None = None, updated_by_name: str | None = None, audit_action: str = "edited") -> Optional[dict]:
+    def update(
+        self,
+        id: str,
+        data: dict,
+        updated_by_email: str | None = None,
+        updated_by_name: str | None = None,
+        audit_action: str = "edited",
+        audit_change_details: list[str] | None = None,
+    ) -> Optional[dict]:
         try:
             oid = ObjectId(id)
         except Exception:
@@ -587,17 +713,39 @@ class CaseRepository:
             data.pop(key, None)
         self._normalize_pathologists_in_payload(data)
         now = datetime.now(UTC)
-        if data.get("max_opportunity_time") is not None:
-            max_opp = _round_decimal(data.pop("max_opportunity_time"))
-            existing_doc_opp = self._coll.find_one({"_id": oid}, {"opportunity_info": 1})
-            current_opp = (existing_doc_opp or {}).get("opportunity_info") or [{}]
+        recalc_max: float | None = None
+        if "samples" in data:
+            recalc_max = self._calc_max_opportunity_from_samples(data["samples"])
+
+        has_max_key = "max_opportunity_time" in data
+        explicit_max = data.pop("max_opportunity_time", None) if has_max_key else None
+
+        # max explícito del cliente gana sobre el recálculo por muestras
+        resolved_max: float | None = None
+        if has_max_key and explicit_max is not None:
+            resolved_max = float(explicit_max)
+        elif not has_max_key and recalc_max is not None:
+            resolved_max = float(recalc_max)
+
+        if resolved_max is not None:
+            existing = self._coll.find_one({"_id": oid}, {"opportunity_info": 1, "date_info": 1})
+            current_opp = (existing or {}).get("opportunity_info") or [{}]
+            _strip_legacy_opportunity_extras(current_opp)
+            max_opp = _round_decimal(resolved_max)
             current_opp = _update_opportunity_info(current_opp, "max_opportunity_time", max_opp)
-            
-            # Re-evaluar was_timely si ya existe un tiempo de oportunidad (caso firmado)
-            opp_time = current_opp[0].get("opportunity_time")
-            if opp_time is not None:
-                current_opp = _update_opportunity_info(current_opp, "was_timely", opp_time <= max_opp)
-            
+            opp_days_f: float | None = None
+            raw_ot = current_opp[0].get("opportunity_time")
+            if raw_ot is not None:
+                try:
+                    opp_days_f = float(raw_ot)
+                except (TypeError, ValueError):
+                    pass
+            if opp_days_f is None:
+                opp_days_f = _derive_opportunity_elapsed_days(existing)
+            if opp_days_f is not None:
+                current_opp = _update_opportunity_info(
+                    current_opp, "was_timely", opp_days_f <= float(max_opp)
+                )
             data["opportunity_info"] = current_opp
         # Upsert de "updated" en date_info
         existing_doc = self._coll.find_one({"_id": oid}, {"date_info": 1})
@@ -612,8 +760,10 @@ class CaseRepository:
         
         user_email = updated_by_email or "system"
         user_name = updated_by_name or user_email
-        audit_entry = {"action": audit_action, "user_name": user_name, "user_email": user_email, "timestamp": now}
-        
+        audit_entry: dict = {"action": audit_action, "user_name": user_name, "user_email": user_email, "timestamp": now}
+        if audit_change_details and audit_action == "edited":
+            audit_entry["details"] = audit_change_details[:40]
+
         self._coll.update_one(
             {"_id": oid},
             {"$set": data, "$push": {"audit_info": audit_entry}},
@@ -657,6 +807,26 @@ class CaseRepository:
             set_data["approval_state"] = approval_state
         if samples is not None:
             set_data["samples"] = samples
+            new_max = self._calc_max_opportunity_from_samples(samples)
+            if new_max is not None:
+                max_opp = _round_decimal(new_max)
+                current_opp = doc.get("opportunity_info") or [{}]
+                _strip_legacy_opportunity_extras(current_opp)
+                current_opp = _update_opportunity_info(current_opp, "max_opportunity_time", max_opp)
+                opp_days_f: float | None = None
+                raw_ot = current_opp[0].get("opportunity_time")
+                if raw_ot is not None:
+                    try:
+                        opp_days_f = float(raw_ot)
+                    except (TypeError, ValueError):
+                        pass
+                if opp_days_f is None:
+                    opp_days_f = _derive_opportunity_elapsed_days(doc)
+                if opp_days_f is not None:
+                    current_opp = _update_opportunity_info(
+                        current_opp, "was_timely", opp_days_f <= float(max_opp)
+                    )
+                set_data["opportunity_info"] = current_opp
         # Upsert condicional en date_info según la acción
         current_date_info = doc.get("date_info") or []
         current_date_info = _update_date_info(current_date_info, "update_at", now)
@@ -668,7 +838,8 @@ class CaseRepository:
                 created_at = current_date_info[0].get("created_at")
                 if created_at:
                     opp_days = calculate_opportunity_days(created_at, now)
-                    current_opp_info = doc.get("opportunity_info") or [{}]
+                    current_opp_info = set_data.get("opportunity_info") or doc.get("opportunity_info") or [{}]
+                    _strip_legacy_opportunity_extras(current_opp_info)
                     current_opp_info = _update_opportunity_info(current_opp_info, "opportunity_time", float(opp_days))
                     max_opp = current_opp_info[0].get("max_opportunity_time")
                     if max_opp is not None:
@@ -688,14 +859,20 @@ class CaseRepository:
         updated = self._coll.find_one({"_id": oid})
         return _doc_to_case(updated) if updated else None
 
-    def update_patient_info(self, id: str, patient_info: dict) -> Optional[dict]:
+    def update_patient_info(
+        self,
+        id: str,
+        patient_info: dict,
+        updated_by_email: str | None = None,
+        updated_by_name: str | None = None,
+        audit_change_details: list[str] | None = None,
+    ) -> Optional[dict]:
         """Actualiza específicamente el bloque patient_info de un caso."""
         try:
             oid = ObjectId(id)
         except Exception:
             return None
-        
-        # Preparar campos con prefijo patient_info.
+
         set_data = {}
         for k, v in patient_info.items():
             if k == "patient_id" and v:
@@ -705,10 +882,23 @@ class CaseRepository:
                     set_data[f"patient_info.{k}"] = v
             else:
                 set_data[f"patient_info.{k}"] = v
-        
+
+        now = datetime.now(UTC)
+        user_email = updated_by_email or "system"
+        user_name = updated_by_name or user_email
+        audit_entry: dict = {
+            "action": "edited",
+            "user_name": user_name,
+            "user_email": user_email,
+            "timestamp": now,
+        }
+        if audit_change_details:
+            prefixed = [f"Paciente — {line}" for line in audit_change_details[:35]]
+            audit_entry["details"] = prefixed[:40]
+
         self._coll.update_one(
             {"_id": oid},
-            {"$set": set_data}
+            {"$set": set_data, "$push": {"audit_info": audit_entry}},
         )
         doc = self._coll.find_one({"_id": oid})
         return _doc_to_case(doc) if doc else None
@@ -747,14 +937,9 @@ class CaseRepository:
         if test_code and test_code.strip():
             query["complementary_tests.code"] = test_code.strip()
         if created_at_from or created_at_to:
-            q: dict[str, Any] = {}
-            if created_at_from:
-                q["$gte"] = datetime.fromisoformat(created_at_from.replace("Z", "+00:00"))
-            if created_at_to:
-                end = datetime.fromisoformat(created_at_to.replace("Z", "+00:00"))
-                end = end.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
-                q["$lt"] = end
-            query["created_at"] = q
+            cr = mongo_created_at_range_from_strings(created_at_from, created_at_to)
+            if cr:
+                query["created_at"] = cr
         total = self._coll.count_documents(query)
         cursor = self._coll.find(query).sort("created_at", -1).skip(skip).limit(limit)
         data = [_doc_to_case(d) for d in cursor]

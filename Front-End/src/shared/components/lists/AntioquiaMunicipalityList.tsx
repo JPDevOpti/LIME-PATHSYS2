@@ -1,7 +1,7 @@
 'use client';
 
 import { Combobox } from '@/shared/components/ui/form/Combobox';
-import { ANTIOQUIA_MUNICIPALITY_OPTIONS } from './data/mock-antioquia-municipalities';
+import { ANTIOQUIA_MUNICIPALITY_OPTIONS } from '@/shared/data/mock-antioquia-municipalities';
 import type { ComboboxOption } from '@/shared/components/ui/form/Combobox';
 
 interface AntioquiaMunicipalityComboboxProps {

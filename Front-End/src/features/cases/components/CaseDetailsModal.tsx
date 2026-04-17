@@ -693,20 +693,29 @@ export function CaseDetailsModal({ visible, caseData, onClose, onCaseUpdated }: 
                                 </div>
                                 <div className="space-y-2">
                                     {caseData.audit_info.map((entry, idx) => (
-                                        <div key={idx} className="flex items-start gap-3 text-sm">
-                                            <span className={`mt-0.5 inline-flex rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap ${entry.action === 'created' ? 'bg-blue-100 text-blue-700' :
-                                                entry.action === 'signed' ? 'bg-green-100 text-green-700' :
-                                                    entry.action === 'delivered' ? 'bg-purple-100 text-purple-700' :
-                                                        entry.action === 'transcribed' ? 'bg-amber-100 text-amber-700' :
-                                                            'bg-neutral-100 text-neutral-600'
-                                                }`}>
-                                                {AUDIT_ACTION_LABELS[entry.action] ?? entry.action}
-                                            </span>
-                                            <span className="text-neutral-700">
-                                                <span className="font-medium">{entry.user_name || entry.user_email}</span>
-                                                <span className="text-neutral-400 ml-1">·</span>
-                                                <span className="text-neutral-500 ml-1">{formatDateTime(entry.timestamp)}</span>
-                                            </span>
+                                        <div key={idx} className="flex flex-col gap-1 text-sm">
+                                            <div className="flex items-start gap-3">
+                                                <span className={`mt-0.5 inline-flex rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap ${entry.action === 'created' ? 'bg-blue-100 text-blue-700' :
+                                                    entry.action === 'signed' ? 'bg-green-100 text-green-700' :
+                                                        entry.action === 'delivered' ? 'bg-purple-100 text-purple-700' :
+                                                            entry.action === 'transcribed' ? 'bg-amber-100 text-amber-700' :
+                                                                'bg-neutral-100 text-neutral-600'
+                                                    }`}>
+                                                    {AUDIT_ACTION_LABELS[entry.action] ?? entry.action}
+                                                </span>
+                                                <span className="text-neutral-700">
+                                                    <span className="font-medium">{entry.user_name || entry.user_email}</span>
+                                                    <span className="text-neutral-400 ml-1">·</span>
+                                                    <span className="text-neutral-500 ml-1">{formatDateTime(entry.timestamp)}</span>
+                                                </span>
+                                            </div>
+                                            {entry.action === 'edited' && entry.details && entry.details.length > 0 && (
+                                                <ul className="ml-0 sm:ml-[7.5rem] list-disc list-inside text-xs text-neutral-600 space-y-0.5 pl-1">
+                                                    {entry.details.map((line, li) => (
+                                                        <li key={li}>{line}</li>
+                                                    ))}
+                                                </ul>
+                                            )}
                                         </div>
                                     ))}
                                 </div>

@@ -7,7 +7,7 @@ import { TestsSummary } from './TestsSummary';
 import { TestsPerformanceChart } from './TestsPerformanceChart';
 import { TestsDetailTable } from './TestsDetailTable';
 import { statisticsService } from '../../services/statistics.service';
-import type { TestStats } from '../../types/statistics.types';
+import type { TestStats, TestsReportSummaryStats } from '../../types/statistics.types';
 
 export function TestsReport() {
     const now = new Date();
@@ -22,7 +22,7 @@ export function TestsReport() {
     const [showReport, setShowReport] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [testsData, setTestsData] = useState<TestStats[]>([]);
-    const [summary, setSummary] = useState<{ total: number; ambulatorios: number; hospitalizados: number } | null>(null);
+    const [summary, setSummary] = useState<TestsReportSummaryStats | null>(null);
 
     const generateReport = useCallback(async () => {
         if (!selectedMonth || !selectedYear) return;
@@ -103,7 +103,8 @@ export function TestsReport() {
                         <div className="mb-4">
                             <h3 className="text-lg font-semibold text-neutral-900">Detalle por prueba</h3>
                             <p className="text-sm text-neutral-500 mt-1">
-                                Tabla con ambulatorios y hospitalizados por tipo de prueba.
+                                Por cada código: total de unidades de prueba (quantity); ambulatorios y
+                                hospitalizados ponderan cada unidad según el tipo de atención del caso.
                             </p>
                         </div>
                         {testsData.length === 0 ? (

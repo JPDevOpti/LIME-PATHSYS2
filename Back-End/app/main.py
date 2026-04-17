@@ -87,6 +87,18 @@ _default_origins = [
     "http://localhost:3001",
     "http://127.0.0.1:3001",
     "http://0.0.0.0:3001",
+    "http://localhost:3002",
+    "http://127.0.0.1:3002",
+    "http://0.0.0.0:3002",
+    # Producción (front en dominio propio / Render); CORS_ORIGINS en el servidor puede ampliar
+    "https://www.laboratorios-lime.com",
+    "https://laboratorios-lime.com",
+    "https://pathsys.laboratorios-lime.com",
+    "http://www.laboratorios-lime.com",
+    "http://laboratorios-lime.com",
+    "http://pathsys.laboratorios-lime.com",
+    "https://pathsys.onrender.com",
+    "http://pathsys.onrender.com",
 ]
 
 _env_origins = _parse_cors_origins(os.getenv("CORS_ORIGINS"))

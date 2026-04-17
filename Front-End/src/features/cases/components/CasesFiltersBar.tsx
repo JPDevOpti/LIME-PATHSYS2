@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 import Link from 'next/link';
 import { BaseCard, BaseButton } from '@/shared/components/base';
@@ -10,7 +10,21 @@ import { Search, FileSpreadsheet, Plus, Trash2, Lock, Printer, PackageCheck } fr
 import type { CaseListFilters } from '../hooks/useCaseList';
 import type { Case } from '../types/case.types';
 import type { CaseStatus } from '../types/case.types';
-import { EntitiesCombobox, PathologistsCombobox, TestsCombobox } from '@/shared/components/lists';
+import { entitiesService } from '@/features/entities-management/services/entities.service';
+import { pathologistService } from '@/features/results/services/pathologist.service';
+import { labTestsService } from '@/features/test-management/services/lab-tests.service';
+import { TodosMultiCombobox, type TodosMultiOption } from './TodosMultiCombobox';
+import { CasesFilterListDropdown } from './CasesFilterListDropdown';
+
+function pathologistInitials(name: string): string {
+    return (name || '')
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .map(part => part[0]?.toUpperCase() || '')
+        .join('')
+        .slice(0, 6);
+}
 
 interface CasesFiltersBarProps {
     filters: CaseListFilters;
@@ -50,6 +64,12 @@ const STATUS_OPTIONS = [
     { value: 'Completado', label: 'Completado' }
 ];
 
+/** Opciones del multicombobox de estado (sin fila “Todos”; esa fila lo pinta el componente). */
+const STATUS_MULTI_OPTIONS: TodosMultiOption[] = STATUS_OPTIONS.filter(o => o.value !== '').map(o => ({
+    value: o.value as string,
+    label: o.label,
+}));
+
 export function CasesFiltersBar({
     filters,
     onFiltersChange,
@@ -66,12 +86,122 @@ export function CasesFiltersBar({
     onDeliverSelected,
 }: CasesFiltersBarProps) {
     const [localFilters, setLocalFilters] = useState<CaseListFilters>(filters);
-    const [pathologistId, setPathologistId] = useState('');
+    const [entityOptions, setEntityOptions] = useState<TodosMultiOption[]>([]);
+    const [pathologistOptions, setPathologistOptions] = useState<TodosMultiOption[]>([]);
+    const [testOptions, setTestOptions] = useState<TodosMultiOption[]>([]);
 
     useEffect(() => {
         setLocalFilters(filters);
-        if (!filters.pathologist) setPathologistId('');
     }, [filters]);
+
+    useEffect(() => {
+        let cancelled = false;
+        entitiesService
+            .getAll(false)
+            .then(entities => {
+                if (cancelled) return;
+                const active = entities.filter(e => e.is_active !== false);
+                setEntityOptions(
+                    active.map(e => ({
+                        value: e.code,
+                        label: e.name,
+                        subtitle: e.code,
+                    }))
+                );
+            })
+            .catch(() => {
+                if (!cancelled) setEntityOptions([]);
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    useEffect(() => {
+        if (lockedPathologist) return;
+        let cancelled = false;
+        pathologistService
+            .listPathologists(undefined, false)
+            .then(pathologists => {
+                if (cancelled) return;
+                setPathologistOptions(
+                    pathologists.map(p => ({
+                        value: p.id,
+                        label: p.name,
+                        subtitle: pathologistInitials(p.name) || undefined,
+                    }))
+                );
+            })
+            .catch(() => {
+                if (!cancelled) setPathologistOptions([]);
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, [lockedPathologist]);
+
+    useEffect(() => {
+        let cancelled = false;
+        labTestsService
+            .getAll(false)
+            .then(tests => {
+                if (cancelled) return;
+                const active = tests.filter(t => t.is_active !== false);
+                setTestOptions(
+                    active.map(t => ({
+                        value: t.test_code,
+                        label: t.name,
+                        subtitle: t.test_code,
+                    }))
+                );
+            })
+            .catch(() => {
+                if (!cancelled) setTestOptions([]);
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    const entitySelectedValues = useMemo(
+        () =>
+            new Set(
+                entityOptions
+                    .filter(o => localFilters.entityIncludedNames.includes(o.label))
+                    .map(o => o.value)
+            ),
+        [entityOptions, localFilters.entityIncludedNames]
+    );
+
+    const pathologistSelectedValues = useMemo(
+        () =>
+            new Set(
+                pathologistOptions
+                    .filter(o => localFilters.pathologistIncludedNames.includes(o.label))
+                    .map(o => o.value)
+            ),
+        [pathologistOptions, localFilters.pathologistIncludedNames]
+    );
+
+    const testSelectedValues = useMemo(
+        () =>
+            new Set(
+                testOptions
+                    .filter(o => localFilters.testIncludedCodes.includes(o.value))
+                    .map(o => o.value)
+            ),
+        [testOptions, localFilters.testIncludedCodes]
+    );
+
+    const statusSelectedValues = useMemo(
+        () =>
+            new Set(
+                STATUS_MULTI_OPTIONS.filter(o =>
+                    localFilters.statusIncluded.includes(o.value as CaseStatus)
+                ).map(o => o.value)
+            ),
+        [localFilters.statusIncluded]
+    );
 
     const handleLocalChange = (updates: Partial<CaseListFilters>) => {
         setLocalFilters(prev => ({ ...prev, ...updates }));
@@ -150,11 +280,22 @@ export function CasesFiltersBar({
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-3 w-full">
                         <div className="min-w-0">
                             <FormField label="Entidad">
-                                <EntitiesCombobox
-                                    value={localFilters.entity}
-                                    onChange={() => { }}
-                                    onEntitySelected={(_code, name) => handleLocalChange({ entity: name })}
-                                    placeholder="Buscar entidad..."
+                                <TodosMultiCombobox
+                                    options={entityOptions}
+                                    allMode={localFilters.entityTodosAll}
+                                    selectedValues={entitySelectedValues}
+                                    onChange={({ allMode: m, selectedValues: sv }) => {
+                                        const names = entityOptions
+                                            .filter(o => sv.has(o.value))
+                                            .map(o => o.label);
+                                        handleLocalChange({
+                                            entityTodosAll: m,
+                                            entityIncludedNames: m ? [] : names,
+                                        });
+                                    }}
+                                    placeholder="Entidades..."
+                                    accentInsensitiveSearch
+                                    todosLabel="Todos"
                                 />
                             </FormField>
                         </div>
@@ -166,50 +307,78 @@ export function CasesFiltersBar({
                                         <span className="truncate">{lockedPathologist}</span>
                                     </div>
                                 ) : (
-                                    <PathologistsCombobox
-                                        value={pathologistId}
-                                        onChange={setPathologistId}
-                                        onPathologistSelected={(id, name) => {
-                                            setPathologistId(id);
-                                            handleLocalChange({ pathologist: name });
+                                    <TodosMultiCombobox
+                                        options={pathologistOptions}
+                                        allMode={localFilters.pathologistTodosAll}
+                                        selectedValues={pathologistSelectedValues}
+                                        onChange={({ allMode: m, selectedValues: sv }) => {
+                                            const names = pathologistOptions
+                                                .filter(o => sv.has(o.value))
+                                                .map(o => o.label);
+                                            handleLocalChange({
+                                                pathologistTodosAll: m,
+                                                pathologistIncludedNames: m ? [] : names,
+                                            });
                                         }}
-                                        placeholder="Buscar patólogo..."
+                                        placeholder="Patólogos..."
+                                        accentInsensitiveSearch
+                                        todosLabel="Todos"
                                     />
                                 )}
                             </FormField>
                         </div>
                         <div className="min-w-0">
                             <FormField label="Prueba">
-                                <TestsCombobox
-                                    value={localFilters.test}
-                                    onChange={v => handleLocalChange({ test: v })}
-                                    placeholder="Buscar prueba..."
+                                <TodosMultiCombobox
+                                    options={testOptions}
+                                    allMode={localFilters.testTodosAll}
+                                    selectedValues={testSelectedValues}
+                                    onChange={({ allMode: m, selectedValues: sv }) => {
+                                        const codes = testOptions
+                                            .filter(o => sv.has(o.value))
+                                            .map(o => o.value);
+                                        handleLocalChange({
+                                            testTodosAll: m,
+                                            testIncludedCodes: m ? [] : codes,
+                                        });
+                                    }}
+                                    placeholder="Pruebas..."
+                                    accentInsensitiveSearch
+                                    todosLabel="Todos"
                                 />
                             </FormField>
                         </div>
                         <div className="min-w-0">
                             <FormField label="Prioridad">
-                                <Select
+                                <CasesFilterListDropdown
                                     value={localFilters.priority}
-                                    onChange={e =>
+                                    onChange={v =>
                                         handleLocalChange({
-                                            priority: e.target.value as '' | 'normal' | 'prioritario'
+                                            priority: v as '' | 'normal' | 'prioritario',
                                         })
                                     }
                                     options={PRIORITY_OPTIONS}
+                                    placeholder="Todas"
                                 />
                             </FormField>
                         </div>
                         <div className="min-w-0">
                             <FormField label="Estado">
-                                <Select
-                                    value={localFilters.status}
-                                    onChange={e =>
+                                <TodosMultiCombobox
+                                    options={STATUS_MULTI_OPTIONS}
+                                    allMode={localFilters.statusTodosAll}
+                                    selectedValues={statusSelectedValues}
+                                    onChange={({ allMode: m, selectedValues: sv }) => {
+                                        const included = STATUS_MULTI_OPTIONS.filter(o => sv.has(o.value)).map(
+                                            o => o.value as CaseStatus
+                                        );
                                         handleLocalChange({
-                                            status: e.target.value as CaseStatus | ''
-                                        })
-                                    }
-                                    options={STATUS_OPTIONS}
+                                            statusTodosAll: m,
+                                            statusIncluded: m ? [] : included,
+                                        });
+                                    }}
+                                    placeholder="Estados..."
+                                    todosLabel="Todos"
                                 />
                             </FormField>
                         </div>

@@ -41,11 +41,17 @@ def list_cases(
     created_at_from: str | None = Query(None, alias="created_at_from"),
     created_at_to: str | None = Query(None, alias="created_at_to"),
     entity: str | None = Query(None),
+    entity_names: list[str] = Query(default_factory=list, alias="entity_names"),
     assigned_pathologist: str | None = Query(None, alias="assigned_pathologist"),
     pathologist_name: str | None = Query(None, alias="pathologist_name"),
+    assigned_pathologist_names: list[str] = Query(
+        default_factory=list, alias="assigned_pathologist_names"
+    ),
     priority: str | None = Query(None),
     test: str | None = Query(None),
+    test_codes: list[str] = Query(default_factory=list, alias="test_codes"),
     state: str | None = Query(None),
+    states: list[str] = Query(default_factory=list, alias="states"),
     doctor: str | None = Query(None),
     patient_id: str | None = Query(None, alias="patient_id"),
     identification_number: str | None = Query(None, alias="identification_number"),
@@ -62,11 +68,15 @@ def list_cases(
         created_at_from=created_at_from,
         created_at_to=created_at_to,
         entity=entity,
+        entity_names=entity_names,
         assigned_pathologist=assigned_pathologist,
         pathologist_name=pathologist_name,
+        assigned_pathologist_names=assigned_pathologist_names,
         priority=priority,
         test=test,
+        test_codes=test_codes,
         state=state,
+        states=states,
         doctor=doctor,
         patient_id=patient_id,
         identification_number=identification_number,
@@ -238,10 +248,15 @@ def update_case_patient(
     id: str,
     data: dict,
     service: CaseService = Depends(get_case_service),
-    _: str = Depends(get_current_user_id),
+    current_user: dict = Depends(get_current_user),
 ):
     """Actualiza la información del paciente incrustada en un caso específico."""
-    return service.update_patient_info(id, data)
+    return service.update_patient_info(
+        id,
+        data,
+        updated_by_email=current_user.get("email"),
+        updated_by_name=current_user.get("name"),
+    )
 
 
 @router.delete("/{id}", status_code=204)

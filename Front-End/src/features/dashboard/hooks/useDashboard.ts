@@ -6,8 +6,8 @@ import type {
     CasoUrgente,
     MonthlyCasesData,
     EstadisticasOportunidad
-} from '../model/dashboard.types';
-import { dashboardService } from '../api/dashboard.service';
+} from '../types/dashboard.types';
+import { dashboardService } from '../services/dashboard.service';
 
 export const useDashboard = () => {
     const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);

@@ -8,7 +8,7 @@ import {
     BillingTestsTable,
     TestBillingDetailModal
 } from '@/features/billing/components';
-import { billingService } from '@/shared/services/billing.service';
+import { billingService } from '@/features/billing/services/billing.service';
 import type { BillingTestsReportData, BillingTestDetail, BillingTestItem } from '@/features/billing/types/billing.types';
 import { Toast } from '@/shared/components/ui/Toast';
 

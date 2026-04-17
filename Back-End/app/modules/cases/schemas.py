@@ -18,6 +18,7 @@ class AuditEntrySchema(BaseModel):
     user_name: str
     user_email: str
     timestamp: str
+    details: Optional[list[str]] = None
 
 
 class DateEntrySchema(BaseModel):

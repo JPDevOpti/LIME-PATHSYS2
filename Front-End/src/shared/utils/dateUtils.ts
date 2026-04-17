@@ -1,5 +1,3 @@
-import { Case, getDateFromDateInfo } from "@/features/cases/types/case.types";
-
 export function getColombianHolidays(year: number): Set<string> {
   const holidays = new Set<string>();
 
@@ -107,26 +105,53 @@ export function calculateBusinessDays(startStr: string, endStr?: string): number
   return count;
 }
 
-export function getElapsedDays(c: Case): number {
-  // Si ya tiene un tiempo calculado por el backend (firmado o completado), usar ese
+type OpportunityInfoItem = {
+  opportunity_time?: number | null;
+  was_timely?: boolean;
+  max_opportunity_time?: number;
+};
+
+type CaseLike = {
+  status?: string;
+  date_info?: unknown[];
+  opportunity_info?: OpportunityInfoItem[];
+};
+
+function getDateFromDateInfo(
+  dateInfo: unknown[] | undefined,
+  field: string,
+): string | null {
+  if (!dateInfo || dateInfo.length === 0) return null;
+
+  // Soporta ambos formatos: [{ created_at: "..." }] y [{ field_name, value }]
+  const firstItem = dateInfo[0] as Record<string, unknown> | undefined;
+  const directValue = firstItem?.[field];
+  if (typeof directValue === "string") return directValue;
+
+  const fieldItem = dateInfo.find((item) => {
+    const typedItem = item as Record<string, unknown> | undefined;
+    return typedItem?.field_name === field && typeof typedItem?.value === "string";
+  }) as Record<string, unknown> | undefined;
+  return (fieldItem?.value as string | undefined) ?? null;
+}
+
+export function getElapsedDays(c: CaseLike): number {
   const status = c.status;
   const isFinished = status === "Completado" || status === "Por entregar";
   const storedTime = c.opportunity_info?.[0]?.opportunity_time;
-
   if (isFinished && storedTime !== undefined && storedTime !== null) {
     return Math.floor(storedTime);
   }
 
   const start = getDateFromDateInfo(c.date_info, "created_at");
   if (!start) return 0;
-
   return calculateBusinessDays(start);
 }
 
-export function getWasTimely(c: Case): boolean | undefined {
+export function getWasTimely(c: CaseLike): boolean | undefined {
   return c.opportunity_info?.[0]?.was_timely;
 }
 
-export function getMaxOpportunityTime(c: Case): number | undefined {
+export function getMaxOpportunityTime(c: CaseLike): number | undefined {
   return c.opportunity_info?.[0]?.max_opportunity_time;
 }

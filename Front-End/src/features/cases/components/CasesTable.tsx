@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Case, getDateFromDateInfo } from "../types/case.types";
+import { caseEntityNameForList } from "../utils/isAlmaMaterCaseByEntity";
 import type { CaseSortKey, SortOrder } from "../hooks/useCaseList";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
 import { openCasePdf } from "@/shared/utils/pdf";
@@ -343,7 +344,7 @@ export function CasesTable({
                             </span>
                           )}
                       </div>
-                      <p className="text-gray-500 text-xs">{c.entity?.name || "-"}</p>
+                      <p className="text-gray-500 text-xs">{caseEntityNameForList(c)}</p>
                     </div>
                   </td>
                   <td className="px-3 py-3 text-center">
@@ -585,7 +586,7 @@ export function CasesTable({
                   <div>
                     <p className="text-gray-500">Entidad</p>
                     <p className="text-gray-800 font-medium">
-                      {c.entity?.name || "-"}
+                      {caseEntityNameForList(c)}
                     </p>
                   </div>
                   <div>

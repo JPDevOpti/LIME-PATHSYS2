@@ -12,8 +12,8 @@ import { useAuth } from '@/features/auth/context/AuthContext';
 import { usePermissions } from '@/features/auth/hooks/usePermissions';
 import type { Case } from '@/features/cases/types/case.types';
 import type { CaseListFilters } from '@/features/cases/hooks/useCaseList';
-import { caseService } from '@/features/cases/services/case.service';
-import { exportCasesToExcel } from '@/shared/utils/excelExport';
+import { caseService, type DeliveredCasePayload } from '@/features/cases/services/case.service';
+import { exportCasesToExcel } from '@/features/cases/utils/exportCases';
 import { openCasePdf } from '@/shared/utils/pdf';
 
 const COLUMNS = [
@@ -53,11 +53,15 @@ export default function CasesListPage() {
         : undefined;
 
     const initialListFilters: Partial<CaseListFilters> | undefined = lockedPathologist
-        ? { pathologistName: lockedPathologist }
+        ? { pathologistTodosAll: false, pathologistIncludedNames: [lockedPathologist] }
         : isVisitante
             ? { identificationNumber: restrictedDocument ?? '' }
             : isPaciente
-                ? { identificationNumber: restrictedDocument ?? '', status: 'Completado' as const }
+                ? {
+                      identificationNumber: restrictedDocument ?? '',
+                      statusTodosAll: false,
+                      statusIncluded: ['Completado' as const],
+                  }
                 : undefined;
 
     return (
@@ -133,11 +137,8 @@ function CasesListInner({ isRestrictedView, lockedPathologist, lockedIdentificat
         if (deliverable.length > 0) setMarkDeliveredCases(deliverable);
     };
 
-    const handleMarkDeliveredConfirm = async (
-        deliveredTo: string,
-        caseEdits: { caseId: string; tests: unknown[] }[]
-    ) => {
-        await caseService.markCasesDelivered(caseEdits, deliveredTo);
+    const handleMarkDeliveredConfirm = async (deliveredTo: string, items: DeliveredCasePayload[]) => {
+        await caseService.markCasesDelivered(items, deliveredTo);
         setMarkDeliveredCases([]);
         loadCases();
     };
@@ -146,11 +147,11 @@ function CasesListInner({ isRestrictedView, lockedPathologist, lockedIdentificat
         !!filters.search ||
         !!filters.dateFrom ||
         !!filters.dateTo ||
-        !!filters.entity ||
-        (!lockedPathologist && (!!filters.pathologist || !!filters.pathologistName)) ||
+        !filters.entityTodosAll ||
+        (!lockedPathologist && !filters.pathologistTodosAll) ||
         !!filters.priority ||
-        !!filters.test ||
-        !!filters.status ||
+        (!filters.testTodosAll && filters.testIncludedCodes.length > 0) ||
+        (!filters.statusTodosAll && filters.statusIncluded.length > 0) ||
         !!filters.opportunity;
 
     const noResultsMessage = hasActiveFilters
@@ -167,7 +168,11 @@ function CasesListInner({ isRestrictedView, lockedPathologist, lockedIdentificat
                 onExport={handleExport}
                 onSearch={(f) => {
                     if (lockedPathologist && f.search.trim()) {
-                        applySearch({ ...f, pathologistName: '' });
+                        applySearch({
+                            ...f,
+                            pathologistTodosAll: false,
+                            pathologistIncludedNames: [lockedPathologist],
+                        });
                     } else {
                         applySearch(f);
                     }

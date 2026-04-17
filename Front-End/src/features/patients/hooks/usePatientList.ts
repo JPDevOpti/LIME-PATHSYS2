@@ -36,8 +36,8 @@ const defaultFilters: PatientListFilters = {
 function toPatientFilters(f: PatientListFilters): PatientFilters {
     return {
         search: f.search.trim() || undefined,
-        created_at_from: f.dateFrom ? `${f.dateFrom}T00:00:00.000Z` : undefined,
-        created_at_to: f.dateTo ? `${f.dateTo}T23:59:59.999Z` : undefined,
+        created_at_from: f.dateFrom?.trim() || undefined,
+        created_at_to: f.dateTo?.trim() || undefined,
         entity: f.entity.trim() || undefined,
         care_type: f.care_type || undefined,
         gender: f.gender || undefined

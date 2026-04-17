@@ -10,6 +10,7 @@ import { CreateCaseRequest, UpdateCaseRequest, Case, CasePriority, CaseStatus, S
 import { BodyRegionCombobox, PathologistsCombobox, TestsCombobox, EntitiesCombobox } from '@/shared/components/lists';
 import { patientService } from '../../patients/services/patient.service';
 import { CareType } from '../../patients/types/patient.types';
+import { labTestsService } from '@/features/test-management/services/lab-tests.service';
 
 const PRIORITY_OPTIONS = [
     { value: 'normal', label: 'Normal' },
@@ -54,6 +55,29 @@ interface CaseFormEditProps {
     onDelete?: () => void | Promise<void>;
 }
 
+/** Máximo días de oportunidad según pruebas: prioriza time en fila, si no, catálogo por código. */
+function computeMaxOpportunityFromSamples(
+    samples: SampleInfo[],
+    timeByTestCode: Record<string, number>
+): number {
+    let max = 0;
+    for (const s of samples) {
+        for (const t of s.tests) {
+            const code = (t.test_code || '').trim().toUpperCase();
+            if (!code) continue;
+            let days = 0;
+            if (t.time != null && Number(t.time) > 0) {
+                days = Number(t.time);
+            } else {
+                const fromCat = timeByTestCode[code];
+                if (fromCat != null && fromCat > 0) days = fromCat;
+            }
+            if (days > max) max = days;
+        }
+    }
+    return max;
+}
+
 function getStatusStyles(status?: CaseStatus): string {
     switch (status) {
         case 'Completado': return 'bg-green-100 text-green-800 border-green-200';
@@ -77,7 +101,13 @@ function caseToFormData(c: Case): CreateCaseRequest & { assigned_pathologist?: {
         numberOfSamples: c.samples?.length || 1,
         samples: c.samples?.length ? c.samples.map(s => ({
             body_region: s.body_region,
-            tests: s.tests?.map(t => ({ id: t.id || '', test_code: t.test_code, name: t.name, quantity: t.quantity || 1 })) || [createEmptyTest()]
+            tests: s.tests?.map(t => ({
+                id: t.id || '',
+                test_code: t.test_code,
+                name: t.name,
+                quantity: t.quantity || 1,
+                time: t.time,
+            })) || [createEmptyTest()]
         })) : [createEmptySample()],
         assigned_pathologist: c.assigned_pathologist,
         status: c.status,
@@ -100,16 +130,45 @@ export function CaseForm(props: CaseFormCreateProps | CaseFormEditProps) {
     const [isDeleting, setIsDeleting] = useState(false);
     const [error, setError] = useState<{ message: string; type: 'validation' | 'submit'; field?: string; errors?: Array<{ field: string; message: string }> } | null>(null);
     const [fieldErrors, setFieldErrors] = useState<Record<string, boolean>>({});
+    const [labTimeByCode, setLabTimeByCode] = useState<Record<string, number>>({});
 
     useEffect(() => {
-        const allTests = formData.samples.flatMap(s => s.tests);
-        const times = allTests.map(t => t.time || 0).filter(t => t > 0);
-        if (times.length === 0) return;
-        const maxTime = Math.max(...times);
-        if (formData.max_opportunity_time !== maxTime) {
-            setFormData(prev => ({ ...prev, max_opportunity_time: maxTime }));
-        }
-    }, [formData.samples]);
+        let cancelled = false;
+        labTestsService
+            .getAll(true)
+            .then((tests) => {
+                if (cancelled) return;
+                const m: Record<string, number> = {};
+                for (const t of tests) {
+                    const c = (t.test_code || '').trim().toUpperCase();
+                    if (c && t.time > 0) m[c] = t.time;
+                }
+                setLabTimeByCode(m);
+            })
+            .catch(() => {});
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    useEffect(() => {
+        const samples = formData.samples;
+        const needsCatalogLookup = samples.some((s) =>
+            s.tests.some(
+                (t) =>
+                    (t.test_code || '').trim() !== '' &&
+                    (t.time == null || Number(t.time) <= 0)
+            )
+        );
+        if (needsCatalogLookup && Object.keys(labTimeByCode).length === 0) return;
+
+        const maxTime = computeMaxOpportunityFromSamples(samples, labTimeByCode);
+        setFormData((prev) => {
+            const cur = prev.max_opportunity_time ?? 0;
+            if (cur === maxTime) return prev;
+            return { ...prev, max_opportunity_time: maxTime };
+        });
+    }, [formData.samples, labTimeByCode]);
 
     useEffect(() => {
         if (!isEdit && formData.patientId) {

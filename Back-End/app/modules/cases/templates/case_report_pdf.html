@@ -8,10 +8,18 @@
             @page {
                 size: Letter;
                 margin: 43mm 12mm 12mm 12mm;
-                @top-left-corner { content: none; }
-                @top-left { content: none; }
-                @top-right { content: none; }
-                @top-right-corner { content: none; }
+                @top-left-corner {
+                    content: none;
+                }
+                @top-left {
+                    content: none;
+                }
+                @top-right {
+                    content: none;
+                }
+                @top-right-corner {
+                    content: none;
+                }
                 @top-center {
                     content: element(running-header);
                     width: 100%;
@@ -29,8 +37,9 @@
                     vertical-align: bottom;
                 }
                 @bottom-center {
-                    content: "Los informes de resultados, las placas y bloques de estudios anatomopatológicos se archivan por 15 años" "\A" string(report-code);
-                    font-size: 10px;
+                    content: "Los informes de resultados, las placas y bloques de estudios anatomopatológicos se archivan por 15 años"
+                        "\A" string(report-code);
+                    font-size: 8px;
                     font-family: Arial, sans-serif;
                     color: #000;
                     margin-left: 1mm;
@@ -38,7 +47,7 @@
                     margin-bottom: 2.5mm;
                     padding-top: 0;
                     white-space: pre;
-                    line-height: 1;
+                    line-height: 1.22;
                     text-align: center;
                     vertical-align: bottom;
                 }
@@ -386,11 +395,7 @@
             <div class="header-container">
                 <div class="logos-section">
                     {% if header.unified_banner %}
-                    <img
-                        src="{{ header.unified_banner }}"
-                        alt="Logos LIME UdeA HAMA"
-                        class="logos-banner"
-                    />
+                    <img src="{{ header.unified_banner }}" alt="Logos LIME UdeA HAMA" class="logos-banner" />
                     {% endif %}
                 </div>
                 <div class="code-box">
@@ -412,11 +417,7 @@
             <div class="header-container">
                 <div class="logos-section">
                     {% if header.unified_banner %}
-                    <img
-                        src="{{ header.unified_banner }}"
-                        alt="Logos LIME UdeA HAMA"
-                        class="logos-banner"
-                    />
+                    <img src="{{ header.unified_banner }}" alt="Logos LIME UdeA HAMA" class="logos-banner" />
                     {% endif %}
                 </div>
                 <div class="code-box">
@@ -436,10 +437,23 @@
             <div class="dept-info-container">
                 <div class="dept-section">
                     <div class="dept-title">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
-                            <path d="M19.43 12.935c.357-.967.57-1.955.57-2.935a8 8 0 0 0-16 0c0 4.993 5.539 10.193 7.399 11.799a1 1 0 0 0 1.202 0 32.197 32.197 0 0 0 .813-.728"/>
-                            <circle cx="12" cy="10" r="3"/>
-                            <path d="m16 18 2 2 4-4"/>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            style="flex-shrink: 0"
+                        >
+                            <path
+                                d="M19.43 12.935c.357-.967.57-1.955.57-2.935a8 8 0 0 0-16 0c0 4.993 5.539 10.193 7.399 11.799a1 1 0 0 0 1.202 0 32.197 32.197 0 0 0 .813-.728"
+                            />
+                            <circle cx="12" cy="10" r="3" />
+                            <path d="m16 18 2 2 4-4" />
                         </svg>
                         Departamento de Patología
                     </div>
@@ -458,9 +472,7 @@
                     </div>
                     <div class="info-row">
                         <span class="info-label">Fecha de Informe:</span>
-                        <div class="info-value">
-                            {{ case.signature_date or case.report_date }}
-                        </div>
+                        <div class="info-value">{{ case.signature_date or case.report_date }}</div>
                     </div>
                 </div>
             </div>
@@ -522,44 +534,27 @@
                 <div class="section-title">CIE-10:</div>
                 <div class="content-box">{{ case.cie10 }}</div>
             </div>
-            {% endif %}
-
-            {% if case.cieo %}
+            {% endif %} {% if case.cieo %}
             <div class="content-section">
                 <div class="section-title">CIE-O:</div>
                 <div class="content-box">{{ case.cieo }}</div>
             </div>
-            {% endif %}
-
-            {% if case.has_additional_report %}
+            {% endif %} {% if case.has_additional_report %}
             <div class="content-section">
-                <div class="section-title">
-                    SE NECESITAN PRUEBAS COMPLEMENTARIAS PARA COMPLETAR EL DIAGNÓSTICO:
-                </div>
+                <div class="section-title">SE NECESITAN PRUEBAS COMPLEMENTARIAS PARA COMPLETAR EL DIAGNÓSTICO:</div>
                 <div class="content-box">
-                    {% if case.additional_tests_display and
-                    case.additional_tests_display|length > 0 %}
-                    <strong>Pruebas solicitadas:</strong><br />
-                    {% for test in case.additional_tests_display %}
-                    • {{ test }}<br />
-                    {% endfor %}
-                    {% endif %}
-
                     {% if case.additional_report_reason_html %}
                     <br /><strong>Motivo:</strong>
                     <div>{{ case.additional_report_reason_html }}</div>
                     {% endif %}
                 </div>
             </div>
-            {% endif %}
-
-            {% if case.additional_notes_display and case.additional_notes_display|length > 0 %}
+            {% endif %} {% if case.additional_notes_display and case.additional_notes_display|length > 0 %}
             <div class="content-section">
                 <div class="section-title">NOTAS ADICIONALES:</div>
                 <div class="content-box">
-                    {% for note in case.additional_notes_display %}
-                    {{ note }}{% if not loop.last %}<br />{% endif %}
-                    {% endfor %}
+                    {% for note in case.additional_notes_display %} {{ note }}{% if not loop.last %}<br />{% endif %} {%
+                    endfor %}
                 </div>
             </div>
             {% endif %}
@@ -567,11 +562,7 @@
             <div class="signature-block">
                 <div class="signature-line-wrap">
                     {% if case.pathologist_signature %}
-                    <img
-                        class="signature-image"
-                        src="{{ case.pathologist_signature }}"
-                        alt="Firma patólogo"
-                    />
+                    <img class="signature-image" src="{{ case.pathologist_signature }}" alt="Firma patólogo" />
                     {% endif %}
                     <div class="signature-line"></div>
                 </div>
@@ -584,8 +575,7 @@
                     <span class="patient-label">Residente:</span>
                     <span class="patient-value">{{ case.resident_name }}</span>
                 </div>
-                {% endif %}
-                {% if case.assistant_names and case.assistant_names|length > 0 %}
+                {% endif %} {% if case.assistant_names and case.assistant_names|length > 0 %}
                 <div class="signature-signer">
                     <span class="patient-label">Revisado por:</span>
                     <span class="patient-value">{{ case.assistant_names | join(", ") }}</span>

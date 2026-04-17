@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
-import { AppLayout } from '@/app/layouts/app-layout';
+import { AppLayout } from '@/shared/components/layout/app-layout';
 import { LayoutShell } from '@/shared/components/layout';
 import { AppHeader } from '@/shared/components/navigation';
 import { useAuth } from '../context/AuthContext';

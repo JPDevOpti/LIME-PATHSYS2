@@ -1,5 +1,5 @@
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 from bson import ObjectId
@@ -8,7 +8,7 @@ from pymongo.database import Database
 from pymongo.cursor import Cursor
 from pymongo.errors import DuplicateKeyError
 
-from app.core.date_utils import format_iso_datetime
+from app.core.date_utils import format_iso_datetime, mongo_created_at_range_from_strings
 from app.core.exceptions import conflict_exception
 
 _ID_TYPE_LEGACY_TO_SIGLA = {
@@ -98,14 +98,9 @@ class PatientRepository:
             })
 
         if created_at_from or created_at_to:
-            q: dict[str, Any] = {}
-            if created_at_from:
-                q["$gte"] = datetime.fromisoformat(created_at_from.replace("Z", "+00:00"))
-            if created_at_to:
-                end = datetime.fromisoformat(created_at_to.replace("Z", "+00:00"))
-                end = end.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
-                q["$lt"] = end
-            query["created_at"] = q
+            cr = mongo_created_at_range_from_strings(created_at_from, created_at_to)
+            if cr:
+                query["created_at"] = cr
 
         if entity and entity.strip():
             query["entity_info.entity_name"] = {"$regex": entity.strip(), "$options": "i"}

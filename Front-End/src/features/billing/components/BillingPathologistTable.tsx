@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 import { BaseButton, BaseCard } from '@/shared/components/base';
-import { exportJsonToExcel } from '@/shared/lib/exportExcel';
+import { exportJsonToExcel } from '@/shared/utils/exportExcel';
 import type { BillingPathologistItem } from '../types/billing.types';
 
 const formatCurrency = (value: number) => {

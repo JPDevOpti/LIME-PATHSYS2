@@ -30,6 +30,8 @@ class OpportunityStats(BaseModel):
     tiempo_promedio: float
     casos_dentro_oportunidad: int
     casos_fuera_oportunidad: int
+    total_casos_periodo: int
+    casos_sin_evaluacion_oportunidad: int
     total_casos_mes_anterior: int
     mes_anterior: OpportunityStatsMonth
 
